@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>vorgster kombat</title>
     <style>
-        * { -webkit-tap-highlight-color: transparent; }
-        body { 
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html, body { 
+            height: 100%; /* фиксит скрытое нижнее меню на телефонах */
             margin: 0; padding: 0; 
             background: #000; color: #fff; 
             font-family: 'segoe ui', roboto, sans-serif; 
             overflow: hidden; user-select: none; -webkit-user-select: none; 
         }
         .container { 
-            display: flex; flex-direction: column; height: 100vh; max-width: 500px; 
+            display: flex; flex-direction: column; height: 100%; max-width: 500px; 
             margin: 0 auto; background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); 
-            position: relative; 
         }
         
-        .header { padding: 15px; }
+        .header { padding: 15px; flex-shrink: 0; }
         .top-stats { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px;}
         .stat-box { 
             flex: 1; background: rgba(30, 30, 30, 0.8); border: 1px solid #333;
@@ -30,12 +30,14 @@
         .league-info { text-align: center; font-size: 14px; color: #888; margin-bottom: 5px; text-transform: lowercase;}
         .main-balance { text-align: center; font-size: 42px; font-weight: 900; margin: 5px 0 15px 0; }
 
-        .tab-content { flex: 1; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
+        .tab-content { flex: 1; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
         .tab-content.active { display: flex; }
 
         .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         .vorg-coin { 
-            width: 280px; height: 280px; border-radius: 50%; 
+            width: 70vw; max-width: 280px; /* адаптивный размер монеты */
+            height: 70vw; max-height: 280px; 
+            border-radius: 50%; 
             background: url('vorg.jpg') center/cover no-repeat; 
             background-color: #222;
             border: 8px solid #d4af37; 
@@ -44,7 +46,7 @@
         }
         .vorg-coin:active { transform: scale(0.95); }
         
-        .energy-container { padding: 0 20px 20px 20px; }
+        .energy-container { padding: 0 20px 20px 20px; flex-shrink: 0; }
         .energy-text { display: flex; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #ccc; }
         .energy-bar-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
         .energy-bar-fill { height: 100%; background: #d4af37; width: 100%; transition: width 0.1s; }
@@ -76,9 +78,9 @@
         }
 
         .bottom-nav { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: #0a0a0a; display: flex; padding: 10px 5px 20px 5px; 
-            border-top: 1px solid #222;
+            background: #0a0a0a; display: flex; 
+            padding: 10px 5px calc(15px + env(safe-area-inset-bottom)) 5px; 
+            border-top: 1px solid #222; flex-shrink: 0; /* прижимает к низу */
         }
         .nav-item { 
             flex: 1; text-align: center; color: #555; font-size: 13px; font-weight: bold; 
@@ -169,20 +171,6 @@
                 </div>
             </div>
         </div>
-        
-        <div id="tab-tasks" class="tab-content">
-            <div class="upgrade-list">
-                <div class="section-title">задания</div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">ежедневная награда</span>
-                        <span class="upgrade-desc">забирай монеты каждый день</span>
-                        <span class="upgrade-price">+ 50 000 $vrgk</span>
-                    </div>
-                    <button class="buy-btn gold" id="daily-btn" onclick="claim_daily()">забрать</button>
-                </div>
-            </div>
-        </div>
 
         <div id="tab-skrepki" class="tab-content">
             <div class="upgrade-list">
@@ -198,7 +186,6 @@
         <div class="bottom-nav">
             <div class="nav-item active" onclick="sw_tab('mine', this)">тапать</div>
             <div class="nav-item" onclick="sw_tab('upgrades', this)">прокачка</div>
-            <div class="nav-item" onclick="sw_tab('tasks', this)">задания</div>
             <div class="nav-item" onclick="sw_tab('skrepki', this)">скрепки</div>
         </div>
     </div>
@@ -221,8 +208,6 @@
         let c1_price = parseInt(localStorage.getItem('c1_price')) || 2000;
         let c2_price = parseInt(localStorage.getItem('c2_price')) || 10000;
         let c3_price = parseInt(localStorage.getItem('c3_price')) || 50000;
-        
-        let last_daily = localStorage.getItem('last_daily') || 0;
 
         const el_bal = document.getElementById('vrgk-balance');
         const el_skr = document.getElementById('skrepki-val');
@@ -245,17 +230,6 @@
         document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`;
         document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`;
         document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`;
-        
-        function chk_daily() {
-            let now = new Date().getTime();
-            if (now - last_daily < 86400000) {
-                let btn = document.getElementById('daily-btn');
-                btn.innerText = 'уже собрано';
-                btn.style.background = '#333';
-                btn.style.color = '#777';
-                btn.disabled = true;
-            }
-        }
 
         function chk_league() {
             let l = 'бронза';
@@ -376,18 +350,6 @@
                 alert('нужен 1 000 000 воргиков');
             }
         };
-        
-        window.claim_daily = function() {
-            let now = new Date().getTime();
-            if (now - last_daily > 86400000) {
-                vrgk += 50000;
-                last_daily = now;
-                localStorage.setItem('last_daily', last_daily);
-                chk_daily();
-                upd_ui(); save_data();
-                alert('забрал 50 000');
-            }
-        };
 
         window.sw_tab = function(tabid, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -396,7 +358,6 @@
             el.classList.add('active');
         };
 
-        chk_daily();
         upd_ui();
     </script>
 </body>
