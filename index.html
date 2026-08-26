@@ -7,7 +7,7 @@
     <style>
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html, body { 
-            height: 100%; /* фиксит скрытое нижнее меню на телефонах */
+            height: 100%; 
             margin: 0; padding: 0; 
             background: #000; color: #fff; 
             font-family: 'segoe ui', roboto, sans-serif; 
@@ -35,7 +35,7 @@
 
         .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         .vorg-coin { 
-            width: 70vw; max-width: 280px; /* адаптивный размер монеты */
+            width: 70vw; max-width: 280px; 
             height: 70vw; max-height: 280px; 
             border-radius: 50%; 
             background: url('vorg.jpg') center/cover no-repeat; 
@@ -80,13 +80,24 @@
         .bottom-nav { 
             background: #0a0a0a; display: flex; 
             padding: 10px 5px calc(15px + env(safe-area-inset-bottom)) 5px; 
-            border-top: 1px solid #222; flex-shrink: 0; /* прижимает к низу */
+            border-top: 1px solid #222; flex-shrink: 0; 
         }
         .nav-item { 
             flex: 1; text-align: center; color: #555; font-size: 13px; font-weight: bold; 
             padding: 12px 0; cursor: pointer; text-transform: lowercase;
         }
         .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 10px; }
+
+        #offline-modal {
+            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1a1508; border: 2px solid #d4af37; border-radius: 15px;
+            padding: 20px; text-align: center; width: 80%;
+        }
+        .modal-title { font-size: 18px; color: #d4af37; margin-bottom: 10px; }
+        .modal-amount { font-size: 32px; font-weight: bold; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -188,26 +199,40 @@
             <div class="nav-item" onclick="sw_tab('upgrades', this)">прокачка</div>
             <div class="nav-item" onclick="sw_tab('skrepki', this)">скрепки</div>
         </div>
+
+        <div id="offline-modal">
+            <div class="modal-content">
+                <div class="modal-title">офлайн прибыль</div>
+                <div style="font-size: 14px; color: #888; margin-bottom: 10px;">пока тебя не было, ворг нафармил:</div>
+                <div class="modal-amount" id="offline-amount">+0</div>
+                <button class="buy-btn gold" style="width: 100%; padding: 10px;" onclick="close_offline()">забрать</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        let vrgk = parseFloat(localStorage.getItem('vrgk')) || 0;
-        let skrepki = parseInt(localStorage.getItem('skrepki')) || 0;
-        let profit = parseFloat(localStorage.getItem('profit')) || 0;
+        const PREFIX = 'v2_';
         
-        let tap_power = parseInt(localStorage.getItem('tap_power')) || 1;
-        let max_energy = parseInt(localStorage.getItem('max_energy')) || 1000;
-        let cur_energy = parseFloat(localStorage.getItem('cur_energy')) || max_energy;
+        let vrgk = parseFloat(localStorage.getItem(PREFIX + 'vrgk')) || 0;
+        let skrepki = parseInt(localStorage.getItem(PREFIX + 'skrepki')) || 0;
+        let profit = parseFloat(localStorage.getItem(PREFIX + 'profit')) || 0;
         
-        let tap_price = parseInt(localStorage.getItem('tap_price')) || 500;
-        let tap_lvl = parseInt(localStorage.getItem('tap_lvl')) || 1;
+        let tap_power = parseInt(localStorage.getItem(PREFIX + 'tap_power')) || 1;
+        let max_energy = parseInt(localStorage.getItem(PREFIX + 'max_energy')) || 1000;
+        let cur_energy = parseFloat(localStorage.getItem(PREFIX + 'cur_energy')) || max_energy;
         
-        let eng_price = parseInt(localStorage.getItem('eng_price')) || 1000;
-        let eng_lvl = parseInt(localStorage.getItem('eng_lvl')) || 1;
+        let tap_price = parseInt(localStorage.getItem(PREFIX + 'tap_price')) || 500;
+        let tap_lvl = parseInt(localStorage.getItem(PREFIX + 'tap_lvl')) || 1;
+        
+        let eng_price = parseInt(localStorage.getItem(PREFIX + 'eng_price')) || 1000;
+        let eng_lvl = parseInt(localStorage.getItem(PREFIX + 'eng_lvl')) || 1;
 
-        let c1_price = parseInt(localStorage.getItem('c1_price')) || 2000;
-        let c2_price = parseInt(localStorage.getItem('c2_price')) || 10000;
-        let c3_price = parseInt(localStorage.getItem('c3_price')) || 50000;
+        let c1_price = parseInt(localStorage.getItem(PREFIX + 'c1_price')) || 2000;
+        let c2_price = parseInt(localStorage.getItem(PREFIX + 'c2_price')) || 10000;
+        let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000;
+
+        let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || new Date().getTime();
 
         const el_bal = document.getElementById('vrgk-balance');
         const el_skr = document.getElementById('skrepki-val');
@@ -231,29 +256,61 @@
         document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`;
         document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`;
 
+        function calc_offline() {
+            let now = new Date().getTime();
+            if (last_time > 0) {
+                let diff_sec = (now - last_time) / 1000;
+                
+                if (cur_energy < max_energy) {
+                    cur_energy = Math.min(cur_energy + (diff_sec * 3), max_energy);
+                }
+
+                if (profit > 0) {
+                    let profit_sec = diff_sec;
+                    if (profit_sec > 10800) profit_sec = 10800; 
+                    
+                    if (profit_sec > 60) { 
+                        let offline_earn = (profit / 3600) * profit_sec;
+                        vrgk += offline_earn;
+                        
+                        document.getElementById('offline-amount').innerText = "+" + fmt(offline_earn);
+                        document.getElementById('offline-modal').style.display = 'flex';
+                    }
+                }
+            }
+            last_time = now;
+            save_data();
+        }
+
+        window.close_offline = function() {
+            document.getElementById('offline-modal').style.display = 'none';
+            upd_ui();
+        }
+
         function chk_league() {
             let l = 'бронза';
-            if (vrgk > 10000) l = 'серебро';
-            if (vrgk > 100000) l = 'золото';
-            if (vrgk > 1000000) l = 'платина';
-            if (vrgk > 10000000) l = 'алмаз';
+            if (vrgk >= 10000) l = 'серебро';
+            if (vrgk >= 100000) l = 'золото';
+            if (vrgk >= 1000000) l = 'платина';
+            if (vrgk >= 10000000) l = 'алмаз';
             el_league.innerText = 'лига: ' + l;
         }
 
         function save_data() {
-            localStorage.setItem('vrgk', vrgk);
-            localStorage.setItem('skrepki', skrepki);
-            localStorage.setItem('profit', profit);
-            localStorage.setItem('tap_power', tap_power);
-            localStorage.setItem('max_energy', max_energy);
-            localStorage.setItem('cur_energy', cur_energy);
-            localStorage.setItem('tap_price', tap_price);
-            localStorage.setItem('tap_lvl', tap_lvl);
-            localStorage.setItem('eng_price', eng_price);
-            localStorage.setItem('eng_lvl', eng_lvl);
-            localStorage.setItem('c1_price', c1_price);
-            localStorage.setItem('c2_price', c2_price);
-            localStorage.setItem('c3_price', c3_price);
+            localStorage.setItem(PREFIX + 'vrgk', vrgk);
+            localStorage.setItem(PREFIX + 'skrepki', skrepki);
+            localStorage.setItem(PREFIX + 'profit', profit);
+            localStorage.setItem(PREFIX + 'tap_power', tap_power);
+            localStorage.setItem(PREFIX + 'max_energy', max_energy);
+            localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
+            localStorage.setItem(PREFIX + 'tap_price', tap_price);
+            localStorage.setItem(PREFIX + 'tap_lvl', tap_lvl);
+            localStorage.setItem(PREFIX + 'eng_price', eng_price);
+            localStorage.setItem(PREFIX + 'eng_lvl', eng_lvl);
+            localStorage.setItem(PREFIX + 'c1_price', c1_price);
+            localStorage.setItem(PREFIX + 'c2_price', c2_price);
+            localStorage.setItem(PREFIX + 'c3_price', c3_price);
+            localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
         }
 
         function upd_ui() {
@@ -358,6 +415,7 @@
             el.classList.add('active');
         };
 
+        calc_offline();
         upd_ui();
     </script>
 </body>
