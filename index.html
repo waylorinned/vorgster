@@ -152,6 +152,15 @@
                     <button class="buy-btn" onclick="buy_upg('eng')">купить</button>
                 </div>
 
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">реген энергии</span>
+                        <span class="upgrade-desc" id="regen-lvl">+3 в сек</span>
+                        <span class="upgrade-price" id="regen-price">цена: 5 000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buy_upg('regen')">купить</button>
+                </div>
+
                 <div class="section-title">карточки (пассив)</div>
                 
                 <div class="upgrade-item">
@@ -167,18 +176,54 @@
                     <div class="upgrade-info">
                         <span class="upgrade-name">пиар от ворга</span>
                         <span class="upgrade-desc">+3000 в час</span>
-                        <span class="upgrade-price" id="card2-price">цена: 10000</span>
+                        <span class="upgrade-price" id="card2-price">цена: 10 000</span>
                     </div>
                     <button class="buy-btn" onclick="buy_card('c2', 3000)">купить</button>
+                </div>
+
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">свой клан</span>
+                        <span class="upgrade-desc">+5000 в час</span>
+                        <span class="upgrade-price" id="card5-price">цена: 20 000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buy_card('c5', 5000)">купить</button>
                 </div>
                 
                 <div class="upgrade-item">
                     <div class="upgrade-info">
                         <span class="upgrade-name">свой дс сервер</span>
                         <span class="upgrade-desc">+15000 в час</span>
-                        <span class="upgrade-price" id="card3-price">цена: 50000</span>
+                        <span class="upgrade-price" id="card3-price">цена: 50 000</span>
                     </div>
                     <button class="buy-btn" onclick="buy_card('c3', 15000)">купить</button>
+                </div>
+
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">доска позора</span>
+                        <span class="upgrade-desc">+20000 в час</span>
+                        <span class="upgrade-price" id="card4-price">цена: 100 000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buy_card('c4', 20000)">купить</button>
+                </div>
+
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">личный пони</span>
+                        <span class="upgrade-desc">+25000 в час</span>
+                        <span class="upgrade-price" id="card7-price">цена: 130 000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buy_card('c7', 25000)">купить</button>
+                </div>
+
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">админка</span>
+                        <span class="upgrade-desc">+30000 в час</span>
+                        <span class="upgrade-price" id="card6-price">цена: 200 000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buy_card('c6', 30000)">купить</button>
                 </div>
             </div>
         </div>
@@ -222,15 +267,24 @@
         let max_energy = parseInt(localStorage.getItem(PREFIX + 'max_energy')) || 1000;
         let cur_energy = parseFloat(localStorage.getItem(PREFIX + 'cur_energy')) || max_energy;
         
+        let eng_regen = parseInt(localStorage.getItem(PREFIX + 'eng_regen')) || 3;
+        
         let tap_price = parseInt(localStorage.getItem(PREFIX + 'tap_price')) || 500;
         let tap_lvl = parseInt(localStorage.getItem(PREFIX + 'tap_lvl')) || 1;
         
         let eng_price = parseInt(localStorage.getItem(PREFIX + 'eng_price')) || 1000;
         let eng_lvl = parseInt(localStorage.getItem(PREFIX + 'eng_lvl')) || 1;
 
+        let regen_price = parseInt(localStorage.getItem(PREFIX + 'regen_price')) || 5000;
+
+        // цены карточек
         let c1_price = parseInt(localStorage.getItem(PREFIX + 'c1_price')) || 2000;
         let c2_price = parseInt(localStorage.getItem(PREFIX + 'c2_price')) || 10000;
-        let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000;
+        let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000; // дс
+        let c4_price = parseInt(localStorage.getItem(PREFIX + 'c4_price')) || 100000; // доска
+        let c5_price = parseInt(localStorage.getItem(PREFIX + 'c5_price')) || 20000; // клан
+        let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; // админка
+        let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; // пони
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || new Date().getTime();
 
@@ -248,13 +302,22 @@
             return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); 
         }
         
-        document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`;
-        document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
-        document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`;
-        document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
-        document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`;
-        document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`;
-        document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`;
+        function init_prices() {
+            document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`;
+            document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
+            document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`;
+            document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
+            document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`;
+            document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
+            
+            document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`;
+            document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`;
+            document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`;
+            document.getElementById('card4-price').innerText = `цена: ${fmt(c4_price)}`;
+            document.getElementById('card5-price').innerText = `цена: ${fmt(c5_price)}`;
+            document.getElementById('card6-price').innerText = `цена: ${fmt(c6_price)}`;
+            document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`;
+        }
 
         function calc_offline() {
             let now = new Date().getTime();
@@ -262,7 +325,7 @@
                 let diff_sec = (now - last_time) / 1000;
                 
                 if (cur_energy < max_energy) {
-                    cur_energy = Math.min(cur_energy + (diff_sec * 3), max_energy);
+                    cur_energy = Math.min(cur_energy + (diff_sec * eng_regen), max_energy);
                 }
 
                 if (profit > 0) {
@@ -303,13 +366,21 @@
             localStorage.setItem(PREFIX + 'tap_power', tap_power);
             localStorage.setItem(PREFIX + 'max_energy', max_energy);
             localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
+            localStorage.setItem(PREFIX + 'eng_regen', eng_regen);
+            
             localStorage.setItem(PREFIX + 'tap_price', tap_price);
             localStorage.setItem(PREFIX + 'tap_lvl', tap_lvl);
             localStorage.setItem(PREFIX + 'eng_price', eng_price);
             localStorage.setItem(PREFIX + 'eng_lvl', eng_lvl);
+            localStorage.setItem(PREFIX + 'regen_price', regen_price);
+            
             localStorage.setItem(PREFIX + 'c1_price', c1_price);
             localStorage.setItem(PREFIX + 'c2_price', c2_price);
             localStorage.setItem(PREFIX + 'c3_price', c3_price);
+            localStorage.setItem(PREFIX + 'c4_price', c4_price);
+            localStorage.setItem(PREFIX + 'c5_price', c5_price);
+            localStorage.setItem(PREFIX + 'c6_price', c6_price);
+            localStorage.setItem(PREFIX + 'c7_price', c7_price);
             localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
         }
 
@@ -352,7 +423,7 @@
         }
 
         setInterval(() => {
-            if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + 3, max_energy);
+            if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + eng_regen, max_energy);
             if (profit > 0) vrgk += profit / 3600;
             upd_ui();
             save_data();
@@ -373,6 +444,12 @@
                 eng_price = Math.floor(eng_price * 2.1);
                 document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`;
                 document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
+            } else if (type === 'regen' && vrgk >= regen_price) {
+                vrgk -= regen_price;
+                eng_regen += 1;
+                regen_price = Math.floor(regen_price * 1.5);
+                document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`;
+                document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
             } else {
                 alert('мало денег, иди тапай'); return;
             }
@@ -380,15 +457,27 @@
         };
 
         window.buy_card = function(id, prof) {
-            let cur_pr = id === 'c1' ? c1_price : id === 'c2' ? c2_price : c3_price;
-            if (vrgk >= cur_pr) {
-                vrgk -= cur_pr;
+            let price = 0;
+            if (id === 'c1') price = c1_price;
+            if (id === 'c2') price = c2_price;
+            if (id === 'c3') price = c3_price;
+            if (id === 'c4') price = c4_price;
+            if (id === 'c5') price = c5_price;
+            if (id === 'c6') price = c6_price;
+            if (id === 'c7') price = c7_price;
+
+            if (vrgk >= price) {
+                vrgk -= price;
                 profit += prof;
-                let new_pr = Math.floor(cur_pr * 1.5);
+                let new_pr = Math.floor(price * 1.5);
                 
                 if (id === 'c1') c1_price = new_pr;
                 if (id === 'c2') c2_price = new_pr;
                 if (id === 'c3') c3_price = new_pr;
+                if (id === 'c4') c4_price = new_pr;
+                if (id === 'c5') c5_price = new_pr;
+                if (id === 'c6') c6_price = new_pr;
+                if (id === 'c7') c7_price = new_pr;
                 
                 document.getElementById(`card${id[1]}-price`).innerText = `цена: ${fmt(new_pr)}`;
                 upd_ui(); save_data();
@@ -415,6 +504,7 @@
             el.classList.add('active');
         };
 
+        init_prices();
         calc_offline();
         upd_ui();
     </script>
