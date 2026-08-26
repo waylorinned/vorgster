@@ -275,19 +275,21 @@
             </div>
         </div>
 
+        <!-- стартовая рега (без зависания браузера) -->
+        <div id="auth-modal" class="modal-overlay" style="z-index: 9999; background: #000;">
+            <div class="modal-content" style="background: #111; border: 1px solid #d4af37;">
+                <div class="modal-title">добро пожаловать</div>
+                <div style="font-size: 13px; color: #888; margin-bottom: 10px;">введи ник для рейтинга и клубов:</div>
+                <input type="text" id="auth-nick" placeholder="твой ник (без мата)" maxlength="15">
+                <button class="buy-btn gold" style="margin-top: 10px; padding: 12px;" onclick="set_start_nick()">начать игру</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
         const PREFIX = 'v2_';
-        
         let nickname = localStorage.getItem(PREFIX + 'nickname');
-        if (!nickname) {
-            while (!nickname || nickname.trim() === '') {
-                nickname = prompt('обязательно введи свой ник для рейтинга (без мата):');
-            }
-            nickname = nickname.trim();
-            localStorage.setItem(PREFIX + 'nickname', nickname);
-        }
         
         let vrgk = parseFloat(localStorage.getItem(PREFIX + 'vrgk')) || 0;
         let skrepki = parseInt(localStorage.getItem(PREFIX + 'skrepki')) || 0;
@@ -326,7 +328,21 @@
         const el_league = document.getElementById('league-name');
         const tap_area = document.getElementById('tap-area');
 
-        document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
+        if (!nickname) {
+            document.getElementById('auth-modal').style.display = 'flex';
+        } else {
+            document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
+        }
+
+        window.set_start_nick = function() {
+            let n = document.getElementById('auth-nick').value.trim();
+            if(!n) { alert('напиши хоть что-то!'); return; }
+            nickname = n;
+            localStorage.setItem(PREFIX + 'nickname', nickname);
+            document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
+            document.getElementById('auth-modal').style.display = 'none';
+            sync_cloud(); 
+        };
 
         function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
         
@@ -352,7 +368,7 @@
             if (last_time > 0) {
                 let diff_sec = (now - last_time) / 1000;
                 if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + (diff_sec * eng_regen), max_energy);
-                if (profit > 0) {
+                if (profit > 0 && nickname) {
                     let profit_sec = diff_sec;
                     if (profit_sec > 10800) profit_sec = 10800; 
                     if (profit_sec > 60) { 
@@ -503,6 +519,7 @@
         }
 
         async function sync_cloud() {
+            if (!nickname) return;
             try {
                 let d = await fetch_cloud();
                 let players = d.players || {};
@@ -552,7 +569,7 @@
             if(!confirm('точно удалить аккаунт? все монеты, бусты и скрепки сгорят навсегда!')) return;
             let d = await fetch_cloud();
             let players = d.players || {}; let clubs = d.clubs || {};
-            delete players[nickname];
+            if(nickname && players[nickname]) delete players[nickname];
             let my_c = localStorage.getItem(PREFIX + 'club');
             if(my_c && clubs[my_c]) {
                 clubs[my_c].members = clubs[my_c].members.filter(m => m !== nickname);
