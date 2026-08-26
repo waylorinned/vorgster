@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>vorgster kombat</title>
     <style>
+        * { -webkit-tap-highlight-color: transparent; }
         body { 
             margin: 0; padding: 0; 
             background: #000; color: #fff; 
@@ -35,7 +36,7 @@
         .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         .vorg-coin { 
             width: 280px; height: 280px; border-radius: 50%; 
-            background: url('1000050339.jpg') center/cover no-repeat; 
+            background: url('vorg.jpg') center/cover no-repeat; 
             background-color: #222;
             border: 8px solid #d4af37; 
             box-shadow: 0 0 40px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.8); 
@@ -104,7 +105,6 @@
             <div class="main-balance" id="vrgk-balance">0</div>
         </div>
 
-        <!-- тапалка -->
         <div id="tab-mine" class="tab-content active">
             <div class="tap-area" id="tap-area">
                 <div class="vorg-coin" id="vorg-coin"></div>
@@ -117,7 +117,6 @@
             </div>
         </div>
 
-        <!-- прокачка -->
         <div id="tab-upgrades" class="tab-content">
             <div class="upgrade-list">
                 <div class="section-title">бусты</div>
@@ -171,7 +170,6 @@
             </div>
         </div>
         
-        <!-- задания -->
         <div id="tab-tasks" class="tab-content">
             <div class="upgrade-list">
                 <div class="section-title">задания</div>
@@ -186,7 +184,6 @@
             </div>
         </div>
 
-        <!-- скрепки -->
         <div id="tab-skrepki" class="tab-content">
             <div class="upgrade-list">
                 <div class="section-title" style="text-align: center;">черный рынок</div>
@@ -207,7 +204,6 @@
     </div>
 
     <script>
-        // загрузка сохранений или дефолт
         let vrgk = parsefloat(localstorage.getitem('vrgk')) || 0;
         let skrepki = parseint(localstorage.getitem('skrepki')) || 0;
         let profitperhour = parsefloat(localstorage.getitem('profit')) || 0;
@@ -223,7 +219,6 @@
         let energylvlprice = parseint(localstorage.getitem('energylvlprice')) || 1000;
         let energylvl = parseint(localstorage.getitem('energylvl')) || 1;
 
-        // цены карточек (чтобы сохранялись)
         let c1price = parseint(localstorage.getitem('c1price')) || 2000;
         let c2price = parseint(localstorage.getitem('c2price')) || 10000;
         let c3price = parseint(localstorage.getitem('c3price')) || 50000;
@@ -242,7 +237,6 @@
 
         function format(num) { return math.floor(num).tostring().replace(/\b(?=(\d{3})+(?!\d))/g, " "); }
         
-        // обновление интерфейса цен при загрузке
         document.getelementbyid('multitap-lvl').innertext = `ур ${multitaplvl} (+${earnpertap} за тап)`;
         document.getelementbyid('multitap-price').innertext = `цена: ${format(multitapprice)}`;
         document.getelementbyid('energy-lvl').innertext = `ур ${energylvl} (+${maxenergy} энг)`;
@@ -251,7 +245,6 @@
         document.getelementbyid('card2-price').innertext = `цена: ${format(c2price)}`;
         document.getelementbyid('card3-price').innertext = `цена: ${format(c3price)}`;
         
-        // проверка кнопки дейлика
         function checkdaily() {
             let now = new date().gettime();
             if (now - lastdaily < 86400000) {
@@ -331,10 +324,9 @@
             if (currentenergy < maxenergy) currentenergy = math.min(currentenergy + energyregen, maxenergy);
             if (profitperhour > 0) vrgk += profitperhour / 3600;
             updateui();
-            savedata(); // сейвим каждую секунду
+            savedata();
         }, 1000);
 
-        // глобальные функции для кнопок в html
         window.buyupgrade = function(type) {
             if (type === 'multitap' && vrgk >= multitapprice) {
                 vrgk -= multitapprice;
@@ -408,12 +400,10 @@
         const parsefloat = window.parseFloat;
         const parseint = window.parseInt;
         
-        // фикс регистра для базовых js функций, чтобы код работал
         document.getelementbyid = document.getElementById.bind(document);
         document.createelement = document.createElement.bind(document);
         document.queryselectorall = document.querySelectorAll.bind(document);
         
-        // исправляем прототипы для работы с нижним регистром в нашем коде
         Element.prototype.appendchild = Element.prototype.appendChild;
         Element.prototype.getboundingclientrect = Element.prototype.getBoundingClientRect;
         Element.prototype.addeventlistener = Element.prototype.addEventListener;
