@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>vorgster kombat</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; 
+            background: #000; color: #fff; 
+            font-family: 'segoe ui', roboto, sans-serif; 
+            overflow: hidden; user-select: none; -webkit-user-select: none; 
+        }
+        .container { 
+            display: flex; flex-direction: column; height: 100vh; max-width: 500px; 
+            margin: 0 auto; background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); 
+            position: relative; 
+        }
+        
+        .header { padding: 15px; }
+        .top-stats { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px;}
+        .stat-box { 
+            flex: 1; background: rgba(30, 30, 30, 0.8); border: 1px solid #333;
+            border-radius: 12px; padding: 10px; text-align: center; 
+        }
+        .stat-label { font-size: 11px; color: #aaa; text-transform: lowercase; margin-bottom: 4px; }
+        .stat-value { font-size: 16px; font-weight: 800; color: #d4af37; }
+        
+        .league-info { text-align: center; font-size: 14px; color: #888; margin-bottom: 5px; text-transform: lowercase;}
+        .main-balance { text-align: center; font-size: 42px; font-weight: 900; margin: 5px 0 15px 0; }
+
+        .tab-content { flex: 1; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
+        .tab-content.active { display: flex; }
+
+        .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .vorg-coin { 
+            width: 280px; height: 280px; border-radius: 50%; 
+            background: url('1000050339.jpg') center/cover no-repeat; 
+            background-color: #222;
+            border: 8px solid #d4af37; 
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.8); 
+            cursor: pointer; transition: transform 0.05s ease-out; position: relative; z-index: 10; 
+        }
+        .vorg-coin:active { transform: scale(0.95); }
+        
+        .energy-container { padding: 0 20px 20px 20px; }
+        .energy-text { display: flex; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #ccc; }
+        .energy-bar-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
+        .energy-bar-fill { height: 100%; background: #d4af37; width: 100%; transition: width 0.1s; }
+
+        .upgrade-list { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .section-title { margin: 5px 0; color: #d4af37; font-size: 16px; text-transform: lowercase;}
+        .upgrade-item { 
+            background: #111; border: 1px solid #222; border-radius: 12px; 
+            padding: 15px; display: flex; justify-content: space-between; align-items: center; 
+        }
+        .upgrade-info { display: flex; flex-direction: column; gap: 4px; }
+        .upgrade-name { font-size: 15px; font-weight: bold; color: #eee; text-transform: lowercase;}
+        .upgrade-desc { font-size: 12px; color: #777; text-transform: lowercase;}
+        .upgrade-price { font-size: 13px; color: #d4af37; font-weight: bold; }
+        .buy-btn { 
+            background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: lowercase;
+        }
+        .buy-btn:active { background: #555; }
+        .buy-btn.gold { background: #d4af37; color: #000; border: none; }
+
+        .floating-text { 
+            position: absolute; font-size: 32px; font-weight: 900; color: #fff; 
+            pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20; 
+        }
+        @keyframes floatUp { 
+            0% { opacity: 1; transform: translateY(0) scale(1); } 
+            100% { opacity: 0; transform: translateY(-120px) scale(1.2); } 
+        }
+
+        .bottom-nav { 
+            position: absolute; bottom: 0; left: 0; right: 0; 
+            background: #0a0a0a; display: flex; padding: 10px 5px 20px 5px; 
+            border-top: 1px solid #222;
+        }
+        .nav-item { 
+            flex: 1; text-align: center; color: #555; font-size: 13px; font-weight: bold; 
+            padding: 12px 0; cursor: pointer; text-transform: lowercase;
+        }
+        .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="header">
+            <div class="top-stats">
+                <div class="stat-box">
+                    <div class="stat-label">скрепки</div>
+                    <div class="stat-value" id="skrepki-val">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">прибыль в час</div>
+                    <div class="stat-value" id="profit-val">+0</div>
+                </div>
+            </div>
+            <div class="league-info" id="league-name">лига: бронза</div>
+            <div class="main-balance" id="vrgk-balance">0</div>
+        </div>
+
+        <!-- тапалка -->
+        <div id="tab-mine" class="tab-content active">
+            <div class="tap-area" id="tap-area">
+                <div class="vorg-coin" id="vorg-coin"></div>
+            </div>
+            <div class="energy-container">
+                <div class="energy-text"><span id="energy-current">1000</span> / <span id="energy-max">1000</span> энг</div>
+                <div class="energy-bar-bg">
+                    <div class="energy-bar-fill" id="energy-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- прокачка -->
+        <div id="tab-upgrades" class="tab-content">
+            <div class="upgrade-list">
+                <div class="section-title">бусты</div>
+                
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">сила тапа</span>
+                        <span class="upgrade-desc" id="multitap-lvl">ур 1 (+1 за тап)</span>
+                        <span class="upgrade-price" id="multitap-price">цена: 500</span>
+                    </div>
+                    <button class="buy-btn" onclick="buyupgrade('multitap')">купить</button>
+                </div>
+                
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">макс энергия</span>
+                        <span class="upgrade-desc" id="energy-lvl">ур 1 (+500 энг)</span>
+                        <span class="upgrade-price" id="energy-price">цена: 1000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buyupgrade('energy')">купить</button>
+                </div>
+
+                <div class="section-title">карточки (пассив)</div>
+                
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">флуд в тг</span>
+                        <span class="upgrade-desc">+500 в час</span>
+                        <span class="upgrade-price" id="card1-price">цена: 2000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buycard('card1', 2000, 500)">купить</button>
+                </div>
+
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">пиар от ворга</span>
+                        <span class="upgrade-desc">+3000 в час</span>
+                        <span class="upgrade-price" id="card2-price">цена: 10000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buycard('card2', 10000, 3000)">купить</button>
+                </div>
+                
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">свой гдпс сервер</span>
+                        <span class="upgrade-desc">+15000 в час</span>
+                        <span class="upgrade-price" id="card3-price">цена: 50000</span>
+                    </div>
+                    <button class="buy-btn" onclick="buycard('card3', 50000, 15000)">купить</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- задания -->
+        <div id="tab-tasks" class="tab-content">
+            <div class="upgrade-list">
+                <div class="section-title">задания</div>
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">ежедневная награда</span>
+                        <span class="upgrade-desc">забирай монеты каждый день</span>
+                        <span class="upgrade-price">+ 50 000 $vrgk</span>
+                    </div>
+                    <button class="buy-btn gold" id="daily-btn" onclick="claimdaily()">забрать</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- скрепки -->
+        <div id="tab-skrepki" class="tab-content">
+            <div class="upgrade-list">
+                <div class="section-title" style="text-align: center;">черный рынок</div>
+                <div class="upgrade-item" style="flex-direction: column; text-align: center; gap: 15px; padding: 30px 15px;">
+                    <div style="font-size: 20px; color: #aaa;">крафт скрепки</div>
+                    <div style="font-size: 14px; color: #777;">курс: 1 000 000 $vrgk = 1 скрепка</div>
+                    <button class="buy-btn gold" style="width: 100%; padding: 15px; font-size: 16px;" onclick="craftskrepka()">скрафтить скрепку</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchtab('mine', this)">тапать</div>
+            <div class="nav-item" onclick="switchtab('upgrades', this)">прокачка</div>
+            <div class="nav-item" onclick="switchtab('tasks', this)">задания</div>
+            <div class="nav-item" onclick="switchtab('skrepki', this)">скрепки</div>
+        </div>
+    </div>
+
+    <script>
+        // загрузка сохранений или дефолт
+        let vrgk = parsefloat(localstorage.getitem('vrgk')) || 0;
+        let skrepki = parseint(localstorage.getitem('skrepki')) || 0;
+        let profitperhour = parsefloat(localstorage.getitem('profit')) || 0;
+        
+        let earnpertap = parseint(localstorage.getitem('earnpertap')) || 1;
+        let maxenergy = parseint(localstorage.getitem('maxenergy')) || 1000;
+        let currentenergy = parsefloat(localstorage.getitem('currentenergy')) || maxenergy;
+        let energyregen = 3; 
+
+        let multitapprice = parseint(localstorage.getitem('multitapprice')) || 500;
+        let multitaplvl = parseint(localstorage.getitem('multitaplvl')) || 1;
+        
+        let energylvlprice = parseint(localstorage.getitem('energylvlprice')) || 1000;
+        let energylvl = parseint(localstorage.getitem('energylvl')) || 1;
+
+        // цены карточек (чтобы сохранялись)
+        let c1price = parseint(localstorage.getitem('c1price')) || 2000;
+        let c2price = parseint(localstorage.getitem('c2price')) || 10000;
+        let c3price = parseint(localstorage.getitem('c3price')) || 50000;
+        
+        let lastdaily = localstorage.getitem('lastdaily') || 0;
+
+        const elbalance = document.getelementbyid('vrgk-balance');
+        const elskrepki = document.getelementbyid('skrepki-val');
+        const elprofit = document.getelementbyid('profit-val');
+        const elenergy = document.getelementbyid('energy-current');
+        const elenergymax = document.getelementbyid('energy-max');
+        const elenergyfill = document.getelementbyid('energy-fill');
+        const elleague = document.getelementbyid('league-name');
+        const coin = document.getelementbyid('vorg-coin');
+        const taparea = document.getelementbyid('tap-area');
+
+        function format(num) { return math.floor(num).tostring().replace(/\b(?=(\d{3})+(?!\d))/g, " "); }
+        
+        // обновление интерфейса цен при загрузке
+        document.getelementbyid('multitap-lvl').innertext = `ур ${multitaplvl} (+${earnpertap} за тап)`;
+        document.getelementbyid('multitap-price').innertext = `цена: ${format(multitapprice)}`;
+        document.getelementbyid('energy-lvl').innertext = `ур ${energylvl} (+${maxenergy} энг)`;
+        document.getelementbyid('energy-price').innertext = `цена: ${format(energylvlprice)}`;
+        document.getelementbyid('card1-price').innertext = `цена: ${format(c1price)}`;
+        document.getelementbyid('card2-price').innertext = `цена: ${format(c2price)}`;
+        document.getelementbyid('card3-price').innertext = `цена: ${format(c3price)}`;
+        
+        // проверка кнопки дейлика
+        function checkdaily() {
+            let now = new date().gettime();
+            if (now - lastdaily < 86400000) {
+                let btn = document.getelementbyid('daily-btn');
+                btn.innertext = 'уже собрано';
+                btn.style.background = '#333';
+                btn.style.color = '#777';
+                btn.disabled = true;
+            }
+        }
+
+        function checkleague() {
+            let l = 'бронза';
+            if (vrgk > 10000) l = 'серебро';
+            if (vrgk > 100000) l = 'золото';
+            if (vrgk > 1000000) l = 'платина';
+            if (vrgk > 10000000) l = 'алмаз';
+            elleague.innertext = 'лига: ' + l;
+        }
+
+        function savedata() {
+            localstorage.setitem('vrgk', vrgk);
+            localstorage.setitem('skrepki', skrepki);
+            localstorage.setitem('profit', profitperhour);
+            localstorage.setitem('earnpertap', earnpertap);
+            localstorage.setitem('maxenergy', maxenergy);
+            localstorage.setitem('currentenergy', currentenergy);
+            localstorage.setitem('multitapprice', multitapprice);
+            localstorage.setitem('multitaplvl', multitaplvl);
+            localstorage.setitem('energylvlprice', energylvlprice);
+            localstorage.setitem('energylvl', energylvl);
+            localstorage.setitem('c1price', c1price);
+            localstorage.setitem('c2price', c2price);
+            localstorage.setitem('c3price', c3price);
+        }
+
+        function updateui() {
+            elbalance.innertext = format(vrgk);
+            elskrepki.innertext = format(skrepki);
+            elprofit.innertext = "+" + format(profitperhour);
+            
+            elenergy.innertext = math.floor(currentenergy);
+            elenergymax.innertext = maxenergy;
+            elenergyfill.style.width = `${(currentenergy / maxenergy) * 100}%`;
+            checkleague();
+        }
+
+        coin.addeventlistener('touchstart', (e) => { e.preventdefault(); handletap(e.changedtouches); }, {passive: false});
+        coin.addeventlistener('mousedown', (e) => { if (e.button === 0) handletap([{clientx: e.clientx, clienty: e.clienty}]); });
+
+        function handletap(touches) {
+            for (let i = 0; i < touches.length; i++) {
+                if (currentenergy >= earnpertap) {
+                    currentenergy -= earnpertap;
+                    vrgk += earnpertap;
+                    createtext(touches[i].clientx, touches[i].clienty, `+${earnpertap}`);
+                    if (navigator.vibrate) navigator.vibrate(10);
+                }
+            }
+            updateui();
+            savedata();
+        }
+
+        function createtext(x, y, text) {
+            const el = document.createelement('div');
+            el.classlist.add('floating-text');
+            el.innertext = text;
+            const rect = taparea.getboundingclientrect();
+            const offset = (math.random() - 0.5) * 40;
+            el.style.left = `${x - rect.left - 20 + offset}px`;
+            el.style.top = `${y - rect.top - 20}px`;
+            taparea.appendchild(el);
+            settimeout(() => el.remove(), 800);
+        }
+
+        setinterval(() => {
+            if (currentenergy < maxenergy) currentenergy = math.min(currentenergy + energyregen, maxenergy);
+            if (profitperhour > 0) vrgk += profitperhour / 3600;
+            updateui();
+            savedata(); // сейвим каждую секунду
+        }, 1000);
+
+        // глобальные функции для кнопок в html
+        window.buyupgrade = function(type) {
+            if (type === 'multitap' && vrgk >= multitapprice) {
+                vrgk -= multitapprice;
+                earnpertap += 1;
+                multitaplvl += 1;
+                multitapprice = math.floor(multitapprice * 2.1);
+                document.getelementbyid('multitap-lvl').innertext = `ур ${multitaplvl} (+${earnpertap} за тап)`;
+                document.getelementbyid('multitap-price').innertext = `цена: ${format(multitapprice)}`;
+            } else if (type === 'energy' && vrgk >= energylvlprice) {
+                vrgk -= energylvlprice;
+                maxenergy += 500;
+                energylvl += 1;
+                energylvlprice = math.floor(energylvlprice * 2.1);
+                document.getelementbyid('energy-lvl').innertext = `ур ${energylvl} (+${maxenergy} энг)`;
+                document.getelementbyid('energy-price').innertext = `цена: ${format(energylvlprice)}`;
+            } else {
+                alert('мало денег, иди тапай'); return;
+            }
+            updateui(); savedata();
+        };
+
+        window.buycard = function(id, baseprice, profit) {
+            let currentprice = id === 'card1' ? c1price : id === 'card2' ? c2price : c3price;
+            if (vrgk >= currentprice) {
+                vrgk -= currentprice;
+                profitperhour += profit;
+                let newprice = math.floor(currentprice * 1.5);
+                
+                if (id === 'card1') c1price = newprice;
+                if (id === 'card2') c2price = newprice;
+                if (id === 'card3') c3price = newprice;
+                
+                document.getelementbyid(`${id}-price`).innertext = `цена: ${format(newprice)}`;
+                updateui(); savedata();
+            } else {
+                alert('мало денег');
+            }
+        };
+
+        window.craftskrepka = function() {
+            if (vrgk >= 1000000) {
+                vrgk -= 1000000;
+                skrepki += 1;
+                updateui(); savedata();
+                alert('крафт успешен. у тебя +1 скрепка');
+            } else {
+                alert('нужен 1 000 000 воргиков');
+            }
+        };
+        
+        window.claimdaily = function() {
+            let now = new date().gettime();
+            if (now - lastdaily > 86400000) {
+                vrgk += 50000;
+                lastdaily = now;
+                localstorage.setitem('lastdaily', lastdaily);
+                checkdaily();
+                updateui(); savedata();
+                alert('забрал 50 000');
+            }
+        };
+
+        window.switchtab = function(tabid, el) {
+            document.queryselectorall('.tab-content').foreach(t => t.classlist.remove('active'));
+            document.queryselectorall('.nav-item').foreach(n => n.classlist.remove('active'));
+            document.getelementbyid(`tab-${tabid}`).classlist.add('active');
+            el.classlist.add('active');
+        };
+
+        const math = window.Math;
+        const parsefloat = window.parseFloat;
+        const parseint = window.parseInt;
+        
+        // фикс регистра для базовых js функций, чтобы код работал
+        document.getelementbyid = document.getElementById.bind(document);
+        document.createelement = document.createElement.bind(document);
+        document.queryselectorall = document.querySelectorAll.bind(document);
+        
+        // исправляем прототипы для работы с нижним регистром в нашем коде
+        Element.prototype.appendchild = Element.prototype.appendChild;
+        Element.prototype.getboundingclientrect = Element.prototype.getBoundingClientRect;
+        Element.prototype.addeventlistener = Element.prototype.addEventListener;
+        Event.prototype.preventdefault = Event.prototype.preventDefault;
+        NodeList.prototype.foreach = NodeList.prototype.forEach;
+        DOMTokenList.prototype.add = DOMTokenList.prototype.add;
+        DOMTokenList.prototype.remove = DOMTokenList.prototype.remove;
+        
+        const localstorage = window.localStorage;
+        localstorage.getitem = localstorage.getItem.bind(localstorage);
+        localstorage.setitem = localstorage.setItem.bind(localstorage);
+        
+        const settimeout = window.setTimeout;
+        const setinterval = window.setInterval;
+        
+        checkdaily();
+        updateui();
+    </script>
+</body>
+</html>
