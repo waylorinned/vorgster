@@ -164,6 +164,7 @@
             <div class="upgrade-list">
                 <div class="section-title">топ флуда</div>
                 
+                <!-- НОВЫЕ КНОПКИ ВЫБОРА РЕЙТИНГА -->
                 <div style="display: flex; gap: 5px; margin-bottom: 15px;">
                     <button class="buy-btn gold" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-players" onclick="switch_top('players')">игроки</button>
                     <button class="buy-btn" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-clubs" onclick="switch_top('clubs')">клубы</button>
@@ -278,7 +279,7 @@
         let profit = parseFloat(localStorage.getItem(PREFIX + 'profit')) || 0;
         let tap_power = parseInt(localStorage.getItem(PREFIX + 'tap_power')) || 1;
         
-        // ФИКС ЭНЕРГИИ И ЗАЩИТА ОТ NaN
+        // ФИКС ЭНЕРГИИ 3.0
         let max_energy = parseInt(localStorage.getItem(PREFIX + 'max_energy')) || 1000;
         let ce = parseFloat(localStorage.getItem(PREFIX + 'cur_energy'));
         let cur_energy = (isNaN(ce) || ce < 0) ? max_energy : ce;
@@ -300,8 +301,10 @@
         let player_rank = parseInt(localStorage.getItem(PREFIX + 'rank')) || 0;
         const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
 
-        let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || new Date().getTime();
+        // DELTA TIME переменная
+        let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
+        
         let global_event_data = null; 
         let my_event_score = 0;
         let cached_players = {};
@@ -400,36 +403,12 @@
             document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`;
         }
 
-        // БЕЗОПАСНЫЙ РАСЧЕТ ОФЛАЙНА
-        function calc_offline() {
-            let now = new Date().getTime();
-            if (last_time > 0) {
-                let diff_sec = (now - last_time) / 1000;
-                if (diff_sec < 0) diff_sec = 0; // Защита от крутильщиков времени
-                
-                if (cur_energy < max_energy) {
-                    cur_energy += (diff_sec * eng_regen);
-                    if(cur_energy > max_energy) cur_energy = max_energy;
-                }
-                
-                if (profit > 0 && nickname) {
-                    let profit_sec = diff_sec;
-                    if (profit_sec > 10800) profit_sec = 10800; 
-                    if (profit_sec > 60) { 
-                        let offline_earn = (profit / 3600) * profit_sec; vrgk += offline_earn;
-                        document.getElementById('offline-amount').innerText = "+" + fmt(offline_earn); document.getElementById('offline-modal').style.display = 'flex';
-                    }
-                }
-            }
-            last_time = now; save_data();
-        }
-
         function save_data() {
             localStorage.setItem(PREFIX + 'vrgk', vrgk); localStorage.setItem(PREFIX + 'skrepki', skrepki);
             localStorage.setItem(PREFIX + 'profit', profit); localStorage.setItem(PREFIX + 'tap_power', tap_power);
             localStorage.setItem(PREFIX + 'max_energy', max_energy); localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
             localStorage.setItem(PREFIX + 'eng_regen', eng_regen); localStorage.setItem(PREFIX + 'rank', player_rank);
-            localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
+            localStorage.setItem(PREFIX + 'last_time', Date.now());
             localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl);
             localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl);
             localStorage.setItem(PREFIX+'regen_price', regen_price);
@@ -467,19 +446,57 @@
             upd_ui(); save_data();
         }
 
-        setInterval(() => {
-            // Защита от бесконечного NaN
+        function spawn_txt(x, y, txt) {
+            const el = document.createElement('div'); el.classList.add('floating-text'); el.innerText = txt;
+            const rect = tap_area.getBoundingClientRect();
+            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; el.style.top = `${y - rect.top - 20}px`;
+            tap_area.appendChild(el); setTimeout(() => el.remove(), 800);
+        }
+
+        // НОВЫЙ ДВИЖОК DELTA TIME (РАБОТАЕТ ДАЖЕ ЕСЛИ ИГРА БЫЛА СВЕРНУТА/НА ПАУЗЕ)
+        function game_tick() {
+            let now = Date.now();
+            let diff_sec = (now - last_time) / 1000;
+            if (diff_sec < 0) diff_sec = 0; // Защита от крутильщиков времени
+
+            // Восстанавливаем энергию пропорционально прошедшему времени
             if (isNaN(cur_energy) || cur_energy < 0) cur_energy = 0;
-            
-            if (cur_energy < max_energy) {
-                cur_energy += eng_regen;
+            if (cur_energy < max_energy && diff_sec > 0) {
+                cur_energy += (eng_regen * diff_sec);
                 if (cur_energy > max_energy) cur_energy = max_energy;
             }
-            if (profit > 0) vrgk += profit / 3600;
-            upd_ui(); save_data();
+
+            // Начисляем пассивный доход
+            if (profit > 0 && nickname) {
+                if (diff_sec > 60) {
+                    // Если игрока не было больше минуты - показываем модалку
+                    let profit_sec = diff_sec > 10800 ? 10800 : diff_sec; // лимит 3 часа
+                    let offline_earn = (profit / 3600) * profit_sec;
+                    vrgk += offline_earn;
+                    
+                    let el = document.getElementById('offline-amount');
+                    let modal = document.getElementById('offline-modal');
+                    if (el && modal) {
+                        el.innerText = "+" + fmt(offline_earn); 
+                        modal.style.display = 'flex';
+                    }
+                } else if (diff_sec > 0) {
+                    // Обычный фарм при открытой/активной игре
+                    vrgk += (profit / 3600) * diff_sec;
+                }
+            }
+
+            last_time = now;
+            upd_ui();
+            save_data();
+
             // ЭКОНОМИЯ БД: СОХРАНЯЕМ В ФОНЕ РАЗ В 3 МИНУТЫ
-            if (nickname && my_pin && Date.now() - last_sync > 180000) sync_cloud(true);
-        }, 1000);
+            if (nickname && my_pin && (now - last_sync > 180000)) sync_cloud(true);
+        }
+
+        // Запускаем 1 тик сразу при загрузке (чтобы посчитать оффлайн) и затем каждую секунду
+        game_tick();
+        setInterval(game_tick, 1000);
 
         window.buy_upg = function(type) { 
             if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); }
@@ -499,6 +516,7 @@
         };
         window.craft = function() { if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } else alert('нужен 1 000 000'); };
 
+        // ОБЛАКО И СИНХРОНИЗАЦИЯ (ЖЕЛЕЗОБЕТОННАЯ ЗАЩИТА)
         async function fetch_cloud() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
@@ -547,6 +565,7 @@
             } catch (e) {}
         }
 
+        // --- ВЫБОР РЕЙТИНГА ---
         window.switch_top = function(tab) {
             current_top_tab = tab;
             document.getElementById('btn-top-players').className = 'buy-btn';
@@ -879,6 +898,7 @@
             await put_cloud({players, clubs, event: d.event}); localStorage.clear(); location.reload();
         };
 
+        init_prices();
     </script>
 </body>
 </html>
