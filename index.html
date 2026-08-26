@@ -7,11 +7,8 @@
     <style>
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html, body { 
-            height: 100%; 
-            margin: 0; padding: 0; 
-            background: #000; color: #fff; 
-            font-family: 'segoe ui', roboto, sans-serif; 
-            overflow: hidden; user-select: none; -webkit-user-select: none; 
+            height: 100%; margin: 0; padding: 0; background: #000; color: #fff; 
+            font-family: 'segoe ui', roboto, sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; 
         }
         .container { 
             display: flex; flex-direction: column; height: 100%; max-width: 500px; 
@@ -19,33 +16,22 @@
         }
         
         .header { padding: 15px; flex-shrink: 0; position: relative; }
-        .settings-btn {
-            position: absolute; top: 15px; left: 15px; font-size: 12px; color: #aaa; 
-            text-decoration: underline; cursor: pointer; text-transform: lowercase;
-        }
+        .settings-btn { position: absolute; top: 15px; left: 15px; font-size: 12px; color: #aaa; text-decoration: underline; cursor: pointer; text-transform: lowercase; }
         .top-stats { display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 15px; gap: 10px;}
-        .stat-box { 
-            flex: 1; background: rgba(30, 30, 30, 0.8); border: 1px solid #333;
-            border-radius: 12px; padding: 10px; text-align: center; 
-        }
+        .stat-box { flex: 1; background: rgba(30, 30, 30, 0.8); border: 1px solid #333; border-radius: 12px; padding: 10px; text-align: center; }
         .stat-label { font-size: 11px; color: #aaa; text-transform: lowercase; margin-bottom: 4px; }
         .stat-value { font-size: 16px; font-weight: 800; color: #d4af37; }
-        
         .league-info { text-align: center; font-size: 14px; color: #888; margin-bottom: 5px; text-transform: lowercase;}
         .main-balance { text-align: center; font-size: 42px; font-weight: 900; margin: 5px 0 15px 0; }
 
         .tab-content { flex: 1; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
         .tab-content.active { display: flex; }
 
-        .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; flex-direction: column; }
         .vorg-coin { 
-            width: 70vw; max-width: 280px; 
-            height: 70vw; max-height: 280px; 
-            border-radius: 50%; 
-            background: url('vorg.jpg') center/cover no-repeat; 
-            background-color: #222;
-            border: 8px solid #d4af37; 
-            box-shadow: 0 0 40px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.8); 
+            width: 70vw; max-width: 280px; height: 70vw; max-height: 280px; border-radius: 50%; 
+            background: url('vorg.jpg') center/cover no-repeat; background-color: #222;
+            border: 8px solid #d4af37; box-shadow: 0 0 40px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.8); 
             cursor: pointer; transition: transform 0.05s ease-out; position: relative; z-index: 10; 
         }
         .vorg-coin:active { transform: scale(0.95); }
@@ -56,62 +42,65 @@
         .energy-bar-fill { height: 100%; background: #d4af37; width: 100%; transition: width 0.1s; }
 
         .upgrade-list { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .section-title { margin: 5px 0; color: #d4af37; font-size: 16px; text-transform: lowercase;}
-        .upgrade-item { 
-            background: #111; border: 1px solid #222; border-radius: 12px; 
-            padding: 15px; display: flex; justify-content: space-between; align-items: center; 
-        }
+        .section-title { margin: 5px 0; color: #d4af37; font-size: 16px; text-transform: lowercase; font-weight: bold;}
+        .upgrade-item { background: #111; border: 1px solid #222; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .upgrade-info { display: flex; flex-direction: column; gap: 4px; }
         .upgrade-name { font-size: 15px; font-weight: bold; color: #eee; text-transform: lowercase;}
         .upgrade-desc { font-size: 12px; color: #777; text-transform: lowercase;}
         .upgrade-price { font-size: 13px; color: #d4af37; font-weight: bold; }
-        .buy-btn { 
-            background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; 
-            border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: lowercase;
-        }
+        .buy-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: lowercase; }
         .buy-btn:active { background: #555; }
         .buy-btn.gold { background: #d4af37; color: #000; border: none; }
 
-        .floating-text { 
-            position: absolute; font-size: 32px; font-weight: 900; color: #fff; 
-            pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20; 
-        }
-        @keyframes floatUp { 
-            0% { opacity: 1; transform: translateY(0) scale(1); } 
-            100% { opacity: 0; transform: translateY(-120px) scale(1.2); } 
-        }
+        .floating-text { position: absolute; font-size: 32px; font-weight: 900; color: #fff; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
 
-        .bottom-nav { 
-            background: #0a0a0a; display: flex; 
-            padding: 10px 5px calc(15px + env(safe-area-inset-bottom)) 5px; 
-            border-top: 1px solid #222; flex-shrink: 0; justify-content: space-between;
-        }
-        .nav-item { 
-            flex: 1; text-align: center; color: #555; font-size: 11px; font-weight: bold; 
-            padding: 12px 2px; cursor: pointer; text-transform: lowercase;
-        }
+        .bottom-nav { background: #0a0a0a; display: flex; padding: 10px 5px calc(15px + env(safe-area-inset-bottom)) 5px; border-top: 1px solid #222; flex-shrink: 0; justify-content: space-between; }
+        .nav-item { flex: 1; text-align: center; color: #555; font-size: 11px; font-weight: bold; padding: 12px 2px; cursor: pointer; text-transform: lowercase; }
         .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 10px; }
 
-        .modal-overlay {
-            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: #1a1508; border: 1px solid #333; border-radius: 15px;
-            padding: 20px; text-align: center; width: 85%; max-width: 350px; display: flex; flex-direction: column; gap: 10px;
-        }
+        .modal-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: #1a1508; border: 1px solid #333; border-radius: 15px; padding: 20px; text-align: center; width: 85%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; max-height: 90vh; overflow-y: auto;}
         .modal-title { font-size: 18px; color: #d4af37; margin-bottom: 5px; text-transform: lowercase; font-weight: bold;}
         
-        input, select {
-            width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff;
-            padding: 12px; border-radius: 8px; font-family: 'segoe ui', sans-serif; font-size: 14px;
-        }
-        input::placeholder { color: #666; }
+        input, select, textarea { width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-family: 'segoe ui', sans-serif; font-size: 14px; }
+        input::placeholder, textarea::placeholder { color: #666; }
 
         .rank-pos { font-size: 18px; font-weight: 900; color: #555; width: 25px; text-align: center; }
         .rank-pos.gold-pos { color: #d4af37; }
         .rank-pos.silver-pos { color: #aaa; }
         .rank-pos.bronze-pos { color: #cd7f32; }
+
+        .club-card { background: #111; border: 2px solid #d4af37; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; position: relative;}
+        .club-badge { font-size: 32px; background: #222; border: 2px solid #d4af37; border-radius: 12px; width: 60px; height: 60px; line-height: 56px; margin: 0 auto 10px auto; }
+        .club-name-big { font-size: 24px; font-weight: 900; color: #fff; }
+        .club-trophies { font-size: 18px; color: #d4af37; font-weight: bold; margin-bottom: 10px; }
+        .club-desc-box { font-size: 12px; color: #aaa; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 15px; word-wrap: break-word;}
+        .club-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cs-box { background: #222; border: 1px solid #333; padding: 8px; border-radius: 8px; }
+        .cs-title { font-size: 10px; color: #888; text-transform: uppercase; }
+        .cs-val { font-size: 13px; font-weight: bold; color: #fff; }
+        
+        .member-list-item { background: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+        .ml-info { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+        .ml-name { font-weight: bold; font-size: 14px; }
+        .ml-role { font-size: 10px; color: #d4af37; }
+        .ml-status { font-size: 11px; color: #888; }
+        .ml-status.online { color: #4CAF50; }
+        .ml-score { font-weight: bold; color: #d4af37; font-size: 14px; }
+
+        .chat-container { background: #000; border: 1px solid #333; border-radius: 12px; height: 200px; display: flex; flex-direction: column; margin-top: 15px; }
+        .chat-msgs { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        .chat-msg { font-size: 12px; word-wrap: break-word; }
+        .chat-author { color: #d4af37; font-weight: bold; margin-right: 5px; }
+        .chat-input-area { display: flex; padding: 5px; border-top: 1px solid #333; gap: 5px;}
+        .chat-input-area input { padding: 8px; font-size: 12px; }
+
+        .event-banner { background: #d4af37; color: #000; font-weight: 900; text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; animation: pulse 1.5s infinite; line-height: 1.2;}
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        
+        .event-coin { width: 200px; height: 200px; background: #333; border: 5px solid #fff; border-radius: 20px; margin: 20px auto; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 50px; font-weight: bold; color: #fff;}
+        .event-coin:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -120,14 +109,8 @@
         <div class="header">
             <div class="settings-btn" onclick="document.getElementById('settings-modal').style.display='flex'">настройки</div>
             <div class="top-stats">
-                <div class="stat-box">
-                    <div class="stat-label">скрепки</div>
-                    <div class="stat-value" id="skrepki-val">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">прибыль в час</div>
-                    <div class="stat-value" id="profit-val">+0</div>
-                </div>
+                <div class="stat-box"><div class="stat-label">скрепки</div><div class="stat-value" id="skrepki-val">0</div></div>
+                <div class="stat-box"><div class="stat-label">прибыль в час</div><div class="stat-value" id="profit-val">+0</div></div>
             </div>
             <div class="league-info" id="league-name">лига: бронза</div>
             <div class="main-balance" id="vrgk-balance">0</div>
@@ -139,69 +122,24 @@
             </div>
             <div class="energy-container">
                 <div class="energy-text"><span id="energy-current">1000</span> / <span id="energy-max">1000</span> энг</div>
-                <div class="energy-bar-bg">
-                    <div class="energy-bar-fill" id="energy-fill"></div>
-                </div>
+                <div class="energy-bar-bg"><div class="energy-bar-fill" id="energy-fill"></div></div>
             </div>
         </div>
 
         <div id="tab-upgrades" class="tab-content">
             <div class="upgrade-list">
                 <div class="section-title">бусты</div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">сила тапа</span>
-                        <span class="upgrade-desc" id="multitap-lvl">ур 1 (+1 за тап)</span>
-                        <span class="upgrade-price" id="multitap-price">цена: 500</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_upg('tap')">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">макс энергия</span>
-                        <span class="upgrade-desc" id="energy-lvl">ур 1 (+500 энг)</span>
-                        <span class="upgrade-price" id="energy-price">цена: 1000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_upg('eng')">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">реген энергии</span>
-                        <span class="upgrade-desc" id="regen-lvl">+3 в сек</span>
-                        <span class="upgrade-price" id="regen-price">цена: 5 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_upg('regen')">купить</button>
-                </div>
-
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">сила тапа</span><span class="upgrade-desc" id="multitap-lvl">ур 1 (+1 за тап)</span><span class="upgrade-price" id="multitap-price">цена: 500</span></div><button class="buy-btn" onclick="buy_upg('tap')">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">макс энергия</span><span class="upgrade-desc" id="energy-lvl">ур 1 (+500 энг)</span><span class="upgrade-price" id="energy-price">цена: 1000</span></div><button class="buy-btn" onclick="buy_upg('eng')">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">реген энергии</span><span class="upgrade-desc" id="regen-lvl">+3 в сек</span><span class="upgrade-price" id="regen-price">цена: 5 000</span></div><button class="buy-btn" onclick="buy_upg('regen')">купить</button></div>
                 <div class="section-title">карточки (пассив)</div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">флуд в тг</span><span class="upgrade-desc">+500 в час</span><span class="upgrade-price" id="card1-price">цена: 2000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c1', 500)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">пиар от ворга</span><span class="upgrade-desc">+3000 в час</span><span class="upgrade-price" id="card2-price">цена: 10 000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c2', 3000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">свой клан</span><span class="upgrade-desc">+5000 в час</span><span class="upgrade-price" id="card5-price">цена: 20 000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c5', 5000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">свой дс сервер</span><span class="upgrade-desc">+15000 в час</span><span class="upgrade-price" id="card3-price">цена: 50 000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c3', 15000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">доска позора</span><span class="upgrade-desc">+20000 в час</span><span class="upgrade-price" id="card4-price">цена: 100 000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c4', 20000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">личный пони</span><span class="upgrade-desc">+25000 в час</span><span class="upgrade-price" id="card7-price">цена: 130 000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c7', 25000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info"><span class="upgrade-name">админка</span><span class="upgrade-desc">+30000 в час</span><span class="upgrade-price" id="card6-price">цена: 200 000</span></div>
-                    <button class="buy-btn" onclick="buy_card('c6', 30000)">купить</button>
-                </div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">флуд в тг</span><span class="upgrade-desc">+500 в час</span><span class="upgrade-price" id="card1-price">цена: 2000</span></div><button class="buy-btn" onclick="buy_card('c1', 500)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">пиар от ворга</span><span class="upgrade-desc">+3000 в час</span><span class="upgrade-price" id="card2-price">цена: 10 000</span></div><button class="buy-btn" onclick="buy_card('c2', 3000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">свой клан</span><span class="upgrade-desc">+5000 в час</span><span class="upgrade-price" id="card5-price">цена: 20 000</span></div><button class="buy-btn" onclick="buy_card('c5', 5000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">свой дс сервер</span><span class="upgrade-desc">+15000 в час</span><span class="upgrade-price" id="card3-price">цена: 50 000</span></div><button class="buy-btn" onclick="buy_card('c3', 15000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">доска позора</span><span class="upgrade-desc">+20000 в час</span><span class="upgrade-price" id="card4-price">цена: 100 000</span></div><button class="buy-btn" onclick="buy_card('c4', 20000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">личный пони</span><span class="upgrade-desc">+25000 в час</span><span class="upgrade-price" id="card7-price">цена: 130 000</span></div><button class="buy-btn" onclick="buy_card('c7', 25000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">админка</span><span class="upgrade-desc">+30000 в час</span><span class="upgrade-price" id="card6-price">цена: 200 000</span></div><button class="buy-btn" onclick="buy_card('c6', 30000)">купить</button></div>
             </div>
         </div>
 
@@ -252,8 +190,16 @@
             <div class="modal-content">
                 <div class="modal-title">настройки</div>
                 <div style="font-size: 12px; color: #888; margin-bottom: 10px;" id="current-nick"></div>
+                
                 <button class="buy-btn" onclick="change_nick()">сменить ник</button>
-                <button class="buy-btn" style="background: #311; border: 1px solid #a33; color: #f88;" onclick="delete_acc()">удалить аккаунт</button>
+                
+                <!-- АДМИНКА ДЛЯ CONEXION -->
+                <div id="admin-panel" style="display:none; background: #220; padding: 10px; border-radius: 8px; border: 1px solid #d4af37; margin: 10px 0;">
+                    <div style="color: #d4af37; font-weight: bold; margin-bottom: 5px;">панель админа</div>
+                    <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="toggle_event()">управление событием</button>
+                </div>
+
+                <button class="buy-btn" style="background: #311; border: 1px solid #a33; color: #f88; margin-top:10px;" onclick="delete_acc()">удалить аккаунт</button>
                 <button class="buy-btn" style="margin-top: 10px;" onclick="document.getElementById('settings-modal').style.display='none'">закрыть</button>
             </div>
         </div>
@@ -263,7 +209,7 @@
             <div class="modal-content">
                 <div class="modal-title">создать клуб</div>
                 <input type="text" id="c-name" placeholder="название клуба (без мата)" maxlength="15">
-                <input type="text" id="c-desc" placeholder="описание" maxlength="40">
+                <textarea id="c-desc" placeholder="описание клуба..." maxlength="150" rows="3"></textarea>
                 <input type="number" id="c-req" placeholder="мин. воргиков для входа">
                 <select id="c-type">
                     <option value="открытый">открытый</option>
@@ -275,7 +221,27 @@
             </div>
         </div>
 
-        <!-- стартовая рега (без зависания браузера) -->
+        <!-- модалка просмотра любого клуба -->
+        <div id="view-club-modal" class="modal-overlay" style="align-items: flex-start; padding-top: 20px;">
+            <div class="modal-content" style="width: 95%; max-width: 400px; padding: 15px;" id="view-club-content">
+                <!-- рендер клуба тут -->
+            </div>
+        </div>
+
+        <!-- модалка Ивента -->
+        <div id="event-modal" class="modal-overlay">
+            <div class="modal-content" style="background: #111; border: 2px solid #d4af37;">
+                <div class="modal-title" id="event-title">событие</div>
+                <div style="font-size: 12px; color: #aaa;">натапай как можно больше очков!</div>
+                <div style="font-size: 24px; color: #fff; font-weight: bold; margin: 10px 0;" id="event-my-score">твой счет: 0</div>
+                <div class="event-coin" onclick="tap_event()">📦</div>
+                <div style="font-size: 12px; color: #d4af37; margin-bottom: 5px;">топ события:</div>
+                <div id="event-top" style="font-size: 11px; color: #ccc; text-align: left; background: #000; padding: 10px; border-radius: 8px; min-height: 50px;">загрузка...</div>
+                <button class="buy-btn" style="margin-top: 15px;" onclick="document.getElementById('event-modal').style.display='none'">выйти</button>
+            </div>
+        </div>
+
+        <!-- стартовая рега -->
         <div id="auth-modal" class="modal-overlay" style="z-index: 9999; background: #000;">
             <div class="modal-content" style="background: #111; border: 1px solid #d4af37;">
                 <div class="modal-title">добро пожаловать</div>
@@ -315,51 +281,57 @@
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || new Date().getTime();
         let last_sync = 0;
+        let global_event_data = null; 
+        let my_event_score = 0;
+        let cached_players = {};
+        let cached_clubs = {};
 
         const BIN_ID = '6a8f2d5cf5f4af5e2945ec3f';
         const API_KEY = '$2a$10$aaQQW4GHe/epejM6DjxqmubroFphtxyH7bfo30HN2R8zxaklID9fO';
 
         const el_bal = document.getElementById('vrgk-balance');
-        const el_skr = document.getElementById('skrepki-val');
-        const el_prof = document.getElementById('profit-val');
         const el_eng = document.getElementById('energy-current');
         const el_eng_max = document.getElementById('energy-max');
         const el_eng_fill = document.getElementById('energy-fill');
-        const el_league = document.getElementById('league-name');
         const tap_area = document.getElementById('tap-area');
 
-        if (!nickname) {
-            document.getElementById('auth-modal').style.display = 'flex';
-        } else {
+        if (!nickname) { document.getElementById('auth-modal').style.display = 'flex'; } 
+        else { check_admin(); }
+
+        function check_admin() {
             document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
+            if(nickname && nickname.toLowerCase() === 'conexion') {
+                document.getElementById('admin-panel').style.display = 'block';
+            }
         }
 
         window.set_start_nick = function() {
             let n = document.getElementById('auth-nick').value.trim();
             if(!n) { alert('напиши хоть что-то!'); return; }
-            nickname = n;
-            localStorage.setItem(PREFIX + 'nickname', nickname);
-            document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
+            nickname = n; localStorage.setItem(PREFIX + 'nickname', nickname);
             document.getElementById('auth-modal').style.display = 'none';
-            sync_cloud(); 
+            check_admin(); sync_cloud(); 
         };
 
         function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+        function gen_tag() { return '#' + Math.random().toString(36).substr(2, 6).toUpperCase(); }
         
-        function init_prices() {
-            document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`;
-            document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
-            document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`;
-            document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
-            document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`;
-            document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
-            
-            document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`;
-            document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`;
-            document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`;
-            document.getElementById('card4-price').innerText = `цена: ${fmt(c4_price)}`;
-            document.getElementById('card5-price').innerText = `цена: ${fmt(c5_price)}`;
-            document.getElementById('card6-price').innerText = `цена: ${fmt(c6_price)}`;
+        function timeAgo(ts) {
+            if(!ts) return "давно";
+            let diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 120) return "в сети";
+            if (diff < 3600) return `был(а) ${Math.floor(diff/60)} мин назад`;
+            if (diff < 86400) return `был(а) ${Math.floor(diff/3600)} ч назад`;
+            return `был(а) ${Math.floor(diff/86400)} дн назад`;
+        }
+        
+        function init_prices() { 
+            document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`; document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
+            document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`; document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
+            document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`; document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
+            document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`; document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`;
+            document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`; document.getElementById('card4-price').innerText = `цена: ${fmt(c4_price)}`;
+            document.getElementById('card5-price').innerText = `цена: ${fmt(c5_price)}`; document.getElementById('card6-price').innerText = `цена: ${fmt(c6_price)}`;
             document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`;
         }
 
@@ -379,48 +351,33 @@
                     }
                 }
             }
-            last_time = now;
-            save_data();
+            last_time = now; save_data();
         }
 
         function chk_league() {
             let l = 'бронза';
-            if (vrgk >= 10000) l = 'серебро';
-            if (vrgk >= 100000) l = 'золото';
-            if (vrgk >= 1000000) l = 'платина';
-            if (vrgk >= 10000000) l = 'алмаз';
-            el_league.innerText = 'лига: ' + l;
+            if (vrgk >= 10000) l = 'серебро'; if (vrgk >= 100000) l = 'золото';
+            if (vrgk >= 1000000) l = 'платина'; if (vrgk >= 10000000) l = 'алмаз';
+            document.getElementById('league-name').innerText = 'лига: ' + l;
         }
 
         function save_data() {
-            localStorage.setItem(PREFIX + 'vrgk', vrgk);
-            localStorage.setItem(PREFIX + 'skrepki', skrepki);
-            localStorage.setItem(PREFIX + 'profit', profit);
-            localStorage.setItem(PREFIX + 'tap_power', tap_power);
-            localStorage.setItem(PREFIX + 'max_energy', max_energy);
-            localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
-            localStorage.setItem(PREFIX + 'eng_regen', eng_regen);
-            localStorage.setItem(PREFIX + 'tap_price', tap_price);
-            localStorage.setItem(PREFIX + 'tap_lvl', tap_lvl);
-            localStorage.setItem(PREFIX + 'eng_price', eng_price);
-            localStorage.setItem(PREFIX + 'eng_lvl', eng_lvl);
-            localStorage.setItem(PREFIX + 'regen_price', regen_price);
-            localStorage.setItem(PREFIX + 'c1_price', c1_price);
-            localStorage.setItem(PREFIX + 'c2_price', c2_price);
-            localStorage.setItem(PREFIX + 'c3_price', c3_price);
-            localStorage.setItem(PREFIX + 'c4_price', c4_price);
-            localStorage.setItem(PREFIX + 'c5_price', c5_price);
-            localStorage.setItem(PREFIX + 'c6_price', c6_price);
-            localStorage.setItem(PREFIX + 'c7_price', c7_price);
-            localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
+            localStorage.setItem(PREFIX + 'vrgk', vrgk); localStorage.setItem(PREFIX + 'skrepki', skrepki);
+            localStorage.setItem(PREFIX + 'profit', profit); localStorage.setItem(PREFIX + 'tap_power', tap_power);
+            localStorage.setItem(PREFIX + 'max_energy', max_energy); localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
+            localStorage.setItem(PREFIX + 'eng_regen', eng_regen); localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
+            localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl);
+            localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl);
+            localStorage.setItem(PREFIX+'regen_price', regen_price);
+            localStorage.setItem(PREFIX+'c1_price', c1_price); localStorage.setItem(PREFIX+'c2_price', c2_price);
+            localStorage.setItem(PREFIX+'c3_price', c3_price); localStorage.setItem(PREFIX+'c4_price', c4_price);
+            localStorage.setItem(PREFIX+'c5_price', c5_price); localStorage.setItem(PREFIX+'c6_price', c6_price); localStorage.setItem(PREFIX+'c7_price', c7_price);
         }
 
         function upd_ui() {
-            el_bal.innerText = fmt(vrgk);
-            el_skr.innerText = fmt(skrepki);
-            el_prof.innerText = "+" + fmt(profit);
-            el_eng.innerText = Math.floor(cur_energy);
-            el_eng_max.innerText = max_energy;
+            el_bal.innerText = fmt(vrgk); document.getElementById('skrepki-val').innerText = fmt(skrepki);
+            document.getElementById('profit-val').innerText = "+" + fmt(profit);
+            el_eng.innerText = Math.floor(cur_energy); el_eng_max.innerText = max_energy;
             el_eng_fill.style.width = `${(cur_energy / max_energy) * 100}%`;
             chk_league();
         }
@@ -431,8 +388,7 @@
         function do_tap(touches) {
             for (let i = 0; i < touches.length; i++) {
                 if (cur_energy >= tap_power) {
-                    cur_energy -= tap_power;
-                    vrgk += tap_power;
+                    cur_energy -= tap_power; vrgk += tap_power;
                     spawn_txt(touches[i].clientX, touches[i].clientY, `+${tap_power}`);
                     if (navigator.vibrate) navigator.vibrate(10);
                 }
@@ -441,163 +397,107 @@
         }
 
         function spawn_txt(x, y, txt) {
-            const el = document.createElement('div');
-            el.classList.add('floating-text');
-            el.innerText = txt;
+            const el = document.createElement('div'); el.classList.add('floating-text'); el.innerText = txt;
             const rect = tap_area.getBoundingClientRect();
-            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`;
-            el.style.top = `${y - rect.top - 20}px`;
-            tap_area.appendChild(el);
-            setTimeout(() => el.remove(), 800);
+            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; el.style.top = `${y - rect.top - 20}px`;
+            tap_area.appendChild(el); setTimeout(() => el.remove(), 800);
         }
 
         setInterval(() => {
             if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + eng_regen, max_energy);
             if (profit > 0) vrgk += profit / 3600;
             upd_ui(); save_data();
+            if (nickname && Date.now() - last_sync > 10000) sync_cloud(true);
         }, 1000);
 
-        window.buy_upg = function(type) {
-            if (type === 'tap' && vrgk >= tap_price) {
-                vrgk -= tap_price; tap_power += 1; tap_lvl += 1;
-                tap_price = Math.floor(tap_price * 2.1);
-                document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`;
-                document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
-            } else if (type === 'eng' && vrgk >= eng_price) {
-                vrgk -= eng_price; max_energy += 500; eng_lvl += 1;
-                eng_price = Math.floor(eng_price * 2.1);
-                document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`;
-                document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
-            } else if (type === 'regen' && vrgk >= regen_price) {
-                vrgk -= regen_price; eng_regen += 1;
-                regen_price = Math.floor(regen_price * 1.5);
-                document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`;
-                document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
-            } else { alert('мало денег, иди тапай'); return; }
+        window.buy_upg = function(type) { 
+            if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`; document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`; }
+            else if (type === 'eng' && vrgk >= eng_price) { vrgk -= eng_price; max_energy += 500; eng_lvl += 1; eng_price = Math.floor(eng_price * 2.1); document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`; document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`; }
+            else if (type === 'regen' && vrgk >= regen_price) { vrgk -= regen_price; eng_regen += 1; regen_price = Math.floor(regen_price * 1.5); document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`; document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`; }
+            else { alert('мало денег, иди тапай'); return; }
             upd_ui(); save_data();
         };
 
         window.buy_card = function(id, prof) {
             let p = id==='c1'?c1_price:id==='c2'?c2_price:id==='c3'?c3_price:id==='c4'?c4_price:id==='c5'?c5_price:id==='c6'?c6_price:c7_price;
             if (vrgk >= p) {
-                vrgk -= p; profit += prof;
-                let np = Math.floor(p * 1.5);
-                if(id==='c1') c1_price = np; if(id==='c2') c2_price = np; if(id==='c3') c3_price = np;
-                if(id==='c4') c4_price = np; if(id==='c5') c5_price = np; if(id==='c6') c6_price = np; if(id==='c7') c7_price = np;
-                document.getElementById(`card${id[1]}-price`).innerText = `цена: ${fmt(np)}`;
-                upd_ui(); save_data();
+                vrgk -= p; profit += prof; let np = Math.floor(p * 1.5);
+                if(id==='c1') c1_price=np; if(id==='c2') c2_price=np; if(id==='c3') c3_price=np; if(id==='c4') c4_price=np; if(id==='c5') c5_price=np; if(id==='c6') c6_price=np; if(id==='c7') c7_price=np;
+                document.getElementById(`card${id[1]}-price`).innerText = `цена: ${fmt(np)}`; upd_ui(); save_data();
             } else { alert('мало денег'); }
         };
+        window.craft = function() { if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } else alert('нужен 1 000 000'); };
 
-        window.craft = function() {
-            if (vrgk >= 1000000) {
-                vrgk -= 1000000; skrepki += 1;
-                upd_ui(); save_data(); alert('крафт успешен. у тебя +1 скрепка');
-            } else { alert('нужен 1 000 000 воргиков'); }
-        };
-
-        // НАДЕЖНАЯ РАБОТА С JSONBIN
+        // ОБЛАКО
         async function fetch_cloud() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
-                let d = await res.json();
-                let rec = d.record || {};
+                let d = await res.json(); let rec = d.record || {};
                 return {
                     players: rec.players || (rec.record && rec.record.players) || {},
-                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {}
+                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {},
+                    event: rec.event || (rec.record && rec.record.event) || { active: false, name: "", scores: {} }
                 };
-            } catch (e) {
-                return { players: {}, clubs: {} };
-            }
+            } catch (e) { return { players: {}, clubs: {}, event: {active:false} }; }
         }
-        
         async function put_cloud(data) {
-            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                body: JSON.stringify(data)
-            });
+            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data) });
         }
 
-        async function sync_cloud() {
+        async function sync_cloud(is_bg = false) {
             if (!nickname) return;
             try {
                 let d = await fetch_cloud();
-                let players = d.players || {};
-                let clubs = d.clubs || {};
+                let players = d.players; let clubs = d.clubs; global_event_data = d.event;
                 
+                let my_cloud_data = players[nickname];
+                if (my_cloud_data && my_cloud_data.club && clubs[my_cloud_data.club] && clubs[my_cloud_data.club].members.includes(nickname)) {
+                    localStorage.setItem(PREFIX + 'club', my_cloud_data.club);
+                } else {
+                    localStorage.removeItem(PREFIX + 'club');
+                    if (my_cloud_data) delete my_cloud_data.club;
+                }
+
                 players[nickname] = players[nickname] || {};
                 players[nickname].vrgk = Math.floor(vrgk);
                 players[nickname].skrepki = skrepki;
+                players[nickname].last_seen = Date.now();
                 let my_c = localStorage.getItem(PREFIX + 'club');
                 if (my_c) players[nickname].club = my_c;
                 
-                await put_cloud({players, clubs});
-                render_leaderboard(players);
-                render_clubs(clubs);
-            } catch (e) {
-                document.getElementById('leaderboard-content').innerText = 'ошибка подключения';
-                document.getElementById('club-content').innerText = 'ошибка подключения';
-            }
+                cached_players = players; cached_clubs = clubs;
+                
+                await put_cloud({players, clubs, event: global_event_data});
+                last_sync = Date.now();
+
+                if(!is_bg) { render_leaderboard(); render_clubs_list(); }
+
+                if (global_event_data && global_event_data.active && document.getElementById('event-modal').style.display === 'flex') {
+                    render_event_top();
+                }
+
+                let viewing_club = document.getElementById('view-club-modal').getAttribute('data-club');
+                if (viewing_club && document.getElementById('view-club-modal').style.display === 'flex') {
+                    open_club_details(viewing_club, true); 
+                }
+
+            } catch (e) {}
         }
 
-        window.change_nick = async function() {
-            let nn = prompt('введи новый ник (без мата):');
-            if(!nn || nn.trim() === '' || nn === nickname) return;
-            document.getElementById('settings-modal').style.display='none';
-            let d = await fetch_cloud();
-            let players = d.players || {}; let clubs = d.clubs || {};
-            
-            players[nn] = players[nickname] || {vrgk: vrgk, skrepki: skrepki};
-            delete players[nickname];
-            
-            let my_c = localStorage.getItem(PREFIX + 'club');
-            if(my_c && clubs[my_c]) {
-                let idx = clubs[my_c].members.indexOf(nickname);
-                if(idx !== -1) clubs[my_c].members[idx] = nn;
-                if(clubs[my_c].owner === nickname) clubs[my_c].owner = nn;
-                if(clubs[my_c].reqs) {
-                    let r_idx = clubs[my_c].reqs.indexOf(nickname);
-                    if(r_idx !== -1) clubs[my_c].reqs[r_idx] = nn;
-                }
-            }
-            nickname = nn; localStorage.setItem(PREFIX + 'nickname', nickname);
-            await put_cloud({players, clubs});
-            alert('ник успешно изменен!'); location.reload();
-        };
-
-        window.delete_acc = async function() {
-            if(!confirm('точно удалить аккаунт? все монеты, бусты и скрепки сгорят навсегда!')) return;
-            let d = await fetch_cloud();
-            let players = d.players || {}; let clubs = d.clubs || {};
-            if(nickname && players[nickname]) delete players[nickname];
-            let my_c = localStorage.getItem(PREFIX + 'club');
-            if(my_c && clubs[my_c]) {
-                clubs[my_c].members = clubs[my_c].members.filter(m => m !== nickname);
-                if(clubs[my_c].owner === nickname) {
-                    if (clubs[my_c].members.length > 0) clubs[my_c].owner = clubs[my_c].members[0];
-                    else delete clubs[my_c];
-                }
-            }
-            await put_cloud({players, clubs});
-            localStorage.clear(); location.reload();
-        };
-
-        function render_leaderboard(players) {
-            let sorted = Object.keys(players).map(k => {
-                return { name: k, vrgk: players[k].vrgk || 0, skrepki: players[k].skrepki || 0, club: players[k].club };
+        function render_leaderboard() {
+            let sorted = Object.keys(cached_players).map(k => {
+                return { name: k, vrgk: cached_players[k].vrgk || 0, skrepki: cached_players[k].skrepki || 0, club: cached_players[k].club };
             }).sort((a, b) => b.vrgk - a.vrgk);
 
             let html = '';
             sorted.forEach((p, i) => {
-                let pos = i + 1;
-                let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
+                let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
                 html += `
                 <div class="upgrade-item">
                     <div class="rank-pos ${c_cls}">${pos}</div>
                     <div class="upgrade-info" style="flex: 1; margin-left: 10px;">
                         <span class="upgrade-name">${p.name}</span>
                         ${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}
-                        <span class="upgrade-desc">скрепок: ${p.skrepki}</span>
                     </div>
                     <div class="upgrade-price">${fmt(p.vrgk)}</div>
                 </div>`;
@@ -605,59 +505,122 @@
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет игроков</div>';
         }
 
-        function render_clubs(clubs) {
+        // --- КЛУБЫ: BRAWL STARS STYLE ---
+        function render_clubs_list() {
             let my_c = localStorage.getItem(PREFIX + 'club');
             let html = '';
             
-            if (my_c && clubs[my_c]) {
-                let c = clubs[my_c];
-                html += `<div class="section-title">твой клуб</div>
-                <div class="upgrade-item" style="flex-direction: column; align-items: flex-start;">
-                    <div style="font-size: 22px; color: #d4af37; font-weight: bold;">${my_c}</div>
-                    <div style="font-size: 13px; color: #aaa; margin-bottom: 10px;">${c.desc}</div>
-                    <div style="font-size: 12px; margin-bottom: 5px;">участников: ${c.members.length} | тип: ${c.type}</div>
-                    <button class="buy-btn" style="background: #411; border: 1px solid #933; margin-top: 10px; color: #f88;" onclick="leave_club()">выйти из клуба</button>
-                </div>`;
-                
-                if (c.owner === nickname && c.reqs && c.reqs.length > 0) {
-                    html += `<div class="section-title">заявки (${c.reqs.length})</div>`;
-                    c.reqs.forEach(r => {
-                        html += `<div class="upgrade-item">
-                            <div style="font-weight: bold;">${r}</div>
-                            <div style="display: flex; gap: 5px;">
-                                <button class="buy-btn gold" style="padding: 5px 10px;" onclick="acc_req('${r}')">да</button>
-                                <button class="buy-btn" style="padding: 5px 10px; background: #311;" onclick="rej_req('${r}')">нет</button>
-                            </div>
-                        </div>`;
-                    });
-                }
-                
-                html += `<div class="section-title">участники</div>`;
-                c.members.forEach(m => {
-                    html += `<div class="upgrade-item" style="padding: 10px;">${m} <span style="color: #666; font-size: 11px;">${m === c.owner ? 'лидер' : ''}</span></div>`;
-                });
+            if (my_c && cached_clubs[my_c]) {
+                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`;
             } else {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>
-                <div class="section-title">список клубов</div>`;
-                
-                let count = 0;
-                for (let name in clubs) {
-                    count++; let c = clubs[name];
-                    html += `<div class="upgrade-item" style="flex-direction: column; align-items: flex-start; gap: 5px;">
-                        <div style="display: flex; justify-content: space-between; width: 100%;">
-                            <div style="font-weight: bold; color: #d4af37; font-size: 16px;">${name}</div>
-                            <div style="font-size: 12px; color: #888;">${c.members.length} чел.</div>
-                        </div>
-                        <div style="font-size: 12px; color: #aaa;">${c.desc}</div>
-                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 5px;">
-                            <div style="font-size: 11px; color: #777;">вход: ${fmt(c.req)} | ${c.type}</div>
-                            <button class="buy-btn" style="padding: 5px 15px;" onclick="join_club('${name}')">вступить</button>
-                        </div>
-                    </div>`;
-                }
-                if(count === 0) html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`;
+                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`;
             }
+            
+            html += `<div class="section-title">список клубов</div>`;
+            let count = 0;
+            for (let name in cached_clubs) {
+                count++; let c = cached_clubs[name];
+                html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')">
+                    <div class="upgrade-info">
+                        <span class="upgrade-name">${name}</span>
+                        <span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span>
+                    </div>
+                    <div style="font-size: 20px;">ℹ️</div>
+                </div>`;
+            }
+            if(count === 0) html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`;
             document.getElementById('club-content').innerHTML = html;
+        }
+
+        window.open_club_details = function(name, is_silent_update = false) {
+            let c = cached_clubs[name]; if(!c) return;
+            let total_vrgk = 0;
+            c.members.forEach(m => { if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); });
+            
+            let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>
+                ${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}
+            </div>`;
+
+            // КАРТОЧКА КЛУБА (СЛЕВА)
+            html += `<div class="club-card">
+                <div class="club-badge">🔥</div>
+                <div class="club-name-big">${name}</div>
+                <div class="club-trophies">🏆 ${fmt(total_vrgk)}</div>
+                <div class="club-desc-box">${c.desc || 'нет описания'}</div>
+                <div class="club-stats-grid">
+                    <div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div>
+                    <div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div>
+                    <div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div>
+                </div>`;
+            
+            if (localStorage.getItem(PREFIX + 'club') !== name) {
+                html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`;
+            }
+            html += `</div>`;
+
+            // КЛУБНОЕ СОБЫТИЕ (Только если игрок открыл клуб и ивент активен)
+            if (global_event_data && global_event_data.active) {
+                html += `<div style="text-align: left; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Клубное событие:</div>
+                <div class="event-banner" onclick="open_event()">🏆 ${global_event_data.name.toUpperCase()} 🏆<br><span style="font-size: 11px; font-weight: normal; color: #333;">нажми, чтобы участвовать</span></div>`;
+            }
+
+            // СПИСОК УЧАСТНИКОВ 
+            html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`;
+            
+            let mems = c.members.map(m => { return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; }).sort((a,b) => b.vrgk - a.vrgk);
+
+            mems.forEach((m, idx) => {
+                let is_online = timeAgo(m.ls) === "в сети";
+                html += `<div class="member-list-item">
+                    <div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div>
+                    <div class="ml-info" style="flex: 1; padding-left: 10px;">
+                        <div class="ml-name">${m.name}</div>
+                        <div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="ml-score">🪙 ${fmt(m.vrgk)}</div>
+                        <div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div>
+                    </div>
+                </div>`;
+            });
+
+            // ЗАЯВКИ (ТОЛЬКО ДЛЯ ЛИДЕРА)
+            if (c.owner === nickname && c.reqs && c.reqs.length > 0) {
+                html += `<div style="text-align: left; font-weight: bold; margin-top: 10px; font-size: 12px; color: #d4af37;">Заявки (${c.reqs.length}):</div>`;
+                c.reqs.forEach(r => {
+                    html += `<div class="member-list-item">
+                        <div style="flex: 1; text-align: left; font-weight: bold;">${r}</div>
+                        <button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button>
+                        <button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button>
+                    </div>`;
+                });
+            }
+
+            // ЧАТ (ТОЛЬКО ДЛЯ СВОИХ)
+            if (localStorage.getItem(PREFIX + 'club') === name) {
+                html += `<div class="chat-container">
+                    <div class="chat-msgs" id="chat-msgs-box">`;
+                if(c.chat && c.chat.length > 0) {
+                    c.chat.forEach(msg => { html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; });
+                } else { html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; }
+                html += `</div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="сообщение..." maxlength="100">
+                        <button class="buy-btn gold" onclick="send_chat('${name}')">></button>
+                    </div>
+                </div>`;
+            }
+
+            let modal = document.getElementById('view-club-modal');
+            modal.setAttribute('data-club', name);
+            document.getElementById('view-club-content').innerHTML = html;
+            modal.style.display = 'flex';
+            
+            if(!is_silent_update) {
+                let chatBox = document.getElementById('chat-msgs-box');
+                if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+            }
         }
 
         window.submit_club = async function() {
@@ -665,113 +628,150 @@
             let desc = document.getElementById('c-desc').value.trim();
             let req = parseInt(document.getElementById('c-req').value) || 0;
             let type = document.getElementById('c-type').value;
-            
             if(!name) return alert('введи название!');
             document.getElementById('create-club-modal').style.display = 'none';
-            document.getElementById('club-content').innerText = 'создаем...';
-            
-            let d = await fetch_cloud();
-            let clubs = d.clubs || {}; let players = d.players || {};
-            
-            if(clubs[name]) { alert('клуб с таким именем уже есть!'); sync_cloud(); return; }
-            
-            clubs[name] = { desc: desc, req: req, type: type, owner: nickname, members: [nickname], reqs: [] };
-            players[nickname] = players[nickname] || {};
-            players[nickname].club = name;
+            if(cached_clubs[name]) { alert('клуб с таким именем уже есть!'); return; }
+            cached_clubs[name] = { desc: desc, req: req, type: type, owner: nickname, members: [nickname], reqs: [], tag: gen_tag(), chat: [] };
+            cached_players[nickname].club = name;
             localStorage.setItem(PREFIX + 'club', name);
-            
-            await put_cloud({players, clubs});
+            await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
             sync_cloud();
         };
 
         window.join_club = async function(name) {
-            document.getElementById('club-content').innerText = 'вступаем...';
-            let d = await fetch_cloud();
-            let clubs = d.clubs || {}; let players = d.players || {};
-            
-            let c = clubs[name];
-            if(!c) { alert('клуб не найден'); sync_cloud(); return; }
-            if(vrgk < c.req) { alert('у тебя не хватает воргиков для входа!'); sync_cloud(); return; }
-            if(c.type === 'закрытый') { alert('этот клуб закрыт для вступления'); sync_cloud(); return; }
-            
+            let c = cached_clubs[name];
+            if(!c) return;
+            if(vrgk < c.req) return alert('мало воргиков для входа!');
+            if(c.type === 'закрытый') return alert('клуб закрыт');
             if(c.type === 'по заявкам') {
                 if(!c.reqs) c.reqs = [];
                 if(!c.reqs.includes(nickname)) c.reqs.push(nickname);
-                await put_cloud({players, clubs});
-                alert('заявка отправлена лидеру!'); sync_cloud(); return;
+                await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+                alert('заявка отправлена!'); return;
             }
-            
             if(!c.members.includes(nickname)) c.members.push(nickname);
-            players[nickname] = players[nickname] || {};
-            players[nickname].club = name;
+            cached_players[nickname].club = name;
             localStorage.setItem(PREFIX + 'club', name);
-            
-            await put_cloud({players, clubs});
+            await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+            document.getElementById('view-club-modal').style.display = 'none';
             sync_cloud();
         };
 
         window.leave_club = async function() {
             if(!confirm('точно выйти из клуба?')) return;
-            document.getElementById('club-content').innerText = 'выходим...';
-            let d = await fetch_cloud();
             let my_c = localStorage.getItem(PREFIX + 'club');
-            
-            if (d.clubs && d.clubs[my_c]) {
-                let c = d.clubs[my_c];
+            if (cached_clubs[my_c]) {
+                let c = cached_clubs[my_c];
                 c.members = c.members.filter(m => m !== nickname);
                 if (c.owner === nickname) {
                     if (c.members.length > 0) c.owner = c.members[0];
-                    else delete d.clubs[my_c]; 
+                    else delete cached_clubs[my_c]; 
                 }
             }
-            if (d.players && d.players[nickname]) delete d.players[nickname].club;
-            
+            delete cached_players[nickname].club;
             localStorage.removeItem(PREFIX + 'club');
-            await put_cloud(d); sync_cloud();
+            await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+            document.getElementById('view-club-modal').style.display = 'none';
+            sync_cloud();
         };
 
-        window.acc_req = async function(user) {
-            let d = await fetch_cloud(); let my_c = localStorage.getItem(PREFIX + 'club');
-            if (d.clubs && d.clubs[my_c]) {
-                let c = d.clubs[my_c];
+        window.acc_req = async function(cname, user) {
+            let c = cached_clubs[cname];
+            if (c) {
                 c.reqs = c.reqs.filter(r => r !== user);
                 if(!c.members.includes(user)) c.members.push(user);
-                if(!d.players) d.players = {};
-                if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0};
-                d.players[user].club = my_c;
-                await put_cloud(d);
+                if(!cached_players[user]) cached_players[user] = {vrgk: 0, skrepki: 0};
+                cached_players[user].club = cname;
+                await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+                open_club_details(cname);
             }
-            sync_cloud();
         };
 
-        window.rej_req = async function(user) {
-            let d = await fetch_cloud(); let my_c = localStorage.getItem(PREFIX + 'club');
-            if (d.clubs && d.clubs[my_c]) {
-                d.clubs[my_c].reqs = d.clubs[my_c].reqs.filter(r => r !== user);
-                await put_cloud(d);
-            }
-            sync_cloud();
+        window.rej_req = async function(cname, user) {
+            let c = cached_clubs[cname];
+            if (c) { c.reqs = c.reqs.filter(r => r !== user); await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data}); open_club_details(cname); }
         };
+
+        window.send_chat = async function(cname) {
+            let inp = document.getElementById('chat-input');
+            let txt = inp.value.trim(); if(!txt) return;
+            inp.value = '';
+            let c = cached_clubs[cname];
+            if(c) {
+                if(!c.chat) c.chat = [];
+                c.chat.push({a: nickname, t: txt});
+                if(c.chat.length > 30) c.chat.shift(); 
+                await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+                open_club_details(cname);
+                
+                // Прокрутка чата вниз
+                setTimeout(() => {
+                    let chatBox = document.getElementById('chat-msgs-box');
+                    if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+                }, 50);
+            }
+        }
+
+        // --- ИВЕНТЫ ---
+        window.toggle_event = async function() {
+            if(global_event_data && global_event_data.active) {
+                if(confirm('Остановить текущее событие?')) {
+                    global_event_data.active = false;
+                    await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+                    alert('Событие остановлено!'); sync_cloud();
+                }
+            } else {
+                let n = prompt('Введи название нового события (например, Склад Ворга):');
+                if(n) {
+                    global_event_data = { active: true, name: n, scores: {} };
+                    await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+                    alert('Событие запущено!'); sync_cloud();
+                }
+            }
+        };
+
+        window.open_event = function() {
+            document.getElementById('event-title').innerText = global_event_data.name;
+            document.getElementById('event-modal').style.display = 'flex';
+            my_event_score = global_event_data.scores[nickname] || 0;
+            document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score;
+            render_event_top();
+        };
+
+        window.tap_event = function() {
+            my_event_score += 1;
+            document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score;
+            if(navigator.vibrate) navigator.vibrate(15);
+            
+            if(!window.eventSyncTimer) {
+                window.eventSyncTimer = setTimeout(async () => {
+                    global_event_data.scores[nickname] = my_event_score;
+                    await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
+                    render_event_top();
+                    window.eventSyncTimer = null;
+                }, 2000);
+            }
+        };
+
+        function render_event_top() {
+            if(!global_event_data || !global_event_data.scores) return;
+            let sorted = Object.keys(global_event_data.scores).map(k => { return {n: k, s: global_event_data.scores[k]}; }).sort((a,b) => b.s - a.s);
+            let html = '';
+            sorted.slice(0, 10).forEach((p, i) => { html += `<div>${i+1}. <b>${p.n}</b> - ${p.s} очков</div>`; });
+            if(html === '') html = 'пока никто не тапал';
+            document.getElementById('event-top').innerHTML = html;
+        }
 
         window.sw_tab = function(tabid, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(`tab-${tabid}`).classList.add('active');
             el.classList.add('active');
-
-            if (tabid === 'rating' || tabid === 'clubs') {
-                let now = new Date().getTime();
-                if (now - last_sync > 5000) { 
-                    if(tabid === 'rating') document.getElementById('leaderboard-content').innerText = 'загрузка...';
-                    if(tabid === 'clubs') document.getElementById('club-content').innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">загрузка...</div>';
-                    sync_cloud(); last_sync = now;
-                }
-            }
+            if (tabid === 'rating' || tabid === 'clubs') { sync_cloud(); }
         };
 
-        init_prices();
-        calc_offline();
-        upd_ui();
+        init_prices(); calc_offline(); upd_ui();
+        if(nickname) sync_cloud();
     </script>
 </body>
 </html>
