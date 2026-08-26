@@ -98,6 +98,11 @@
         }
         .modal-title { font-size: 18px; color: #d4af37; margin-bottom: 10px; }
         .modal-amount { font-size: 32px; font-weight: bold; margin-bottom: 20px; }
+        
+        .rank-pos { font-size: 18px; font-weight: 900; color: #555; width: 30px; text-align: center; }
+        .rank-pos.gold-pos { color: #d4af37; }
+        .rank-pos.silver-pos { color: #aaa; }
+        .rank-pos.bronze-pos { color: #cd7f32; }
     </style>
 </head>
 <body>
@@ -227,6 +232,13 @@
                 </div>
             </div>
         </div>
+        
+        <div id="tab-rating" class="tab-content">
+            <div class="upgrade-list">
+                <div class="section-title">топ флуда</div>
+                <div id="leaderboard-content" style="text-align: center; color: #888; margin-top: 20px;">загрузка...</div>
+            </div>
+        </div>
 
         <div id="tab-skrepki" class="tab-content">
             <div class="upgrade-list">
@@ -242,6 +254,7 @@
         <div class="bottom-nav">
             <div class="nav-item active" onclick="sw_tab('mine', this)">тапать</div>
             <div class="nav-item" onclick="sw_tab('upgrades', this)">прокачка</div>
+            <div class="nav-item" onclick="sw_tab('rating', this)">рейтинг</div>
             <div class="nav-item" onclick="sw_tab('skrepki', this)">скрепки</div>
         </div>
 
@@ -258,6 +271,16 @@
 
     <script>
         const PREFIX = 'v2_';
+        
+        // запрос ника
+        let nickname = localStorage.getItem(PREFIX + 'nickname');
+        if (!nickname) {
+            nickname = prompt('введи свой ник для рейтинга:');
+            if (!nickname || nickname.trim() === '') {
+                nickname = 'игрок' + Math.floor(Math.random() * 1000);
+            }
+            localStorage.setItem(PREFIX + 'nickname', nickname);
+        }
         
         let vrgk = parseFloat(localStorage.getItem(PREFIX + 'vrgk')) || 0;
         let skrepki = parseInt(localStorage.getItem(PREFIX + 'skrepki')) || 0;
@@ -277,16 +300,19 @@
 
         let regen_price = parseInt(localStorage.getItem(PREFIX + 'regen_price')) || 5000;
 
-        // цены карточек
         let c1_price = parseInt(localStorage.getItem(PREFIX + 'c1_price')) || 2000;
         let c2_price = parseInt(localStorage.getItem(PREFIX + 'c2_price')) || 10000;
-        let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000; // дс
-        let c4_price = parseInt(localStorage.getItem(PREFIX + 'c4_price')) || 100000; // доска
-        let c5_price = parseInt(localStorage.getItem(PREFIX + 'c5_price')) || 20000; // клан
-        let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; // админка
-        let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; // пони
+        let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000; 
+        let c4_price = parseInt(localStorage.getItem(PREFIX + 'c4_price')) || 100000; 
+        let c5_price = parseInt(localStorage.getItem(PREFIX + 'c5_price')) || 20000; 
+        let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; 
+        let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; 
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || new Date().getTime();
+        let last_sync = 0;
+
+        const BIN_ID = '6a8f2d5cf5f4af5e2945ec3f';
+        const API_KEY = '$2a$10$aaQQW4GHe/epejM6DjxqmubroFphtxyH7bfo30HN2R8zxaklID9fO';
 
         const el_bal = document.getElementById('vrgk-balance');
         const el_skr = document.getElementById('skrepki-val');
@@ -323,19 +349,15 @@
             let now = new Date().getTime();
             if (last_time > 0) {
                 let diff_sec = (now - last_time) / 1000;
-                
                 if (cur_energy < max_energy) {
                     cur_energy = Math.min(cur_energy + (diff_sec * eng_regen), max_energy);
                 }
-
                 if (profit > 0) {
                     let profit_sec = diff_sec;
                     if (profit_sec > 10800) profit_sec = 10800; 
-                    
                     if (profit_sec > 60) { 
                         let offline_earn = (profit / 3600) * profit_sec;
                         vrgk += offline_earn;
-                        
                         document.getElementById('offline-amount').innerText = "+" + fmt(offline_earn);
                         document.getElementById('offline-modal').style.display = 'flex';
                     }
@@ -497,11 +519,77 @@
             }
         };
 
+        // логика онлайна базы данных
+        async function sync_leaderboard() {
+            try {
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                let data = await res.json();
+                
+                let players = {};
+                if (data && data.record) {
+                    if (data.record.players) players = data.record.players;
+                    else players = data.record;
+                }
+                
+                players[nickname] = { vrgk: Math.floor(vrgk), skrepki: skrepki };
+                
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({ players: players })
+                });
+
+                render_leaderboard(players);
+            } catch (e) {
+                document.getElementById('leaderboard-content').innerText = 'ошибка загрузки...';
+            }
+        }
+
+        function render_leaderboard(players) {
+            let sorted = Object.keys(players).map(k => {
+                return { name: k, vrgk: players[k].vrgk, skrepki: players[k].skrepki };
+            }).sort((a, b) => b.vrgk - a.vrgk);
+
+            let html = '';
+            sorted.forEach((p, i) => {
+                let pos = i + 1;
+                let color_class = '';
+                if (pos === 1) color_class = 'gold-pos';
+                if (pos === 2) color_class = 'silver-pos';
+                if (pos === 3) color_class = 'bronze-pos';
+
+                html += `
+                <div class="upgrade-item">
+                    <div class="rank-pos ${color_class}">${pos}</div>
+                    <div class="upgrade-info" style="flex: 1; margin-left: 10px;">
+                        <span class="upgrade-name">${p.name}</span>
+                        <span class="upgrade-desc">скрепок: ${p.skrepki}</span>
+                    </div>
+                    <div class="upgrade-price">${fmt(p.vrgk)}</div>
+                </div>`;
+            });
+            document.getElementById('leaderboard-content').innerHTML = html;
+        }
+
         window.sw_tab = function(tabid, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(`tab-${tabid}`).classList.add('active');
             el.classList.add('active');
+
+            if (tabid === 'rating') {
+                let now = new Date().getTime();
+                if (now - last_sync > 20000) { 
+                    document.getElementById('leaderboard-content').innerText = 'загрузка...';
+                    sync_leaderboard();
+                    last_sync = now;
+                }
+            }
         };
 
         init_prices();
