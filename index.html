@@ -438,7 +438,7 @@
             if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + eng_regen, max_energy);
             if (profit > 0) vrgk += profit / 3600;
             upd_ui(); save_data();
-            if (nickname && my_pin && Date.now() - last_sync > 10000) sync_cloud(true);
+            if (nickname && my_pin && Date.now() - last_sync > 180000) sync_cloud(true);
         }, 1000);
 
         window.buy_upg = function(type) { 
@@ -463,7 +463,7 @@
         async function fetch_cloud() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
-                if(!res.ok) return null; // Защита от кривого интернета
+                if(!res.ok) return null; 
                 let d = await res.json(); 
                 let rec = d.record || {};
                 return { 
@@ -481,7 +481,7 @@
             if (!nickname || !my_pin) return;
             try {
                 let d = await fetch_cloud();
-                if(!d) return; // ЗАЩИТА ОТ УДАЛЕНИЯ ПРИ ОШИБКЕ СЕТИ
+                if(!d) return; 
                 let players = d.players; let clubs = d.clubs; global_event_data = d.event;
                 
                 let my_cloud_data = players[nickname];
@@ -621,7 +621,6 @@
                 document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
                 let old_rank = player_rank; player_rank++; save_data(); upd_ui();
                 
-                // Фикс наград: убраны скрепки, оставлен чистый балансный пассив
                 if(old_rank < 12 && player_rank >= 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit+=5000; save_data(); upd_ui(); }
                 if(old_rank < 15 && player_rank >= 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit+=15000; save_data(); upd_ui(); }
                 if(old_rank < 18 && player_rank >= 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit+=45000; save_data(); upd_ui(); }
