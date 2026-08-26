@@ -282,8 +282,10 @@
         
         let nickname = localStorage.getItem(PREFIX + 'nickname');
         if (!nickname) {
-            nickname = prompt('введи свой ник для рейтинга:');
-            if (!nickname || nickname.trim() === '') nickname = 'игрок' + Math.floor(Math.random() * 1000);
+            while (!nickname || nickname.trim() === '') {
+                nickname = prompt('обязательно введи свой ник для рейтинга (без мата):');
+            }
+            nickname = nickname.trim();
             localStorage.setItem(PREFIX + 'nickname', nickname);
         }
         
@@ -478,13 +480,19 @@
             } else { alert('нужен 1 000 000 воргиков'); }
         };
 
-        // КЛАУД, КЛУБЫ, НАСТРОЙКИ
+        // НАДЕЖНАЯ РАБОТА С JSONBIN
         async function fetch_cloud() {
-            let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
-            let d = await res.json();
-            if (d.record && d.record.players) return d.record;
-            if (d.record) return { players: d.record, clubs: {} }; 
-            return { players: {}, clubs: {} };
+            try {
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
+                let d = await res.json();
+                let rec = d.record || {};
+                return {
+                    players: rec.players || (rec.record && rec.record.players) || {},
+                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {}
+                };
+            } catch (e) {
+                return { players: {}, clubs: {} };
+            }
         }
         
         async function put_cloud(data) {
@@ -559,7 +567,7 @@
 
         function render_leaderboard(players) {
             let sorted = Object.keys(players).map(k => {
-                return { name: k, vrgk: players[k].vrgk, skrepki: players[k].skrepki, club: players[k].club };
+                return { name: k, vrgk: players[k].vrgk || 0, skrepki: players[k].skrepki || 0, club: players[k].club };
             }).sort((a, b) => b.vrgk - a.vrgk);
 
             let html = '';
@@ -577,10 +585,9 @@
                     <div class="upgrade-price">${fmt(p.vrgk)}</div>
                 </div>`;
             });
-            document.getElementById('leaderboard-content').innerHTML = html;
+            document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет игроков</div>';
         }
 
-        // КЛУБЫ ЛОГИКА
         function render_clubs(clubs) {
             let my_c = localStorage.getItem(PREFIX + 'club');
             let html = '';
@@ -737,7 +744,7 @@
 
             if (tabid === 'rating' || tabid === 'clubs') {
                 let now = new Date().getTime();
-                if (now - last_sync > 15000) { 
+                if (now - last_sync > 5000) { 
                     if(tabid === 'rating') document.getElementById('leaderboard-content').innerText = 'загрузка...';
                     if(tabid === 'clubs') document.getElementById('club-content').innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">загрузка...</div>';
                     sync_cloud(); last_sync = now;
