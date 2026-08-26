@@ -6,34 +6,23 @@
     <title>vorgster kombat</title>
     <style>
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        html, body { 
-            height: 100%; margin: 0; padding: 0; background: #000; color: #fff; 
-            font-family: 'segoe ui', roboto, sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; 
-        }
-        .container { 
-            display: flex; flex-direction: column; height: 100%; max-width: 500px; 
-            margin: 0 auto; background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); 
-        }
+        html, body { height: 100%; margin: 0; padding: 0; background: #000; color: #fff; font-family: 'segoe ui', roboto, sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; }
+        .container { display: flex; flex-direction: column; height: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); }
         
         .header { padding: 15px; flex-shrink: 0; position: relative; }
-        .settings-btn { position: absolute; top: 15px; left: 15px; font-size: 12px; color: #aaa; text-decoration: underline; cursor: pointer; text-transform: lowercase; }
-        .top-stats { display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 15px; gap: 10px;}
+        .settings-btn { position: absolute; top: 15px; left: 15px; font-size: 12px; color: #aaa; text-decoration: underline; cursor: pointer; text-transform: lowercase; z-index: 10; }
+        .top-stats { display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 10px; gap: 10px;}
         .stat-box { flex: 1; background: rgba(30, 30, 30, 0.8); border: 1px solid #333; border-radius: 12px; padding: 10px; text-align: center; }
         .stat-label { font-size: 11px; color: #aaa; text-transform: lowercase; margin-bottom: 4px; }
         .stat-value { font-size: 16px; font-weight: 800; color: #d4af37; }
-        .league-info { text-align: center; font-size: 14px; color: #888; margin-bottom: 5px; text-transform: lowercase;}
+        .league-info { text-align: center; font-size: 16px; color: #d4af37; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;}
         .main-balance { text-align: center; font-size: 42px; font-weight: 900; margin: 5px 0 15px 0; }
 
         .tab-content { flex: 1; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
         .tab-content.active { display: flex; }
 
         .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; flex-direction: column; }
-        .vorg-coin { 
-            width: 70vw; max-width: 280px; height: 70vw; max-height: 280px; border-radius: 50%; 
-            background: url('vorg.jpg') center/cover no-repeat; background-color: #222;
-            border: 8px solid #d4af37; box-shadow: 0 0 40px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.8); 
-            cursor: pointer; transition: transform 0.05s ease-out; position: relative; z-index: 10; 
-        }
+        .vorg-coin { width: 70vw; max-width: 280px; height: 70vw; max-height: 280px; border-radius: 50%; background: url('vorg.jpg') center/cover no-repeat; background-color: #222; border: 8px solid #d4af37; box-shadow: 0 0 40px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.05s ease-out; position: relative; z-index: 10; }
         .vorg-coin:active { transform: scale(0.95); }
         
         .energy-container { padding: 0 20px 20px 20px; flex-shrink: 0; }
@@ -48,29 +37,29 @@
         .upgrade-name { font-size: 15px; font-weight: bold; color: #eee; text-transform: lowercase;}
         .upgrade-desc { font-size: 12px; color: #777; text-transform: lowercase;}
         .upgrade-price { font-size: 13px; color: #d4af37; font-weight: bold; }
-        .buy-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: lowercase; }
+        .buy-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: lowercase; text-align: center; }
         .buy-btn:active { background: #555; }
         .buy-btn.gold { background: #d4af37; color: #000; border: none; }
+        .buy-btn.blue { background: #2a52be; color: #fff; border: none; }
 
         .floating-text { position: absolute; font-size: 32px; font-weight: 900; color: #fff; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
 
-        .bottom-nav { background: #0a0a0a; display: flex; padding: 10px 5px calc(15px + env(safe-area-inset-bottom)) 5px; border-top: 1px solid #222; flex-shrink: 0; justify-content: space-between; }
-        .nav-item { flex: 1; text-align: center; color: #555; font-size: 11px; font-weight: bold; padding: 12px 2px; cursor: pointer; text-transform: lowercase; }
-        .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 10px; }
+        .bottom-nav { background: #0a0a0a; display: flex; padding: 10px 2px calc(15px + env(safe-area-inset-bottom)) 2px; border-top: 1px solid #222; flex-shrink: 0; justify-content: space-between; }
+        .nav-item { flex: 1; text-align: center; color: #555; font-size: 10px; font-weight: bold; padding: 12px 0; cursor: pointer; text-transform: lowercase; }
+        .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 8px; }
 
         .modal-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { background: #1a1508; border: 1px solid #333; border-radius: 15px; padding: 20px; text-align: center; width: 85%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; max-height: 90vh; overflow-y: auto;}
         .modal-title { font-size: 18px; color: #d4af37; margin-bottom: 5px; text-transform: lowercase; font-weight: bold;}
         
-        input, select, textarea { width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-family: 'segoe ui', sans-serif; font-size: 14px; }
+        input, select, textarea { width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-family: 'segoe ui', sans-serif; font-size: 14px; margin-bottom: 5px; }
         input::placeholder, textarea::placeholder { color: #666; }
 
         .rank-pos { font-size: 18px; font-weight: 900; color: #555; width: 25px; text-align: center; }
-        .rank-pos.gold-pos { color: #d4af37; }
-        .rank-pos.silver-pos { color: #aaa; }
-        .rank-pos.bronze-pos { color: #cd7f32; }
+        .rank-pos.gold-pos { color: #d4af37; } .rank-pos.silver-pos { color: #aaa; } .rank-pos.bronze-pos { color: #cd7f32; }
 
+        /* Клубы */
         .club-card { background: #111; border: 2px solid #d4af37; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; position: relative;}
         .club-badge { font-size: 32px; background: #222; border: 2px solid #d4af37; border-radius: 12px; width: 60px; height: 60px; line-height: 56px; margin: 0 auto 10px auto; }
         .club-name-big { font-size: 24px; font-weight: 900; color: #fff; }
@@ -85,22 +74,28 @@
         .ml-info { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
         .ml-name { font-weight: bold; font-size: 14px; }
         .ml-role { font-size: 10px; color: #d4af37; }
-        .ml-status { font-size: 11px; color: #888; }
-        .ml-status.online { color: #4CAF50; }
+        .ml-status { font-size: 11px; color: #888; } .ml-status.online { color: #4CAF50; }
         .ml-score { font-weight: bold; color: #d4af37; font-size: 14px; }
 
         .chat-container { background: #000; border: 1px solid #333; border-radius: 12px; height: 200px; display: flex; flex-direction: column; margin-top: 15px; }
         .chat-msgs { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
-        .chat-msg { font-size: 12px; word-wrap: break-word; }
-        .chat-author { color: #d4af37; font-weight: bold; margin-right: 5px; }
-        .chat-input-area { display: flex; padding: 5px; border-top: 1px solid #333; gap: 5px;}
-        .chat-input-area input { padding: 8px; font-size: 12px; }
+        .chat-msg { font-size: 12px; word-wrap: break-word; } .chat-author { color: #d4af37; font-weight: bold; margin-right: 5px; }
+        .chat-input-area { display: flex; padding: 5px; border-top: 1px solid #333; gap: 5px;} .chat-input-area input { padding: 8px; font-size: 12px; margin-bottom: 0;}
 
         .event-banner { background: #d4af37; color: #000; font-weight: 900; text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; animation: pulse 1.5s infinite; line-height: 1.2;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-        
         .event-coin { width: 200px; height: 200px; background: #333; border: 5px solid #fff; border-radius: 20px; margin: 20px auto; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 50px; font-weight: bold; color: #fff;}
         .event-coin:active { transform: scale(0.95); }
+
+        /* Ранкед Арена */
+        .arena-container { width: 100%; height: 350px; background: #050505; border: 2px solid #444; border-radius: 15px; position: relative; margin-top: 15px; overflow: hidden; }
+        .arena-hud { display: flex; justify-content: space-between; padding: 10px; background: #111; border-bottom: 1px solid #333; }
+        .arena-score { font-size: 16px; font-weight: bold; color: #fff; }
+        .arena-vs { font-size: 14px; color: #d4af37; font-weight: bold; }
+        .arena-target-1 { position: absolute; width: 80px; height: 80px; background: radial-gradient(circle, #f00, #800); border-radius: 50%; border: 3px solid #fff; cursor: pointer; left: 50%; top: 50%; transform: translate(-50%, -50%); transition: all 0.1s; }
+        .arena-target-1:active { transform: translate(-50%, -50%) scale(0.9); }
+        .arena-target-2 { position: absolute; width: 60px; height: 60px; background: radial-gradient(circle, #0f0, #080); border-radius: 50%; border: 2px solid #fff; cursor: pointer; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #000; font-weight: bold; line-height: 56px; font-size: 24px; text-align: center; }
+        .arena-target-2:active { transform: translate(-50%, -50%) scale(0.9); }
     </style>
 </head>
 <body>
@@ -112,7 +107,7 @@
                 <div class="stat-box"><div class="stat-label">скрепки</div><div class="stat-value" id="skrepki-val">0</div></div>
                 <div class="stat-box"><div class="stat-label">прибыль в час</div><div class="stat-value" id="profit-val">+0</div></div>
             </div>
-            <div class="league-info" id="league-name">лига: бронза</div>
+            <div class="league-info" id="rank-name">БРОНЗА I</div>
             <div class="main-balance" id="vrgk-balance">0</div>
         </div>
 
@@ -143,10 +138,26 @@
             </div>
         </div>
 
-        <div id="tab-clubs" class="tab-content">
-            <div class="upgrade-list" id="club-content">
-                <div style="text-align: center; color: #888; margin-top: 20px;">загрузка...</div>
+        <div id="tab-ranked" class="tab-content">
+            <div class="upgrade-list">
+                <div class="club-card" style="margin-top: 10px;">
+                    <div style="font-size: 14px; color: #888;">Текущий ранг</div>
+                    <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота, чтобы подняться!</div>
+                    <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
+                </div>
+                <div class="section-title">награды за лиги</div>
+                <div style="font-size: 11px; color: #aaa; background: #111; padding: 10px; border-radius: 8px;">
+                    <b>Мифик I:</b> +5к/ч пассива<br>
+                    <b>Лега I:</b> +15к/ч пассива<br>
+                    <b>Мастер I:</b> +45к/ч пассива<br>
+                    <b>ПРО:</b> +65к/ч пассива
+                </div>
             </div>
+        </div>
+
+        <div id="tab-clubs" class="tab-content">
+            <div class="upgrade-list" id="club-content"><div style="text-align: center; color: #888; margin-top: 20px;">загрузка...</div></div>
         </div>
         
         <div id="tab-rating" class="tab-content">
@@ -156,23 +167,12 @@
             </div>
         </div>
 
-        <div id="tab-skrepki" class="tab-content">
-            <div class="upgrade-list">
-                <div class="section-title" style="text-align: center;">черный рынок</div>
-                <div class="upgrade-item" style="flex-direction: column; text-align: center; gap: 15px; padding: 30px 15px;">
-                    <div style="font-size: 20px; color: #aaa;">крафт скрепки</div>
-                    <div style="font-size: 14px; color: #777;">курс: 1 000 000 $vrgk = 1 скрепка</div>
-                    <button class="buy-btn gold" style="width: 100%; padding: 15px; font-size: 16px;" onclick="craft()">скрафтить скрепку</button>
-                </div>
-            </div>
-        </div>
-
         <div class="bottom-nav">
             <div class="nav-item active" onclick="sw_tab('mine', this)">тапать</div>
             <div class="nav-item" onclick="sw_tab('upgrades', this)">прокачка</div>
+            <div class="nav-item" onclick="sw_tab('ranked', this)">ранкед</div>
             <div class="nav-item" onclick="sw_tab('clubs', this)">клубы</div>
             <div class="nav-item" onclick="sw_tab('rating', this)">рейтинг</div>
-            <div class="nav-item" onclick="sw_tab('skrepki', this)">скрепки</div>
         </div>
 
         <!-- модалка офлайна -->
@@ -190,15 +190,12 @@
             <div class="modal-content">
                 <div class="modal-title">настройки</div>
                 <div style="font-size: 12px; color: #888; margin-bottom: 10px;" id="current-nick"></div>
-                
                 <button class="buy-btn" onclick="change_nick()">сменить ник</button>
-                
                 <!-- АДМИНКА ДЛЯ CONEXION -->
                 <div id="admin-panel" style="display:none; background: #220; padding: 10px; border-radius: 8px; border: 1px solid #d4af37; margin: 10px 0;">
                     <div style="color: #d4af37; font-weight: bold; margin-bottom: 5px;">панель админа</div>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="toggle_event()">управление событием</button>
                 </div>
-
                 <button class="buy-btn" style="background: #311; border: 1px solid #a33; color: #f88; margin-top:10px;" onclick="delete_acc()">удалить аккаунт</button>
                 <button class="buy-btn" style="margin-top: 10px;" onclick="document.getElementById('settings-modal').style.display='none'">закрыть</button>
             </div>
@@ -208,24 +205,18 @@
         <div id="create-club-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-title">создать клуб</div>
-                <input type="text" id="c-name" placeholder="название клуба (без мата)" maxlength="15">
+                <input type="text" id="c-name" placeholder="название (без мата)" maxlength="15">
                 <textarea id="c-desc" placeholder="описание клуба..." maxlength="150" rows="3"></textarea>
                 <input type="number" id="c-req" placeholder="мин. воргиков для входа">
-                <select id="c-type">
-                    <option value="открытый">открытый</option>
-                    <option value="по заявкам">по заявкам</option>
-                    <option value="закрытый">закрытый</option>
-                </select>
+                <select id="c-type"><option value="открытый">открытый</option><option value="по заявкам">по заявкам</option><option value="закрытый">закрытый</option></select>
                 <button class="buy-btn gold" onclick="submit_club()">создать</button>
                 <button class="buy-btn" onclick="document.getElementById('create-club-modal').style.display='none'">отмена</button>
             </div>
         </div>
 
-        <!-- модалка просмотра любого клуба -->
+        <!-- модалка клуба -->
         <div id="view-club-modal" class="modal-overlay" style="align-items: flex-start; padding-top: 20px;">
-            <div class="modal-content" style="width: 95%; max-width: 400px; padding: 15px;" id="view-club-content">
-                <!-- рендер клуба тут -->
-            </div>
+            <div class="modal-content" style="width: 95%; max-width: 400px; padding: 15px;" id="view-club-content"></div>
         </div>
 
         <!-- модалка Ивента -->
@@ -241,13 +232,30 @@
             </div>
         </div>
 
-        <!-- стартовая рега -->
+        <!-- Ранкед Арена -->
+        <div id="ranked-modal" class="modal-overlay" style="background: #000;">
+            <div class="modal-content" style="width: 100%; height: 100%; max-width: 100%; border-radius: 0; justify-content: flex-start; padding: 10px;">
+                <div class="modal-title" style="margin-top: 20px;">РАНКЕД</div>
+                <div id="ranked-status" style="font-size: 14px; color: #aaa; margin-bottom: 10px;">Поиск противника...</div>
+                <div class="arena-container" id="arena-container" style="display:none;">
+                    <div class="arena-hud">
+                        <div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: 0</div>
+                        <div class="arena-vs">VS</div>
+                        <div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: 0</div>
+                    </div>
+                </div>
+                <button class="buy-btn" id="arena-exit-btn" style="margin-top: 20px; display:none;" onclick="exit_arena()">ВЫЙТИ</button>
+            </div>
+        </div>
+
+        <!-- АВТОРИЗАЦИЯ С ПИНКОДОМ -->
         <div id="auth-modal" class="modal-overlay" style="z-index: 9999; background: #000;">
             <div class="modal-content" style="background: #111; border: 1px solid #d4af37;">
-                <div class="modal-title">добро пожаловать</div>
-                <div style="font-size: 13px; color: #888; margin-bottom: 10px;">введи ник для рейтинга и клубов:</div>
-                <input type="text" id="auth-nick" placeholder="твой ник (без мата)" maxlength="15">
-                <button class="buy-btn gold" style="margin-top: 10px; padding: 12px;" onclick="set_start_nick()">начать игру</button>
+                <div class="modal-title">вход / регистрация</div>
+                <div style="font-size: 12px; color: #888; margin-bottom: 15px;">Введи свой ник и секретный ПИН-код (4 цифры). Если ника нет в базе, он будет создан!</div>
+                <input type="text" id="auth-nick" placeholder="твой ник" maxlength="15">
+                <input type="password" id="auth-pin" placeholder="пин-код (например 1234)" maxlength="4" pattern="\d*">
+                <button class="buy-btn gold" style="margin-top: 10px; padding: 12px;" onclick="auth_player()">войти</button>
             </div>
         </div>
 
@@ -256,6 +264,7 @@
     <script>
         const PREFIX = 'v2_';
         let nickname = localStorage.getItem(PREFIX + 'nickname');
+        let my_pin = localStorage.getItem(PREFIX + 'pin');
         
         let vrgk = parseFloat(localStorage.getItem(PREFIX + 'vrgk')) || 0;
         let skrepki = parseInt(localStorage.getItem(PREFIX + 'skrepki')) || 0;
@@ -270,7 +279,6 @@
         let eng_price = parseInt(localStorage.getItem(PREFIX + 'eng_price')) || 1000;
         let eng_lvl = parseInt(localStorage.getItem(PREFIX + 'eng_lvl')) || 1;
         let regen_price = parseInt(localStorage.getItem(PREFIX + 'regen_price')) || 5000;
-
         let c1_price = parseInt(localStorage.getItem(PREFIX + 'c1_price')) || 2000;
         let c2_price = parseInt(localStorage.getItem(PREFIX + 'c2_price')) || 10000;
         let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000; 
@@ -278,6 +286,9 @@
         let c5_price = parseInt(localStorage.getItem(PREFIX + 'c5_price')) || 20000; 
         let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; 
         let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; 
+
+        let player_rank = parseInt(localStorage.getItem(PREFIX + 'rank')) || 0;
+        const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || new Date().getTime();
         let last_sync = 0;
@@ -295,34 +306,61 @@
         const el_eng_fill = document.getElementById('energy-fill');
         const tap_area = document.getElementById('tap-area');
 
-        if (!nickname) { document.getElementById('auth-modal').style.display = 'flex'; } 
-        else { check_admin(); }
+        if (!nickname || !my_pin) { document.getElementById('auth-modal').style.display = 'flex'; } 
+        else { check_admin(); sync_cloud(); }
 
         function check_admin() {
             document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
-            if(nickname && nickname.toLowerCase() === 'conexion') {
-                document.getElementById('admin-panel').style.display = 'block';
-            }
+            if(nickname && nickname.toLowerCase() === 'conexion') document.getElementById('admin-panel').style.display = 'block';
         }
 
-        window.set_start_nick = function() {
+        // АВТОРИЗАЦИЯ
+        window.auth_player = async function() {
             let n = document.getElementById('auth-nick').value.trim();
-            if(!n) { alert('напиши хоть что-то!'); return; }
-            nickname = n; localStorage.setItem(PREFIX + 'nickname', nickname);
+            let p = document.getElementById('auth-pin').value.trim();
+            if(!n || !p || p.length !== 4) return alert('Введи ник и ПИН из 4 цифр!');
+            
+            document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'синхронизация...';
+            
+            let d = await fetch_cloud();
+            if(!d) {
+                document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация';
+                return alert('Ошибка связи с сервером! Попробуй позже.');
+            }
+            let players = d.players;
+            
+            if (players[n]) {
+                if (players[n].pin && players[n].pin !== p) {
+                    document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация';
+                    return alert('Неверный ПИН-код!');
+                }
+                nickname = n; my_pin = p;
+                vrgk = players[n].vrgk || 0; skrepki = players[n].skrepki || 0;
+                player_rank = players[n].rank || 0;
+                if(players[n].stats) {
+                    let s = players[n].stats;
+                    profit = s[0]; tap_power = s[1]; max_energy = s[2]; eng_regen = s[3];
+                    tap_price = s[4]; tap_lvl = s[5]; eng_price = s[6]; eng_lvl = s[7]; regen_price = s[8];
+                    c1_price = s[9]; c2_price = s[10]; c3_price = s[11]; c4_price = s[12]; c5_price = s[13]; c6_price = s[14]; c7_price = s[15];
+                }
+                if(players[n].club) localStorage.setItem(PREFIX+'club', players[n].club); else localStorage.removeItem(PREFIX+'club');
+            } else {
+                nickname = n; my_pin = p;
+            }
+
+            localStorage.setItem(PREFIX + 'nickname', nickname);
+            localStorage.setItem(PREFIX + 'pin', my_pin);
             document.getElementById('auth-modal').style.display = 'none';
-            check_admin(); sync_cloud(); 
+            save_data(); init_prices(); upd_ui(); check_admin(); sync_cloud();
         };
 
         function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
         function gen_tag() { return '#' + Math.random().toString(36).substr(2, 6).toUpperCase(); }
         
         function timeAgo(ts) {
-            if(!ts) return "давно";
-            let diff = Math.floor((Date.now() - ts) / 1000);
-            if (diff < 120) return "в сети";
-            if (diff < 3600) return `был(а) ${Math.floor(diff/60)} мин назад`;
-            if (diff < 86400) return `был(а) ${Math.floor(diff/3600)} ч назад`;
-            return `был(а) ${Math.floor(diff/86400)} дн назад`;
+            if(!ts) return "давно"; let diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 120) return "в сети"; if (diff < 3600) return `был(а) ${Math.floor(diff/60)} мин назад`;
+            if (diff < 86400) return `был(а) ${Math.floor(diff/3600)} ч назад`; return `был(а) ${Math.floor(diff/86400)} дн назад`;
         }
         
         function init_prices() { 
@@ -344,28 +382,20 @@
                     let profit_sec = diff_sec;
                     if (profit_sec > 10800) profit_sec = 10800; 
                     if (profit_sec > 60) { 
-                        let offline_earn = (profit / 3600) * profit_sec;
-                        vrgk += offline_earn;
-                        document.getElementById('offline-amount').innerText = "+" + fmt(offline_earn);
-                        document.getElementById('offline-modal').style.display = 'flex';
+                        let offline_earn = (profit / 3600) * profit_sec; vrgk += offline_earn;
+                        document.getElementById('offline-amount').innerText = "+" + fmt(offline_earn); document.getElementById('offline-modal').style.display = 'flex';
                     }
                 }
             }
             last_time = now; save_data();
         }
 
-        function chk_league() {
-            let l = 'бронза';
-            if (vrgk >= 10000) l = 'серебро'; if (vrgk >= 100000) l = 'золото';
-            if (vrgk >= 1000000) l = 'платина'; if (vrgk >= 10000000) l = 'алмаз';
-            document.getElementById('league-name').innerText = 'лига: ' + l;
-        }
-
         function save_data() {
             localStorage.setItem(PREFIX + 'vrgk', vrgk); localStorage.setItem(PREFIX + 'skrepki', skrepki);
             localStorage.setItem(PREFIX + 'profit', profit); localStorage.setItem(PREFIX + 'tap_power', tap_power);
             localStorage.setItem(PREFIX + 'max_energy', max_energy); localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
-            localStorage.setItem(PREFIX + 'eng_regen', eng_regen); localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
+            localStorage.setItem(PREFIX + 'eng_regen', eng_regen); localStorage.setItem(PREFIX + 'rank', player_rank);
+            localStorage.setItem(PREFIX + 'last_time', new Date().getTime());
             localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl);
             localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl);
             localStorage.setItem(PREFIX+'regen_price', regen_price);
@@ -379,7 +409,8 @@
             document.getElementById('profit-val').innerText = "+" + fmt(profit);
             el_eng.innerText = Math.floor(cur_energy); el_eng_max.innerText = max_energy;
             el_eng_fill.style.width = `${(cur_energy / max_energy) * 100}%`;
-            chk_league();
+            document.getElementById('rank-name').innerText = RANKS[player_rank];
+            document.getElementById('rank-display').innerText = RANKS[player_rank];
         }
 
         document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false});
@@ -407,15 +438,15 @@
             if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + eng_regen, max_energy);
             if (profit > 0) vrgk += profit / 3600;
             upd_ui(); save_data();
-            if (nickname && Date.now() - last_sync > 10000) sync_cloud(true);
+            if (nickname && my_pin && Date.now() - last_sync > 10000) sync_cloud(true);
         }, 1000);
 
         window.buy_upg = function(type) { 
-            if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`; document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`; }
-            else if (type === 'eng' && vrgk >= eng_price) { vrgk -= eng_price; max_energy += 500; eng_lvl += 1; eng_price = Math.floor(eng_price * 2.1); document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`; document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`; }
-            else if (type === 'regen' && vrgk >= regen_price) { vrgk -= regen_price; eng_regen += 1; regen_price = Math.floor(regen_price * 1.5); document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`; document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`; }
-            else { alert('мало денег, иди тапай'); return; }
-            upd_ui(); save_data();
+            if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); }
+            else if (type === 'eng' && vrgk >= eng_price) { vrgk -= eng_price; max_energy += 500; eng_lvl += 1; eng_price = Math.floor(eng_price * 2.1); }
+            else if (type === 'regen' && vrgk >= regen_price) { vrgk -= regen_price; eng_regen += 1; regen_price = Math.floor(regen_price * 1.5); }
+            else { alert('мало денег'); return; }
+            init_prices(); upd_ui(); save_data();
         };
 
         window.buy_card = function(id, prof) {
@@ -423,110 +454,204 @@
             if (vrgk >= p) {
                 vrgk -= p; profit += prof; let np = Math.floor(p * 1.5);
                 if(id==='c1') c1_price=np; if(id==='c2') c2_price=np; if(id==='c3') c3_price=np; if(id==='c4') c4_price=np; if(id==='c5') c5_price=np; if(id==='c6') c6_price=np; if(id==='c7') c7_price=np;
-                document.getElementById(`card${id[1]}-price`).innerText = `цена: ${fmt(np)}`; upd_ui(); save_data();
+                init_prices(); upd_ui(); save_data();
             } else { alert('мало денег'); }
         };
         window.craft = function() { if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } else alert('нужен 1 000 000'); };
 
-        // ОБЛАКО
+        // ОБЛАКО И СИНХРОНИЗАЦИЯ (ЖЕЛЕЗОБЕТОННАЯ ЗАЩИТА)
         async function fetch_cloud() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
-                let d = await res.json(); let rec = d.record || {};
-                return {
-                    players: rec.players || (rec.record && rec.record.players) || {},
-                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {},
-                    event: rec.event || (rec.record && rec.record.event) || { active: false, name: "", scores: {} }
+                if(!res.ok) return null; // Защита от кривого интернета
+                let d = await res.json(); 
+                let rec = d.record || {};
+                return { 
+                    players: rec.players || (rec.record && rec.record.players) || {}, 
+                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {}, 
+                    event: rec.event || (rec.record && rec.record.event) || { active: false, name: "", scores: {} } 
                 };
-            } catch (e) { return { players: {}, clubs: {}, event: {active:false} }; }
+            } catch (e) { return null; }
         }
         async function put_cloud(data) {
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data) });
         }
 
         async function sync_cloud(is_bg = false) {
-            if (!nickname) return;
+            if (!nickname || !my_pin) return;
             try {
                 let d = await fetch_cloud();
+                if(!d) return; // ЗАЩИТА ОТ УДАЛЕНИЯ ПРИ ОШИБКЕ СЕТИ
                 let players = d.players; let clubs = d.clubs; global_event_data = d.event;
                 
                 let my_cloud_data = players[nickname];
                 if (my_cloud_data && my_cloud_data.club && clubs[my_cloud_data.club] && clubs[my_cloud_data.club].members.includes(nickname)) {
                     localStorage.setItem(PREFIX + 'club', my_cloud_data.club);
                 } else {
-                    localStorage.removeItem(PREFIX + 'club');
-                    if (my_cloud_data) delete my_cloud_data.club;
+                    localStorage.removeItem(PREFIX + 'club'); if (my_cloud_data) delete my_cloud_data.club;
                 }
 
                 players[nickname] = players[nickname] || {};
-                players[nickname].vrgk = Math.floor(vrgk);
-                players[nickname].skrepki = skrepki;
-                players[nickname].last_seen = Date.now();
+                players[nickname].pin = my_pin;
+                players[nickname].vrgk = Math.floor(vrgk); players[nickname].skrepki = skrepki;
+                players[nickname].rank = player_rank; players[nickname].last_seen = Date.now();
+                players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price];
+                
                 let my_c = localStorage.getItem(PREFIX + 'club');
                 if (my_c) players[nickname].club = my_c;
                 
                 cached_players = players; cached_clubs = clubs;
-                
-                await put_cloud({players, clubs, event: global_event_data});
-                last_sync = Date.now();
+                await put_cloud({players, clubs, event: global_event_data}); last_sync = Date.now();
 
                 if(!is_bg) { render_leaderboard(); render_clubs_list(); }
-
-                if (global_event_data && global_event_data.active && document.getElementById('event-modal').style.display === 'flex') {
-                    render_event_top();
-                }
-
-                let viewing_club = document.getElementById('view-club-modal').getAttribute('data-club');
-                if (viewing_club && document.getElementById('view-club-modal').style.display === 'flex') {
-                    open_club_details(viewing_club, true); 
-                }
 
             } catch (e) {}
         }
 
-        function render_leaderboard() {
-            let sorted = Object.keys(cached_players).map(k => {
-                return { name: k, vrgk: cached_players[k].vrgk || 0, skrepki: cached_players[k].skrepki || 0, club: cached_players[k].club };
-            }).sort((a, b) => b.vrgk - a.vrgk);
+        // РАНКЕД ЛОГИКА
+        let arena_int, bot_int;
+        let arena_my = 0, arena_bot = 0;
+        let arena_mode = 1; 
+        let arena_target_max = 100;
+        let last_ac_tap = 0;
+        let cheat_strikes = 0;
+        let arena_dots_left = 3; 
 
+        window.start_ranked_search = function() {
+            if(player_rank >= RANKS.length - 1) return alert('Ты уже взял максимальный ранг ПРО!');
+            document.getElementById('ranked-modal').style.display = 'flex';
+            document.getElementById('ranked-status').innerText = 'Поиск противника...';
+            document.getElementById('arena-container').style.display = 'none';
+            document.getElementById('arena-exit-btn').style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('ranked-status').innerText = `Противник найден: Bot_${Math.floor(Math.random()*9999)}`;
+                setTimeout(start_arena, 1500);
+            }, 2000);
+        }
+
+        function start_arena() {
+            arena_my = 0; arena_bot = 0; cheat_strikes = 0;
+            document.getElementById('arena-my-score').innerText = 'Ты: 0';
+            document.getElementById('arena-bot-score').innerText = 'Бот: 0';
+            document.getElementById('arena-container').style.display = 'block';
+            
+            if (player_rank >= 13 && Math.random() > 0.5) {
+                arena_mode = 2; arena_target_max = 15; arena_dots_left = 3;
+                document.getElementById('ranked-status').innerText = 'Режим: РЕАКЦИЯ (Сломай 15 точек)';
+            } else {
+                arena_mode = 1; arena_target_max = 100;
+                document.getElementById('ranked-status').innerText = 'Режим: СПАМ (Нажми 100 раз)';
+            }
+            
+            spawn_arena_target();
+
+            let bot_time_to_finish = 25 - (player_rank * 0.8); 
+            let bot_interval_ms = (bot_time_to_finish * 1000) / arena_target_max;
+            
+            bot_int = setInterval(() => {
+                arena_bot++;
+                document.getElementById('arena-bot-score').innerText = 'Бот: ' + arena_bot;
+                if(arena_bot >= arena_target_max) end_arena(false);
+            }, bot_interval_ms);
+        }
+
+        function spawn_arena_target() {
+            let container = document.getElementById('arena-container');
+            let existing = document.getElementById('arena-btn-active');
+            if(existing) existing.remove();
+
+            let btn = document.createElement('div');
+            btn.id = 'arena-btn-active';
+            
+            if (arena_mode === 1) {
+                btn.className = 'arena-target-1';
+                btn.onmousedown = () => hit_arena_target(btn);
+                btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target(btn); };
+            } else {
+                btn.className = 'arena-target-2';
+                btn.innerText = arena_dots_left;
+                btn.onmousedown = () => hit_arena_target_dot(btn);
+                btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target_dot(btn); };
+            }
+
+            let left = 10 + Math.random() * 70; 
+            let top = 20 + Math.random() * 60; 
+            btn.style.left = `${left}%`; btn.style.top = `${top}%`;
+            container.appendChild(btn);
+        }
+
+        function check_autoclicker() {
+            let now = Date.now();
+            if (now - last_ac_tap < 35) {
+                cheat_strikes++; last_ac_tap = now;
+                if(cheat_strikes > 3) { document.getElementById('ranked-status').innerText = 'Автокликер обнаружен! Блокировка 1 сек.'; return false; }
+            } else { cheat_strikes = 0; }
+            last_ac_tap = now; return true;
+        }
+
+        function hit_arena_target(btn) {
+            if(!check_autoclicker()) return;
+            document.getElementById('ranked-status').innerText = 'Режим: СПАМ (Нажми 100 раз)';
+            arena_my++; document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
+            if(arena_my % 5 === 0) spawn_arena_target(); 
+            if(navigator.vibrate) navigator.vibrate(10);
+            if(arena_my >= arena_target_max) end_arena(true);
+        }
+
+        function hit_arena_target_dot(btn) {
+            if(!check_autoclicker()) return;
+            document.getElementById('ranked-status').innerText = 'Режим: РЕАКЦИЯ (Сломай 15 точек)';
+            arena_dots_left--;
+            if(navigator.vibrate) navigator.vibrate(10);
+            if(arena_dots_left <= 0) {
+                arena_my++; document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
+                if(arena_my >= arena_target_max) end_arena(true);
+                else { arena_dots_left = 3; spawn_arena_target(); }
+            } else { btn.innerText = arena_dots_left; }
+        }
+
+        function end_arena(is_win) {
+            clearInterval(bot_int);
+            let btn = document.getElementById('arena-btn-active');
+            if(btn) btn.remove();
+            document.getElementById('arena-exit-btn').style.display = 'block';
+
+            if (is_win) {
+                document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
+                let old_rank = player_rank; player_rank++; save_data(); upd_ui();
+                
+                // Фикс наград: убраны скрепки, оставлен чистый балансный пассив
+                if(old_rank < 12 && player_rank >= 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit+=5000; save_data(); upd_ui(); }
+                if(old_rank < 15 && player_rank >= 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit+=15000; save_data(); upd_ui(); }
+                if(old_rank < 18 && player_rank >= 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit+=45000; save_data(); upd_ui(); }
+                if(old_rank < 21 && player_rank >= 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit+=65000; save_data(); upd_ui(); }
+            } else {
+                document.getElementById('ranked-status').innerText = 'ПОРАЖЕНИЕ! Ты потерял ранг.';
+                if(player_rank > 0) player_rank--; save_data(); upd_ui();
+            }
+        }
+
+        window.exit_arena = function() { document.getElementById('ranked-modal').style.display = 'none'; sync_cloud(); }
+
+        function render_leaderboard() {
+            let sorted = Object.keys(cached_players).map(k => { return { name: k, vrgk: cached_players[k].vrgk || 0, skrepki: cached_players[k].skrepki || 0, club: cached_players[k].club }; }).sort((a, b) => b.vrgk - a.vrgk);
             let html = '';
             sorted.forEach((p, i) => {
                 let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
-                html += `
-                <div class="upgrade-item">
-                    <div class="rank-pos ${c_cls}">${pos}</div>
-                    <div class="upgrade-info" style="flex: 1; margin-left: 10px;">
-                        <span class="upgrade-name">${p.name}</span>
-                        ${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}
-                    </div>
-                    <div class="upgrade-price">${fmt(p.vrgk)}</div>
-                </div>`;
+                html += `<div class="upgrade-item"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${p.name}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price">${fmt(p.vrgk)}</div></div>`;
             });
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет игроков</div>';
         }
 
-        // --- КЛУБЫ: BRAWL STARS STYLE ---
         function render_clubs_list() {
-            let my_c = localStorage.getItem(PREFIX + 'club');
-            let html = '';
-            
-            if (my_c && cached_clubs[my_c]) {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`;
-            } else {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`;
-            }
-            
-            html += `<div class="section-title">список клубов</div>`;
-            let count = 0;
+            let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
+            if (my_c && cached_clubs[my_c]) html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`;
+            else html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`;
+            html += `<div class="section-title">список клубов</div>`; let count = 0;
             for (let name in cached_clubs) {
                 count++; let c = cached_clubs[name];
-                html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">${name}</span>
-                        <span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span>
-                    </div>
-                    <div style="font-size: 20px;">ℹ️</div>
-                </div>`;
+                html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')"><div class="upgrade-info"><span class="upgrade-name">${name}</span><span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span></div><div style="font-size: 20px;">ℹ️</div></div>`;
             }
             if(count === 0) html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`;
             document.getElementById('club-content').innerHTML = html;
@@ -534,244 +659,110 @@
 
         window.open_club_details = function(name, is_silent_update = false) {
             let c = cached_clubs[name]; if(!c) return;
-            let total_vrgk = 0;
-            c.members.forEach(m => { if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); });
-            
-            let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>
-                ${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}
-            </div>`;
-
-            // КАРТОЧКА КЛУБА (СЛЕВА)
-            html += `<div class="club-card">
-                <div class="club-badge">🔥</div>
-                <div class="club-name-big">${name}</div>
-                <div class="club-trophies">🏆 ${fmt(total_vrgk)}</div>
-                <div class="club-desc-box">${c.desc || 'нет описания'}</div>
-                <div class="club-stats-grid">
-                    <div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div>
-                    <div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div>
-                    <div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div>
-                </div>`;
-            
-            if (localStorage.getItem(PREFIX + 'club') !== name) {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`;
-            }
+            let total_vrgk = 0; c.members.forEach(m => { if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); });
+            let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;"><button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}</div>`;
+            html += `<div class="club-card"><div class="club-badge">🔥</div><div class="club-name-big">${name}</div><div class="club-trophies">🏆 ${fmt(total_vrgk)}</div><div class="club-desc-box">${c.desc || 'нет описания'}</div><div class="club-stats-grid"><div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div><div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div><div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div></div>`;
+            if (localStorage.getItem(PREFIX + 'club') !== name) html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`;
             html += `</div>`;
-
-            // КЛУБНОЕ СОБЫТИЕ (Только если игрок открыл клуб и ивент активен)
-            if (global_event_data && global_event_data.active) {
-                html += `<div style="text-align: left; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Клубное событие:</div>
-                <div class="event-banner" onclick="open_event()">🏆 ${global_event_data.name.toUpperCase()} 🏆<br><span style="font-size: 11px; font-weight: normal; color: #333;">нажми, чтобы участвовать</span></div>`;
-            }
-
-            // СПИСОК УЧАСТНИКОВ 
-            html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`;
             
-            let mems = c.members.map(m => { return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; }).sort((a,b) => b.vrgk - a.vrgk);
+            if (global_event_data && global_event_data.active) html += `<div style="text-align: left; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Клубное событие:</div><div class="event-banner" onclick="open_event()">🏆 ${global_event_data.name.toUpperCase()} 🏆<br><span style="font-size: 11px; font-weight: normal; color: #333;">нажми, чтобы участвовать</span></div>`;
 
+            html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`;
+            let mems = c.members.map(m => { return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; }).sort((a,b) => b.vrgk - a.vrgk);
             mems.forEach((m, idx) => {
                 let is_online = timeAgo(m.ls) === "в сети";
-                html += `<div class="member-list-item">
-                    <div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div>
-                    <div class="ml-info" style="flex: 1; padding-left: 10px;">
-                        <div class="ml-name">${m.name}</div>
-                        <div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="ml-score">🪙 ${fmt(m.vrgk)}</div>
-                        <div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div>
-                    </div>
-                </div>`;
+                html += `<div class="member-list-item"><div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div><div class="ml-info" style="flex: 1; padding-left: 10px;"><div class="ml-name">${m.name}</div><div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div></div><div style="text-align: right;"><div class="ml-score">🪙 ${fmt(m.vrgk)}</div><div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div></div></div>`;
             });
-
-            // ЗАЯВКИ (ТОЛЬКО ДЛЯ ЛИДЕРА)
             if (c.owner === nickname && c.reqs && c.reqs.length > 0) {
                 html += `<div style="text-align: left; font-weight: bold; margin-top: 10px; font-size: 12px; color: #d4af37;">Заявки (${c.reqs.length}):</div>`;
-                c.reqs.forEach(r => {
-                    html += `<div class="member-list-item">
-                        <div style="flex: 1; text-align: left; font-weight: bold;">${r}</div>
-                        <button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button>
-                        <button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button>
-                    </div>`;
-                });
+                c.reqs.forEach(r => { html += `<div class="member-list-item"><div style="flex: 1; text-align: left; font-weight: bold;">${r}</div><button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button><button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button></div>`; });
             }
-
-            // ЧАТ (ТОЛЬКО ДЛЯ СВОИХ)
             if (localStorage.getItem(PREFIX + 'club') === name) {
-                html += `<div class="chat-container">
-                    <div class="chat-msgs" id="chat-msgs-box">`;
-                if(c.chat && c.chat.length > 0) {
-                    c.chat.forEach(msg => { html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; });
-                } else { html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; }
-                html += `</div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="сообщение..." maxlength="100">
-                        <button class="buy-btn gold" onclick="send_chat('${name}')">></button>
-                    </div>
-                </div>`;
+                html += `<div class="chat-container"><div class="chat-msgs" id="chat-msgs-box">`;
+                if(c.chat && c.chat.length > 0) c.chat.forEach(msg => { html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; });
+                else html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`;
+                html += `</div><div class="chat-input-area"><input type="text" id="chat-input" placeholder="сообщение..." maxlength="100"><button class="buy-btn gold" onclick="send_chat('${name}')">></button></div></div>`;
             }
-
-            let modal = document.getElementById('view-club-modal');
-            modal.setAttribute('data-club', name);
-            document.getElementById('view-club-content').innerHTML = html;
-            modal.style.display = 'flex';
-            
-            if(!is_silent_update) {
-                let chatBox = document.getElementById('chat-msgs-box');
-                if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-            }
+            let modal = document.getElementById('view-club-modal'); modal.setAttribute('data-club', name);
+            document.getElementById('view-club-content').innerHTML = html; modal.style.display = 'flex';
+            if(!is_silent_update) { let chatBox = document.getElementById('chat-msgs-box'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }
         }
 
         window.submit_club = async function() {
-            let name = document.getElementById('c-name').value.trim();
-            let desc = document.getElementById('c-desc').value.trim();
-            let req = parseInt(document.getElementById('c-req').value) || 0;
-            let type = document.getElementById('c-type').value;
-            if(!name) return alert('введи название!');
-            document.getElementById('create-club-modal').style.display = 'none';
-            if(cached_clubs[name]) { alert('клуб с таким именем уже есть!'); return; }
-            cached_clubs[name] = { desc: desc, req: req, type: type, owner: nickname, members: [nickname], reqs: [], tag: gen_tag(), chat: [] };
-            cached_players[nickname].club = name;
-            localStorage.setItem(PREFIX + 'club', name);
-            await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-            sync_cloud();
+            let name = document.getElementById('c-name').value.trim(); let desc = document.getElementById('c-desc').value.trim();
+            let req = parseInt(document.getElementById('c-req').value) || 0; let type = document.getElementById('c-type').value;
+            if(!name) return alert('введи название!'); document.getElementById('create-club-modal').style.display = 'none';
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!');
+            if(d.clubs[name]) return alert('клуб с таким именем уже есть!');
+            d.clubs[name] = { desc: desc, req: req, type: type, owner: nickname, members: [nickname], reqs: [], tag: gen_tag(), chat: [] };
+            d.players[nickname].club = name; localStorage.setItem(PREFIX + 'club', name);
+            await put_cloud(d); sync_cloud();
         };
 
         window.join_club = async function(name) {
-            let c = cached_clubs[name];
-            if(!c) return;
-            if(vrgk < c.req) return alert('мало воргиков для входа!');
-            if(c.type === 'закрытый') return alert('клуб закрыт');
-            if(c.type === 'по заявкам') {
-                if(!c.reqs) c.reqs = [];
-                if(!c.reqs.includes(nickname)) c.reqs.push(nickname);
-                await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-                alert('заявка отправлена!'); return;
-            }
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); let c = d.clubs[name]; if(!c) return;
+            if(vrgk < c.req) return alert('мало воргиков для входа!'); if(c.type === 'закрытый') return alert('клуб закрыт');
+            if(c.type === 'по заявкам') { if(!c.reqs) c.reqs = []; if(!c.reqs.includes(nickname)) c.reqs.push(nickname); await put_cloud(d); alert('заявка отправлена!'); return; }
             if(!c.members.includes(nickname)) c.members.push(nickname);
-            cached_players[nickname].club = name;
-            localStorage.setItem(PREFIX + 'club', name);
-            await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-            document.getElementById('view-club-modal').style.display = 'none';
-            sync_cloud();
+            d.players[nickname].club = name; localStorage.setItem(PREFIX + 'club', name);
+            await put_cloud(d); document.getElementById('view-club-modal').style.display = 'none'; sync_cloud();
         };
 
         window.leave_club = async function() {
-            if(!confirm('точно выйти из клуба?')) return;
-            let my_c = localStorage.getItem(PREFIX + 'club');
-            if (cached_clubs[my_c]) {
-                let c = cached_clubs[my_c];
-                c.members = c.members.filter(m => m !== nickname);
-                if (c.owner === nickname) {
-                    if (c.members.length > 0) c.owner = c.members[0];
-                    else delete cached_clubs[my_c]; 
-                }
-            }
-            delete cached_players[nickname].club;
-            localStorage.removeItem(PREFIX + 'club');
-            await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-            document.getElementById('view-club-modal').style.display = 'none';
-            sync_cloud();
+            if(!confirm('точно выйти из клуба?')) return; let my_c = localStorage.getItem(PREFIX + 'club');
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!');
+            if (d.clubs[my_c]) { let c = d.clubs[my_c]; c.members = c.members.filter(m => m !== nickname); if (c.owner === nickname) { if (c.members.length > 0) c.owner = c.members[0]; else delete d.clubs[my_c]; } }
+            delete d.players[nickname].club; localStorage.removeItem(PREFIX + 'club');
+            await put_cloud(d); document.getElementById('view-club-modal').style.display = 'none'; sync_cloud();
         };
 
         window.acc_req = async function(cname, user) {
-            let c = cached_clubs[cname];
-            if (c) {
-                c.reqs = c.reqs.filter(r => r !== user);
-                if(!c.members.includes(user)) c.members.push(user);
-                if(!cached_players[user]) cached_players[user] = {vrgk: 0, skrepki: 0};
-                cached_players[user].club = cname;
-                await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-                open_club_details(cname);
-            }
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); let c = d.clubs[cname];
+            if (c) { c.reqs = c.reqs.filter(r => r !== user); if(!c.members.includes(user)) c.members.push(user); if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0, rank:0}; d.players[user].club = cname; await put_cloud(d); open_club_details(cname); }
         };
 
-        window.rej_req = async function(cname, user) {
-            let c = cached_clubs[cname];
-            if (c) { c.reqs = c.reqs.filter(r => r !== user); await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data}); open_club_details(cname); }
-        };
+        window.rej_req = async function(cname, user) { let d = await fetch_cloud(); if(!d) return; let c = d.clubs[cname]; if (c) { c.reqs = c.reqs.filter(r => r !== user); await put_cloud(d); open_club_details(cname); } };
 
         window.send_chat = async function(cname) {
-            let inp = document.getElementById('chat-input');
-            let txt = inp.value.trim(); if(!txt) return;
-            inp.value = '';
-            let c = cached_clubs[cname];
-            if(c) {
-                if(!c.chat) c.chat = [];
-                c.chat.push({a: nickname, t: txt});
-                if(c.chat.length > 30) c.chat.shift(); 
-                await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-                open_club_details(cname);
-                
-                // Прокрутка чата вниз
-                setTimeout(() => {
-                    let chatBox = document.getElementById('chat-msgs-box');
-                    if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-                }, 50);
-            }
+            let inp = document.getElementById('chat-input'); let txt = inp.value.trim(); if(!txt) return; inp.value = '';
+            let d = await fetch_cloud(); if(!d) return; let c = d.clubs[cname];
+            if(c) { if(!c.chat) c.chat = []; c.chat.push({a: nickname, t: txt}); if(c.chat.length > 30) c.chat.shift(); await put_cloud(d); open_club_details(cname); setTimeout(() => { let chatBox = document.getElementById('chat-msgs-box'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }, 50); }
         }
 
-        // --- ИВЕНТЫ ---
         window.toggle_event = async function() {
-            if(global_event_data && global_event_data.active) {
-                if(confirm('Остановить текущее событие?')) {
-                    global_event_data.active = false;
-                    await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-                    alert('Событие остановлено!'); sync_cloud();
-                }
-            } else {
-                let n = prompt('Введи название нового события (например, Склад Ворга):');
-                if(n) {
-                    global_event_data = { active: true, name: n, scores: {} };
-                    await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-                    alert('Событие запущено!'); sync_cloud();
-                }
-            }
+            let d = await fetch_cloud(); if(!d) return;
+            if(d.event && d.event.active) { if(confirm('Остановить текущее событие?')) { d.event.active = false; await put_cloud(d); alert('Событие остановлено!'); sync_cloud(); } } 
+            else { let n = prompt('Введи название события:'); if(n) { d.event = { active: true, name: n, scores: {} }; await put_cloud(d); alert('Событие запущено!'); sync_cloud(); } }
         };
-
-        window.open_event = function() {
-            document.getElementById('event-title').innerText = global_event_data.name;
-            document.getElementById('event-modal').style.display = 'flex';
-            my_event_score = global_event_data.scores[nickname] || 0;
-            document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score;
-            render_event_top();
-        };
-
+        window.open_event = function() { document.getElementById('event-title').innerText = global_event_data.name; document.getElementById('event-modal').style.display = 'flex'; my_event_score = global_event_data.scores[nickname] || 0; document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score; render_event_top(); };
         window.tap_event = function() {
-            my_event_score += 1;
-            document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score;
-            if(navigator.vibrate) navigator.vibrate(15);
-            
-            if(!window.eventSyncTimer) {
-                window.eventSyncTimer = setTimeout(async () => {
-                    global_event_data.scores[nickname] = my_event_score;
-                    await put_cloud({players: cached_players, clubs: cached_clubs, event: global_event_data});
-                    render_event_top();
-                    window.eventSyncTimer = null;
-                }, 2000);
-            }
+            my_event_score += 1; document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score; if(navigator.vibrate) navigator.vibrate(15);
+            if(!window.eventSyncTimer) { window.eventSyncTimer = setTimeout(async () => { let d = await fetch_cloud(); if(d) { d.event.scores[nickname] = my_event_score; await put_cloud(d); global_event_data = d.event; render_event_top(); } window.eventSyncTimer = null; }, 2000); }
         };
-
         function render_event_top() {
             if(!global_event_data || !global_event_data.scores) return;
             let sorted = Object.keys(global_event_data.scores).map(k => { return {n: k, s: global_event_data.scores[k]}; }).sort((a,b) => b.s - a.s);
-            let html = '';
-            sorted.slice(0, 10).forEach((p, i) => { html += `<div>${i+1}. <b>${p.n}</b> - ${p.s} очков</div>`; });
-            if(html === '') html = 'пока никто не тапал';
-            document.getElementById('event-top').innerHTML = html;
+            let html = ''; sorted.slice(0, 10).forEach((p, i) => { html += `<div>${i+1}. <b>${p.n}</b> - ${p.s} очков</div>`; });
+            if(html === '') html = 'пока никто не тапал'; document.getElementById('event-top').innerHTML = html;
         }
 
         window.sw_tab = function(tabid, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`tab-${tabid}`).classList.add('active');
-            el.classList.add('active');
+            document.getElementById(`tab-${tabid}`).classList.add('active'); el.classList.add('active');
             if (tabid === 'rating' || tabid === 'clubs') { sync_cloud(); }
         };
 
-        init_prices(); calc_offline(); upd_ui();
-        if(nickname) sync_cloud();
+        window.change_nick = async function() { alert('Смена ника временно отключена для безопасности ПИН-кодов. Создай новый акк, если нужно.'); }
+        window.delete_acc = async function() {
+            if(!confirm('удалить аккаунт?')) return;
+            let d = await fetch_cloud(); if(!d) return; let players = d.players || {}; let clubs = d.clubs || {};
+            if(nickname && players[nickname]) delete players[nickname];
+            let my_c = localStorage.getItem(PREFIX + 'club');
+            if(my_c && clubs[my_c]) { clubs[my_c].members = clubs[my_c].members.filter(m => m !== nickname); if(clubs[my_c].owner === nickname) { if (clubs[my_c].members.length > 0) clubs[my_c].owner = clubs[my_c].members[0]; else delete clubs[my_c]; } }
+            await put_cloud({players, clubs, event: d.event}); localStorage.clear(); location.reload();
+        };
+
     </script>
 </body>
 </html>
