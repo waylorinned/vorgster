@@ -164,7 +164,6 @@
             <div class="upgrade-list">
                 <div class="section-title">топ флуда</div>
                 
-                <!-- НОВЫЕ КНОПКИ ВЫБОРА РЕЙТИНГА -->
                 <div style="display: flex; gap: 5px; margin-bottom: 15px;">
                     <button class="buy-btn gold" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-players" onclick="switch_top('players')">игроки</button>
                     <button class="buy-btn" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-clubs" onclick="switch_top('clubs')">клубы</button>
@@ -278,8 +277,11 @@
         let skrepki = parseInt(localStorage.getItem(PREFIX + 'skrepki')) || 0;
         let profit = parseFloat(localStorage.getItem(PREFIX + 'profit')) || 0;
         let tap_power = parseInt(localStorage.getItem(PREFIX + 'tap_power')) || 1;
+        
+        // ФИКС ЭНЕРГИИ И ЗАЩИТА ОТ NaN
         let max_energy = parseInt(localStorage.getItem(PREFIX + 'max_energy')) || 1000;
-        let cur_energy = parseFloat(localStorage.getItem(PREFIX + 'cur_energy')) || max_energy;
+        let ce = parseFloat(localStorage.getItem(PREFIX + 'cur_energy'));
+        let cur_energy = (isNaN(ce) || ce < 0) ? max_energy : ce;
         let eng_regen = parseInt(localStorage.getItem(PREFIX + 'eng_regen')) || 3;
         
         let tap_price = parseInt(localStorage.getItem(PREFIX + 'tap_price')) || 500;
@@ -324,7 +326,7 @@
             if(nickname && nickname.toLowerCase() === 'conexion') document.getElementById('admin-panel').style.display = 'block';
         }
 
-        // АВТОРИЗАЦИЯ
+        // АВТОРИЗАЦИЯ И СТРОГАЯ КОНВЕРТАЦИЯ ДАННЫХ
         window.auth_player = async function() {
             let n = document.getElementById('auth-nick').value.trim();
             let p = document.getElementById('auth-pin').value.trim();
@@ -345,13 +347,28 @@
                     return alert('Неверный ПИН-код!');
                 }
                 nickname = n; my_pin = p;
-                vrgk = players[n].vrgk || 0; skrepki = players[n].skrepki || 0;
-                player_rank = players[n].rank || 0;
+                vrgk = parseFloat(players[n].vrgk) || 0; skrepki = parseInt(players[n].skrepki) || 0;
+                player_rank = parseInt(players[n].rank) || 0;
+                
+                // ЗАЩИТА ОТ ПУСТЫХ СТАТОВ ОБЛАКА
                 if(players[n].stats) {
                     let s = players[n].stats;
-                    profit = s[0]; tap_power = s[1]; max_energy = s[2]; eng_regen = s[3];
-                    tap_price = s[4]; tap_lvl = s[5]; eng_price = s[6]; eng_lvl = s[7]; regen_price = s[8];
-                    c1_price = s[9]; c2_price = s[10]; c3_price = s[11]; c4_price = s[12]; c5_price = s[13]; c6_price = s[14]; c7_price = s[15];
+                    profit = parseFloat(s[0]) || 0; 
+                    tap_power = parseInt(s[1]) || 1; 
+                    max_energy = parseInt(s[2]) || 1000; 
+                    eng_regen = parseInt(s[3]) || 3;
+                    tap_price = parseInt(s[4]) || 500; 
+                    tap_lvl = parseInt(s[5]) || 1; 
+                    eng_price = parseInt(s[6]) || 1000; 
+                    eng_lvl = parseInt(s[7]) || 1; 
+                    regen_price = parseInt(s[8]) || 5000;
+                    c1_price = parseInt(s[9]) || 2000; 
+                    c2_price = parseInt(s[10]) || 10000; 
+                    c3_price = parseInt(s[11]) || 50000; 
+                    c4_price = parseInt(s[12]) || 100000; 
+                    c5_price = parseInt(s[13]) || 20000; 
+                    c6_price = parseInt(s[14]) || 200000; 
+                    c7_price = parseInt(s[15]) || 130000;
                 }
                 if(players[n].club) localStorage.setItem(PREFIX+'club', players[n].club); else localStorage.removeItem(PREFIX+'club');
             } else {
@@ -383,11 +400,18 @@
             document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`;
         }
 
+        // БЕЗОПАСНЫЙ РАСЧЕТ ОФЛАЙНА
         function calc_offline() {
             let now = new Date().getTime();
             if (last_time > 0) {
                 let diff_sec = (now - last_time) / 1000;
-                if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + (diff_sec * eng_regen), max_energy);
+                if (diff_sec < 0) diff_sec = 0; // Защита от крутильщиков времени
+                
+                if (cur_energy < max_energy) {
+                    cur_energy += (diff_sec * eng_regen);
+                    if(cur_energy > max_energy) cur_energy = max_energy;
+                }
+                
                 if (profit > 0 && nickname) {
                     let profit_sec = diff_sec;
                     if (profit_sec > 10800) profit_sec = 10800; 
@@ -426,26 +450,31 @@
         document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false});
         document.getElementById('vorg-coin').addEventListener('mousedown', (e) => { if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); });
 
+        // ФИКС СОФТЛОКА ЭНЕРГИИ: ТАП РАБОТАЕТ ДАЖЕ ЕСЛИ ТАП > ЭНЕРГИИ
         function do_tap(touches) {
             for (let i = 0; i < touches.length; i++) {
-                if (cur_energy >= tap_power) {
-                    cur_energy -= tap_power; vrgk += tap_power;
-                    spawn_txt(touches[i].clientX, touches[i].clientY, `+${tap_power}`);
+                if (cur_energy >= 1) {
+                    let power = tap_power;
+                    if (cur_energy < tap_power) power = Math.floor(cur_energy);
+                    if (power <= 0) break;
+                    
+                    cur_energy -= power; 
+                    vrgk += power;
+                    spawn_txt(touches[i].clientX, touches[i].clientY, `+${power}`);
                     if (navigator.vibrate) navigator.vibrate(10);
                 }
             }
             upd_ui(); save_data();
         }
 
-        function spawn_txt(x, y, txt) {
-            const el = document.createElement('div'); el.classList.add('floating-text'); el.innerText = txt;
-            const rect = tap_area.getBoundingClientRect();
-            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; el.style.top = `${y - rect.top - 20}px`;
-            tap_area.appendChild(el); setTimeout(() => el.remove(), 800);
-        }
-
         setInterval(() => {
-            if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + eng_regen, max_energy);
+            // Защита от бесконечного NaN
+            if (isNaN(cur_energy) || cur_energy < 0) cur_energy = 0;
+            
+            if (cur_energy < max_energy) {
+                cur_energy += eng_regen;
+                if (cur_energy > max_energy) cur_energy = max_energy;
+            }
             if (profit > 0) vrgk += profit / 3600;
             upd_ui(); save_data();
             // ЭКОНОМИЯ БД: СОХРАНЯЕМ В ФОНЕ РАЗ В 3 МИНУТЫ
@@ -470,7 +499,6 @@
         };
         window.craft = function() { if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } else alert('нужен 1 000 000'); };
 
-        // ОБЛАКО И СИНХРОНИЗАЦИЯ (ЖЕЛЕЗОБЕТОННАЯ ЗАЩИТА)
         async function fetch_cloud() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
@@ -519,7 +547,6 @@
             } catch (e) {}
         }
 
-        // --- ВЫБОР РЕЙТИНГА ---
         window.switch_top = function(tab) {
             current_top_tab = tab;
             document.getElementById('btn-top-players').className = 'buy-btn';
@@ -652,23 +679,20 @@
         function check_autoclicker() {
             let now = Date.now();
             
-            // Если висит бан - жестко блочим
             if (now < arena_locked_until) return false;
 
             click_times.push(now);
             if (click_times.length > 8) click_times.shift();
 
-            // Проверяем среднюю скорость последних 8 кликов
             if (click_times.length === 8) {
                 let time_diff = click_times[7] - click_times[0];
-                // 8 кликов за 450 мс = ~18 CPS (человек так стабильно не бьет)
                 if (time_diff < 450) {
                     document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑';
                     document.getElementById('ranked-status').style.color = '#f00';
                     arena_locked_until = now + 3000;
-                    click_times = []; // сбрасываем счетчик
+                    click_times = []; 
                     
-                    if(navigator.vibrate) navigator.vibrate([100, 100, 100]); // триггерим вибро
+                    if(navigator.vibrate) navigator.vibrate([100, 100, 100]);
                     
                     setTimeout(() => {
                         let el = document.getElementById('ranked-status');
@@ -687,7 +711,7 @@
 
         function hit_arena_target(btn) {
             let now = Date.now();
-            if (now - last_hit_time < 20) return; // Фикс дабл-клика (сенсор + мышь одновременно)
+            if (now - last_hit_time < 20) return; 
             last_hit_time = now;
 
             if(!check_autoclicker()) return;
