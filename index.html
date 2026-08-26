@@ -163,7 +163,15 @@
         <div id="tab-rating" class="tab-content">
             <div class="upgrade-list">
                 <div class="section-title">топ флуда</div>
-                <div id="leaderboard-content" style="text-align: center; color: #888; margin-top: 20px;">загрузка...</div>
+                
+                <!-- НОВЫЕ КНОПКИ ВЫБОРА РЕЙТИНГА -->
+                <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                    <button class="buy-btn gold" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-players" onclick="switch_top('players')">игроки</button>
+                    <button class="buy-btn" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-clubs" onclick="switch_top('clubs')">клубы</button>
+                    <button class="buy-btn" style="flex:1; padding: 8px 5px; font-size: 11px;" id="btn-top-ranked" onclick="switch_top('ranked')">ранкед</button>
+                </div>
+
+                <div id="leaderboard-content" style="text-align: center; color: #888;">загрузка...</div>
             </div>
         </div>
 
@@ -296,6 +304,9 @@
         let my_event_score = 0;
         let cached_players = {};
         let cached_clubs = {};
+        
+        // Переменная для вкладки рейтинга
+        window.current_top_tab = 'players';
 
         const BIN_ID = '6a8f2d5cf5f4af5e2945ec3f';
         const API_KEY = '$2a$10$aaQQW4GHe/epejM6DjxqmubroFphtxyH7bfo30HN2R8zxaklID9fO';
@@ -409,8 +420,8 @@
             document.getElementById('profit-val').innerText = "+" + fmt(profit);
             el_eng.innerText = Math.floor(cur_energy); el_eng_max.innerText = max_energy;
             el_eng_fill.style.width = `${(cur_energy / max_energy) * 100}%`;
-            document.getElementById('rank-name').innerText = RANKS[player_rank];
-            document.getElementById('rank-display').innerText = RANKS[player_rank];
+            document.getElementById('rank-name').innerText = RANKS[player_rank] || 'Бронза I';
+            document.getElementById('rank-display').innerText = RANKS[player_rank] || 'Бронза I';
         }
 
         document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false});
@@ -438,6 +449,7 @@
             if (cur_energy < max_energy) cur_energy = Math.min(cur_energy + eng_regen, max_energy);
             if (profit > 0) vrgk += profit / 3600;
             upd_ui(); save_data();
+            // ЭКОНОМИЯ БД: СОХРАНЯЕМ В ФОНЕ РАЗ В 3 МИНУТЫ (180000 МС)
             if (nickname && my_pin && Date.now() - last_sync > 180000) sync_cloud(true);
         }, 1000);
 
@@ -459,7 +471,7 @@
         };
         window.craft = function() { if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } else alert('нужен 1 000 000'); };
 
-        // ОБЛАКО И СИНХРОНИЗАЦИЯ (ЖЕЛЕЗОБЕТОННАЯ ЗАЩИТА)
+        // ОБЛАКО И СИНХРОНИЗАЦИЯ
         async function fetch_cloud() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
@@ -508,7 +520,62 @@
             } catch (e) {}
         }
 
-        // РАНКЕД ЛОГИКА
+        // --- ВЫБОР РЕЙТИНГА ---
+        window.switch_top = function(tab) {
+            current_top_tab = tab;
+            document.getElementById('btn-top-players').className = 'buy-btn';
+            document.getElementById('btn-top-clubs').className = 'buy-btn';
+            document.getElementById('btn-top-ranked').className = 'buy-btn';
+            document.getElementById('btn-top-' + tab).className = 'buy-btn gold';
+            render_leaderboard();
+        }
+
+        function render_leaderboard() {
+            if (Object.keys(cached_players).length === 0 && current_top_tab !== 'clubs') {
+                document.getElementById('leaderboard-content').innerHTML = '<div style="text-align:center; color:#555;">загрузка или нет данных...</div>';
+                return;
+            }
+
+            let html = '';
+            
+            if (current_top_tab === 'players') {
+                let sorted = Object.keys(cached_players).map(k => { return { name: k, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club }; }).sort((a, b) => b.vrgk - a.vrgk);
+                sorted.forEach((p, i) => {
+                    let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
+                    html += `<div class="upgrade-item"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${p.name}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price">${fmt(p.vrgk)}</div></div>`;
+                });
+            } 
+            else if (current_top_tab === 'clubs') {
+                let club_arr = [];
+                for (let cname in cached_clubs) {
+                    let c = cached_clubs[cname];
+                    let total = 0;
+                    c.members.forEach(m => { if(cached_players[m]) total += (cached_players[m].vrgk || 0); });
+                    club_arr.push({name: cname, vrgk: total, mems: c.members.length});
+                }
+                club_arr.sort((a,b) => b.vrgk - a.vrgk);
+                club_arr.forEach((c, i) => {
+                    let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
+                    html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${c.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${c.name}</span><span style="font-size: 10px; color: #888; margin-top: -3px;">${c.mems} чел.</span></div><div class="upgrade-price">🏆 ${fmt(c.vrgk)}</div></div>`;
+                });
+                if (club_arr.length === 0) html = '<div style="text-align:center; color:#555;">клубов пока нет</div>';
+            }
+            else if (current_top_tab === 'ranked') {
+                let sorted = Object.keys(cached_players).map(k => { return { name: k, rank: cached_players[k].rank || 0, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club }; }).sort((a, b) => {
+                    if (b.rank !== a.rank) return b.rank - a.rank;
+                    return b.vrgk - a.vrgk;
+                });
+                sorted.forEach((p, i) => {
+                    let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
+                    let rank_name = RANKS[p.rank] || "Бронза I";
+                    html += `<div class="upgrade-item"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${p.name}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price" style="color: #0f0;">${rank_name}</div></div>`;
+                });
+            }
+            
+            document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет данных</div>';
+        }
+
+        // --- РАНКЕД ЛОГИКА ---
         let arena_int, bot_int;
         let arena_my = 0, arena_bot = 0;
         let arena_mode = 1; 
@@ -632,16 +699,6 @@
         }
 
         window.exit_arena = function() { document.getElementById('ranked-modal').style.display = 'none'; sync_cloud(); }
-
-        function render_leaderboard() {
-            let sorted = Object.keys(cached_players).map(k => { return { name: k, vrgk: cached_players[k].vrgk || 0, skrepki: cached_players[k].skrepki || 0, club: cached_players[k].club }; }).sort((a, b) => b.vrgk - a.vrgk);
-            let html = '';
-            sorted.forEach((p, i) => {
-                let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : '';
-                html += `<div class="upgrade-item"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${p.name}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price">${fmt(p.vrgk)}</div></div>`;
-            });
-            document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет игроков</div>';
-        }
 
         function render_clubs_list() {
             let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
