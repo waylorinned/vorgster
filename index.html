@@ -241,13 +241,6 @@
             color: #fff; 
             border: none; 
         }
-        
-        .buy-btn.disabled {
-            background: #444 !important;
-            color: #888 !important;
-            border: 1px solid #333 !important;
-            cursor: not-allowed;
-        }
 
         .floating-text { 
             position: absolute; 
@@ -823,7 +816,6 @@
         let c7_lvl = parseInt(localStorage.getItem(PREFIX+'c7_lvl')) || 0;
 
         let player_rank = parseInt(localStorage.getItem(PREFIX + 'rank')) || 0;
-        
         let saved_max_rank = parseInt(localStorage.getItem(PREFIX + 'max_rank'));
         let max_rank = isNaN(saved_max_rank) ? player_rank : saved_max_rank;
         
@@ -831,7 +823,9 @@
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
+        
         let global_event_data = null; 
+        let cached_last_winner = "";
         let cached_players = {};
         let cached_clubs = {};
         
@@ -871,7 +865,7 @@
             let d = await fetch_cloud();
             if(!d) {
                 document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация';
-                return alert('Ошибка связи с сервером! Попробуй позже.');
+                return alert('Ошибка связи с сервером!');
             }
             
             let players = d.players;
@@ -902,9 +896,17 @@
                     c3_lvl = parseInt(s[18]) || 0; c4_lvl = parseInt(s[19]) || 0;
                     c5_lvl = parseInt(s[20]) || 0; c6_lvl = parseInt(s[21]) || 0;
                     c7_lvl = parseInt(s[22]) || 0;
-                    
                     max_rank = (s.length > 23 && !isNaN(parseInt(s[23]))) ? parseInt(s[23]) : player_rank;
                 }
+                
+                if (players[n].event_buff) {
+                    localStorage.setItem(PREFIX+'buff_amt', players[n].event_buff.amt);
+                    localStorage.setItem(PREFIX+'buff_exp', players[n].event_buff.exp);
+                } else {
+                    localStorage.removeItem(PREFIX+'buff_amt');
+                    localStorage.removeItem(PREFIX+'buff_exp');
+                }
+
                 if(players[n].club) { localStorage.setItem(PREFIX+'club', players[n].club); } 
                 else { localStorage.removeItem(PREFIX+'club'); }
             } else {
@@ -982,10 +984,18 @@
             localStorage.setItem(PREFIX+'c7_lvl', c7_lvl);
         }
 
+        function get_current_buff() {
+            let amt = parseInt(localStorage.getItem(PREFIX+'buff_amt')) || 0;
+            let exp = parseInt(localStorage.getItem(PREFIX+'buff_exp')) || 0;
+            return (Date.now() < exp) ? amt : 0;
+        }
+
         function upd_ui() {
             el_bal.innerText = fmt(vrgk); 
             document.getElementById('skrepki-val').innerText = fmt(skrepki);
-            document.getElementById('profit-val').innerText = "+" + fmt(profit);
+            
+            let buff = get_current_buff();
+            document.getElementById('profit-val').innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : "");
             
             el_eng.innerText = Math.floor(cur_energy); 
             el_eng_max.innerText = max_energy;
@@ -1019,6 +1029,17 @@
             upd_ui(); save_data();
         }
 
+        function spawn_txt(x, y, txt) {
+            const el = document.createElement('div'); 
+            el.classList.add('floating-text'); 
+            el.innerText = txt;
+            const rect = tap_area.getBoundingClientRect();
+            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; 
+            el.style.top = `${y - rect.top - 20}px`;
+            tap_area.appendChild(el); 
+            setTimeout(() => el.remove(), 800);
+        }
+
         function game_tick() {
             let now = Date.now();
             let diff_sec = (now - last_time) / 1000;
@@ -1030,29 +1051,28 @@
                 if (cur_energy > max_energy) cur_energy = max_energy;
             }
 
-            if (profit > 0 && nickname) {
+            let total_profit = profit + get_current_buff();
+
+            if (total_profit > 0 && nickname) {
                 if (diff_sec > 60) {
                     let profit_sec = diff_sec > 10800 ? 10800 : diff_sec;
-                    let offline_earn = (profit / 3600) * profit_sec;
+                    let offline_earn = (total_profit / 3600) * profit_sec;
                     vrgk += offline_earn;
                     
                     let el = document.getElementById('offline-amount');
                     let modal = document.getElementById('offline-modal');
                     if (el && modal) { el.innerText = "+" + fmt(offline_earn); modal.style.display = 'flex'; }
                 } else if (diff_sec > 0) {
-                    vrgk += (profit / 3600) * diff_sec;
+                    vrgk += (total_profit / 3600) * diff_sec;
                 }
             }
 
             last_time = now; upd_ui(); save_data();
-            
-            // ОПТИМИЗАЦИЯ 1: Фоновое сохранение раз в 5 МИНУТ (300 000 мс)
             if (nickname && my_pin && (now - last_sync > 300000)) { sync_cloud(true); }
         }
 
         game_tick(); setInterval(game_tick, 1000);
         
-        // ОПТИМИЗАЦИЯ 3: Сохранение при сворачивании игры или закрытии вкладки
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden' && nickname && my_pin) {
                 if (Date.now() - last_sync > 10000) { sync_cloud(true); }
@@ -1096,7 +1116,12 @@
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
                 if(!res.ok) return null; 
                 let d = await res.json(); let rec = d.record || {};
-                return { players: rec.players || (rec.record && rec.record.players) || {}, clubs: rec.clubs || (rec.record && rec.record.clubs) || {} };
+                return { 
+                    players: rec.players || (rec.record && rec.record.players) || {}, 
+                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {},
+                    global_event: rec.global_event || (rec.record && rec.record.global_event) || {active:false},
+                    last_winner: rec.last_winner || (rec.record && rec.record.last_winner) || ""
+                };
             } catch (e) { return null; }
         }
 
@@ -1106,7 +1131,7 @@
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, 
                     body: JSON.stringify(data),
-                    keepalive: true // Защита от прерывания при закрытии вкладки
+                    keepalive: true
                 });
             } catch(e) {}
         }
@@ -1117,6 +1142,8 @@
                 let d = await fetch_cloud();
                 if(!d) return; 
                 let players = d.players; let clubs = d.clubs;
+                global_event_data = d.global_event;
+                cached_last_winner = d.last_winner;
                 
                 let my_cloud_data = players[nickname];
                 if (my_cloud_data && my_cloud_data.club && clubs[my_cloud_data.club] && clubs[my_cloud_data.club].members.includes(nickname)) {
@@ -1132,14 +1159,71 @@
                 players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank];
                 
                 let my_c = localStorage.getItem(PREFIX + 'club');
-                if (my_c) players[nickname].club = my_c;
+                if (my_c) {
+                    players[nickname].club = my_c;
+                    let pending_pts = parseInt(localStorage.getItem(PREFIX+'pending_event_pts')) || 0;
+                    if (pending_pts > 0 && clubs[my_c]) {
+                        clubs[my_c].event_pts = (clubs[my_c].event_pts || 0) + pending_pts;
+                        localStorage.setItem(PREFIX+'pending_event_pts', 0);
+                    }
+                }
+                
+                if (players[nickname].event_buff) {
+                    localStorage.setItem(PREFIX+'buff_amt', players[nickname].event_buff.amt);
+                    localStorage.setItem(PREFIX+'buff_exp', players[nickname].event_buff.exp);
+                }
                 
                 cached_players = players; cached_clubs = clubs;
-                await put_cloud({players, clubs}); last_sync = Date.now();
+                await put_cloud(d); last_sync = Date.now();
 
                 if(!is_bg) { render_leaderboard(); render_clubs_list(); }
+                upd_ui();
             } catch (e) {}
         }
+        
+        window.toggle_event = async function() {
+            let d = await fetch_cloud();
+            if(!d) return alert("Ошибка связи с базой!");
+            
+            if (!d.global_event || !d.global_event.active) {
+                let name = prompt("Название ивента (например: Битва за Шаурму):");
+                if (!name) return;
+                d.global_event = { active: true, name: name, start: Date.now() };
+                for (let c in d.clubs) d.clubs[c].event_pts = 0;
+                await put_cloud(d);
+                alert("Событие '" + name + "' успешно ЗАПУЩЕНО!");
+            } else {
+                if (confirm("Событие сейчас активно. ЗАВЕРШИТЬ его и выдать награды Топ-3 клубам?")) {
+                    let sorted = Object.keys(d.clubs).sort((a,b) => (d.clubs[b].event_pts||0) - (d.clubs[a].event_pts||0));
+                    let day3 = Date.now() + (3 * 24 * 3600 * 1000);
+                    
+                    if (sorted[0]) {
+                        d.last_winner = sorted[0];
+                        d.clubs[sorted[0]].members.forEach(m => {
+                            if(!d.players[m]) d.players[m] = {};
+                            d.players[m].event_buff = {amt: 5000, exp: day3};
+                        });
+                    }
+                    if (sorted[1]) {
+                        d.clubs[sorted[1]].members.forEach(m => {
+                            if(!d.players[m]) d.players[m] = {};
+                            d.players[m].event_buff = {amt: 3000, exp: day3};
+                        });
+                    }
+                    if (sorted[2]) {
+                        d.clubs[sorted[2]].members.forEach(m => {
+                            if(!d.players[m]) d.players[m] = {};
+                            d.players[m].event_buff = {amt: 1000, exp: day3};
+                        });
+                    }
+                    
+                    d.global_event.active = false;
+                    await put_cloud(d);
+                    alert("Ивент завершен! Корона и баффы на 3 дня розданы победителям.");
+                }
+            }
+            sync_cloud(true);
+        };
 
         window.switch_top = function(tab) {
             current_top_tab = tab;
@@ -1165,10 +1249,18 @@
                 for (let cname in cached_clubs) {
                     let c = cached_clubs[cname]; let total = 0;
                     c.members.forEach(m => { if(cached_players[m]) total += (cached_players[m].vrgk || 0); });
-                    club_arr.push({name: cname, vrgk: total, mems: c.members.length});
+                    club_arr.push({name: cname, vrgk: total, mems: c.members.length, e_pts: c.event_pts || 0});
                 }
-                club_arr.sort((a,b) => b.vrgk - a.vrgk).forEach((c, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
-                    html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${c.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${c.name}</span><span style="font-size: 10px; color: #888; margin-top: -3px;">${c.mems} чел.</span></div><div class="upgrade-price">🏆 ${fmt(c.vrgk)}</div></div>`; 
+                
+                let is_event = (global_event_data && global_event_data.active);
+                if (is_event) club_arr.sort((a,b) => b.e_pts - a.e_pts);
+                else club_arr.sort((a,b) => b.vrgk - a.vrgk);
+                
+                club_arr.forEach((c, i) => { 
+                    let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
+                    let crown = c.name === cached_last_winner ? ' 👑' : '';
+                    let val_disp = is_event ? `🏆 ${c.e_pts} очков` : `🏆 ${fmt(c.vrgk)}`;
+                    html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${c.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${c.name}${crown}</span><span style="font-size: 10px; color: #888; margin-top: -3px;">${c.mems} чел.</span></div><div class="upgrade-price">${val_disp}</div></div>`; 
                 });
                 if (club_arr.length === 0) html = '<div style="text-align:center; color:#555;">клубов пока нет</div>';
             } else if (current_top_tab === 'ranked') {
@@ -1286,7 +1378,6 @@
                 else if(player_rank >= 18 && player_rank <= 20) sound_name = 'masters.mp3';
                 else if(player_rank === 21) sound_name = 'pro.mp3';
 
-                // Звук играет при переходе на любую лигу
                 if (player_rank % 3 === 0 || player_rank === 21) {
                     try {
                         let snd = new Audio(sound_name);
@@ -1301,6 +1392,11 @@
                     if(player_rank === 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; }
                     if(player_rank === 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; }
                 }
+                
+                if (global_event_data && global_event_data.active) {
+                    let p = parseInt(localStorage.getItem(PREFIX+'pending_event_pts')) || 0;
+                    localStorage.setItem(PREFIX+'pending_event_pts', p + 1);
+                }
 
                 save_data(); upd_ui();
             } else { 
@@ -1313,11 +1409,23 @@
 
         function render_clubs_list() {
             let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
+            
+            if (global_event_data && global_event_data.active) {
+                html += `<div style="background: #2a1100; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                    <div style="color: #d4af37; font-weight: bold; text-transform: uppercase;">🔥 ИВЕНТ: ${global_event_data.name} 🔥</div>
+                    <div style="font-size: 11px; color: #aaa; margin-top: 5px;">1 победа в ранкеде = 1 очко клубу. Топ-3 получают бафф пассива на 3 дня и золотую корону!</div>
+                </div>`;
+            }
+            
             if (my_c && cached_clubs[my_c]) { html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`; } 
             else { html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`; }
             
             html += `<div class="section-title">список клубов</div>`; let count = 0;
-            for (let name in cached_clubs) { count++; let c = cached_clubs[name]; html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')"><div class="upgrade-info"><span class="upgrade-name">${name}</span><span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span></div><div style="font-size: 20px;">ℹ️</div></div>`; }
+            for (let name in cached_clubs) { 
+                count++; let c = cached_clubs[name]; 
+                let crown = (name === cached_last_winner) ? ' 👑' : '';
+                html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')"><div class="upgrade-info"><span class="upgrade-name">${name}${crown}</span><span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span></div><div style="font-size: 20px;">ℹ️</div></div>`; 
+            }
             if(count === 0) { html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`; }
             document.getElementById('club-content').innerHTML = html;
         }
@@ -1325,11 +1433,17 @@
         window.open_club_details = function(name, is_silent_update = false) {
             let c = cached_clubs[name]; if(!c) return;
             let total_vrgk = 0; c.members.forEach(m => { if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); });
+            let crown = (name === cached_last_winner) ? ' 👑' : '';
             
             let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;"><button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}</div>`;
-            html += `<div class="club-card"><div class="club-badge">🔥</div><div class="club-name-big">${name}</div><div class="club-trophies">🏆 ${fmt(total_vrgk)}</div><div class="club-desc-box">${c.desc || 'нет описания'}</div><div class="club-stats-grid"><div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div><div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div><div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div></div>`;
-            if (localStorage.getItem(PREFIX + 'club') !== name) { html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`; }
+            html += `<div class="club-card"><div class="club-badge">🔥</div><div class="club-name-big">${name}${crown}</div><div class="club-trophies">🏆 ${fmt(total_vrgk)}</div><div class="club-desc-box">${c.desc || 'нет описания'}</div><div class="club-stats-grid"><div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div><div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div><div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div>`;
+            
+            if (global_event_data && global_event_data.active) {
+                html += `<div class="cs-box" style="background: #311; border-color: #d4af37; grid-column: span 2;"><div class="cs-title" style="color: #d4af37;">очки ивента</div><div class="cs-val" style="color: #fff;">${c.event_pts || 0} 🏆</div></div>`;
+            }
+            
             html += `</div>`;
+            if (localStorage.getItem(PREFIX + 'club') !== name) { html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`; }
             
             html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`;
             let mems = c.members.map(m => { return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; }).sort((a,b) => b.vrgk - a.vrgk);
@@ -1393,7 +1507,6 @@
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(`tab-${tabid}`).classList.add('active'); el.classList.add('active');
             
-            // ОПТИМИЗАЦИЯ 2: Анти-спам запросов при переключении вкладок. Синхронизируем максимум 1 раз в 60 секунд.
             if (tabid === 'rating' || tabid === 'clubs') { 
                 if (Date.now() - last_sync > 60000) { 
                     sync_cloud(); 
