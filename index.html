@@ -241,6 +241,13 @@
             color: #fff; 
             border: none; 
         }
+        
+        .buy-btn.disabled {
+            background: #444 !important;
+            color: #888 !important;
+            border: 1px solid #333 !important;
+            cursor: not-allowed;
+        }
 
         .floating-text { 
             position: absolute; 
@@ -666,7 +673,8 @@
                     <div style="font-size: 14px; color: #888;">Текущий ранг</div>
                     <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
                     <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота, чтобы подняться!</div>
-                    <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
+                    <!-- КНОПКА ОТКЛЮЧЕНА -->
+                    <button class="buy-btn disabled" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">РАНКЕД ВРЕМЕННО ОТКЛЮЧЕН</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
                 <div style="font-size: 11px; color: #aaa; background: #111; padding: 10px; border-radius: 8px;">
@@ -1167,6 +1175,11 @@
         let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0;
 
         window.start_ranked_search = function() {
+            // ФУНКЦИЯ ЗАБЛОКИРОВАНА
+            alert('Ранкед временно закрыт на тех. работы!');
+            return;
+            
+            /* Оригинальный код закомментирован на время тех. работ
             if(player_rank >= RANKS.length - 1) return alert('Ты уже взял максимальный ранг ПРО!');
             document.getElementById('ranked-modal').style.display = 'flex';
             document.getElementById('ranked-status').innerText = 'Поиск противника...';
@@ -1177,6 +1190,7 @@
                 document.getElementById('ranked-status').innerText = `Противник найден: Bot_${Math.floor(Math.random()*9999)}`; 
                 setTimeout(start_arena, 1500); 
             }, 2000);
+            */
         }
 
         function start_arena() {
