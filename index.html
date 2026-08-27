@@ -1518,13 +1518,22 @@
         };
 
         window.change_nick = async function() { alert('Смена ника временно отключена для безопасности ПИН-кодов. Создай новый акк, если нужно.'); }
+        
+        // ВАЖНО: Финальный фикс функции удаления аккаунта
         window.delete_acc = async function() {
             if(!confirm('удалить аккаунт?')) return;
-            let d = await fetch_cloud(); if(!d) return; let players = d.players || {}; let clubs = d.clubs || {};
-            if(nickname && players[nickname]) delete players[nickname];
+            let d = await fetch_cloud(); if(!d) return; 
+            if(nickname && d.players[nickname]) delete d.players[nickname];
             let my_c = localStorage.getItem(PREFIX + 'club');
-            if(my_c && clubs[my_c]) { clubs[my_c].members = clubs[my_c].members.filter(m => m !== nickname); if(clubs[my_c].owner === nickname) { if (clubs[my_c].members.length > 0) { clubs[my_c].owner = clubs[my_c].members[0]; } else { delete clubs[my_c]; } } }
-            await put_cloud({players, clubs}); localStorage.clear(); location.reload();
+            if(my_c && d.clubs[my_c]) { 
+                d.clubs[my_c].members = d.clubs[my_c].members.filter(m => m !== nickname); 
+                if(d.clubs[my_c].owner === nickname) { 
+                    if (d.clubs[my_c].members.length > 0) { d.clubs[my_c].owner = d.clubs[my_c].members[0]; } 
+                    else { delete d.clubs[my_c]; } 
+                } 
+            }
+            await put_cloud(d); 
+            localStorage.clear(); location.reload();
         };
     </script>
 </body>
