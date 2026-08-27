@@ -477,45 +477,6 @@
             margin-bottom: 0;
         }
 
-        .event-banner { 
-            background: #d4af37; 
-            color: #000; 
-            font-weight: 900; 
-            text-align: center; 
-            padding: 10px; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
-            cursor: pointer; 
-            animation: pulse 1.5s infinite; 
-            line-height: 1.2;
-        }
-        
-        @keyframes pulse { 
-            0% { transform: scale(1); } 
-            50% { transform: scale(1.02); } 
-            100% { transform: scale(1); } 
-        }
-        
-        .event-coin { 
-            width: 200px; 
-            height: 200px; 
-            background: #333; 
-            border: 5px solid #fff; 
-            border-radius: 20px; 
-            margin: 20px auto; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-size: 50px; 
-            font-weight: bold; 
-            color: #fff;
-        }
-        
-        .event-coin:active { 
-            transform: scale(0.95); 
-        }
-
         /* Ранкед Арена */
         .arena-container { 
             width: 100%; 
@@ -790,18 +751,6 @@
             <div class="modal-content" style="width: 95%; max-width: 400px; padding: 15px;" id="view-club-content"></div>
         </div>
 
-        <div id="event-modal" class="modal-overlay">
-            <div class="modal-content" style="background: #111; border: 2px solid #d4af37;">
-                <div class="modal-title" id="event-title">событие</div>
-                <div style="font-size: 12px; color: #aaa;">натапай как можно больше очков!</div>
-                <div style="font-size: 24px; color: #fff; font-weight: bold; margin: 10px 0;" id="event-my-score">твой счет: 0</div>
-                <div class="event-coin" onclick="tap_event()">📦</div>
-                <div style="font-size: 12px; color: #d4af37; margin-bottom: 5px;">топ события:</div>
-                <div id="event-top" style="font-size: 11px; color: #ccc; text-align: left; background: #000; padding: 10px; border-radius: 8px; min-height: 50px;">загрузка...</div>
-                <button class="buy-btn" style="margin-top: 15px;" onclick="document.getElementById('event-modal').style.display='none'">выйти</button>
-            </div>
-        </div>
-
         <div id="ranked-modal" class="modal-overlay" style="background: #000;">
             <div class="modal-content" style="width: 100%; height: 100%; max-width: 100%; border-radius: 0; justify-content: flex-start; padding: 10px;">
                 <div class="modal-title" style="margin-top: 20px;">РАНКЕД</div>
@@ -858,7 +807,6 @@
         let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; 
         let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; 
 
-        // НОВАЯ СИСТЕМА УРОВНЕЙ КАРТОЧЕК
         let c1_lvl = parseInt(localStorage.getItem(PREFIX+'c1_lvl')) || 0;
         let c2_lvl = parseInt(localStorage.getItem(PREFIX+'c2_lvl')) || 0;
         let c3_lvl = parseInt(localStorage.getItem(PREFIX+'c3_lvl')) || 0;
@@ -873,7 +821,6 @@
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
         let global_event_data = null; 
-        let my_event_score = 0;
         let cached_players = {};
         let cached_clubs = {};
         
@@ -931,60 +878,34 @@
                 
                 if(players[n].stats) {
                     let s = players[n].stats;
-                    profit = parseFloat(s[0]) || 0; 
-                    tap_power = parseInt(s[1]) || 1; 
-                    max_energy = parseInt(s[2]) || 1000; 
-                    eng_regen = parseInt(s[3]) || 3;
-                    
-                    tap_price = parseInt(s[4]) || 500; 
-                    tap_lvl = parseInt(s[5]) || 1; 
-                    eng_price = parseInt(s[6]) || 1000; 
-                    eng_lvl = parseInt(s[7]) || 1; 
+                    profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; 
+                    max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3;
+                    tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; 
+                    eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; 
                     regen_price = parseInt(s[8]) || 5000;
-                    
-                    c1_price = parseInt(s[9]) || 2000; 
-                    c2_price = parseInt(s[10]) || 10000; 
-                    c3_price = parseInt(s[11]) || 50000; 
-                    c4_price = parseInt(s[12]) || 100000; 
-                    c5_price = parseInt(s[13]) || 20000; 
-                    c6_price = parseInt(s[14]) || 200000; 
+                    c1_price = parseInt(s[9]) || 2000; c2_price = parseInt(s[10]) || 10000; 
+                    c3_price = parseInt(s[11]) || 50000; c4_price = parseInt(s[12]) || 100000; 
+                    c5_price = parseInt(s[13]) || 20000; c6_price = parseInt(s[14]) || 200000; 
                     c7_price = parseInt(s[15]) || 130000;
-                    
-                    c1_lvl = parseInt(s[16]) || 0; 
-                    c2_lvl = parseInt(s[17]) || 0;
-                    c3_lvl = parseInt(s[18]) || 0; 
-                    c4_lvl = parseInt(s[19]) || 0;
-                    c5_lvl = parseInt(s[20]) || 0; 
-                    c6_lvl = parseInt(s[21]) || 0;
+                    c1_lvl = parseInt(s[16]) || 0; c2_lvl = parseInt(s[17]) || 0;
+                    c3_lvl = parseInt(s[18]) || 0; c4_lvl = parseInt(s[19]) || 0;
+                    c5_lvl = parseInt(s[20]) || 0; c6_lvl = parseInt(s[21]) || 0;
                     c7_lvl = parseInt(s[22]) || 0;
                 }
-                if(players[n].club) {
-                    localStorage.setItem(PREFIX+'club', players[n].club); 
-                } else {
-                    localStorage.removeItem(PREFIX+'club');
-                }
+                if(players[n].club) { localStorage.setItem(PREFIX+'club', players[n].club); } 
+                else { localStorage.removeItem(PREFIX+'club'); }
             } else {
-                nickname = n; 
-                my_pin = p;
+                nickname = n; my_pin = p;
             }
 
             localStorage.setItem(PREFIX + 'nickname', nickname);
             localStorage.setItem(PREFIX + 'pin', my_pin);
             document.getElementById('auth-modal').style.display = 'none';
-            
-            save_data(); 
-            upd_ui(); 
-            check_admin(); 
-            sync_cloud();
+            save_data(); upd_ui(); check_admin(); sync_cloud();
         };
 
-        function fmt(num) { 
-            return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); 
-        }
-        
-        function gen_tag() { 
-            return '#' + Math.random().toString(36).substr(2, 6).toUpperCase(); 
-        }
+        function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+        function gen_tag() { return '#' + Math.random().toString(36).substr(2, 6).toUpperCase(); }
         
         function timeAgo(ts) {
             if(!ts) return "давно"; 
@@ -999,31 +920,23 @@
             try {
                 document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`; 
                 document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
-                
                 document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`; 
                 document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
-                
                 document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`; 
                 document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
                 
                 document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`; 
                 document.getElementById('card1-desc').innerText = `ур ${c1_lvl} (+500/ч)`;
-                
                 document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`; 
                 document.getElementById('card2-desc').innerText = `ур ${c2_lvl} (+3000/ч)`;
-                
                 document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`; 
                 document.getElementById('card3-desc').innerText = `ур ${c3_lvl} (+15000/ч)`;
-                
                 document.getElementById('card4-price').innerText = `цена: ${fmt(c4_price)}`; 
                 document.getElementById('card4-desc').innerText = `ур ${c4_lvl} (+20000/ч)`;
-                
                 document.getElementById('card5-price').innerText = `цена: ${fmt(c5_price)}`; 
                 document.getElementById('card5-desc').innerText = `ур ${c5_lvl} (+5000/ч)`;
-                
                 document.getElementById('card6-price').innerText = `цена: ${fmt(c6_price)}`; 
                 document.getElementById('card6-desc').innerText = `ур ${c6_lvl} (+30000/ч)`;
-                
                 document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`; 
                 document.getElementById('card7-desc').innerText = `ур ${c7_lvl} (+25000/ч)`;
             } catch(e) {}
@@ -1040,26 +953,18 @@
             localStorage.setItem(PREFIX + 'rank', player_rank);
             localStorage.setItem(PREFIX + 'last_time', Date.now());
             
-            localStorage.setItem(PREFIX+'tap_price', tap_price); 
-            localStorage.setItem(PREFIX+'tap_lvl', tap_lvl);
-            localStorage.setItem(PREFIX+'eng_price', eng_price); 
-            localStorage.setItem(PREFIX+'eng_lvl', eng_lvl);
+            localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl);
+            localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl);
             localStorage.setItem(PREFIX+'regen_price', regen_price);
             
-            localStorage.setItem(PREFIX+'c1_price', c1_price); 
-            localStorage.setItem(PREFIX+'c2_price', c2_price);
-            localStorage.setItem(PREFIX+'c3_price', c3_price); 
-            localStorage.setItem(PREFIX+'c4_price', c4_price);
-            localStorage.setItem(PREFIX+'c5_price', c5_price); 
-            localStorage.setItem(PREFIX+'c6_price', c6_price); 
+            localStorage.setItem(PREFIX+'c1_price', c1_price); localStorage.setItem(PREFIX+'c2_price', c2_price);
+            localStorage.setItem(PREFIX+'c3_price', c3_price); localStorage.setItem(PREFIX+'c4_price', c4_price);
+            localStorage.setItem(PREFIX+'c5_price', c5_price); localStorage.setItem(PREFIX+'c6_price', c6_price); 
             localStorage.setItem(PREFIX+'c7_price', c7_price);
             
-            localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); 
-            localStorage.setItem(PREFIX+'c2_lvl', c2_lvl);
-            localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); 
-            localStorage.setItem(PREFIX+'c4_lvl', c4_lvl);
-            localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); 
-            localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); 
+            localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); localStorage.setItem(PREFIX+'c2_lvl', c2_lvl);
+            localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); localStorage.setItem(PREFIX+'c4_lvl', c4_lvl);
+            localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); 
             localStorage.setItem(PREFIX+'c7_lvl', c7_lvl);
         }
 
@@ -1074,13 +979,11 @@
             
             document.getElementById('rank-name').innerText = RANKS[player_rank] || 'Бронза I';
             document.getElementById('rank-display').innerText = RANKS[player_rank] || 'Бронза I';
-            
             init_prices();
         }
 
         document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { 
-            e.preventDefault(); 
-            do_tap(e.changedTouches); 
+            e.preventDefault(); do_tap(e.changedTouches); 
         }, {passive: false});
         
         document.getElementById('vorg-coin').addEventListener('mousedown', (e) => { 
@@ -1094,15 +997,12 @@
                     if (cur_energy < tap_power) power = Math.floor(cur_energy);
                     if (power <= 0) break;
                     
-                    cur_energy -= power; 
-                    vrgk += power;
-                    
+                    cur_energy -= power; vrgk += power;
                     spawn_txt(touches[i].clientX, touches[i].clientY, `+${power}`);
                     if (navigator.vibrate) navigator.vibrate(10);
                 }
             }
-            upd_ui(); 
-            save_data();
+            upd_ui(); save_data();
         }
 
         function spawn_txt(x, y, txt) {
@@ -1122,7 +1022,6 @@
             if (diff_sec < 0) diff_sec = 0;
 
             if (isNaN(cur_energy) || cur_energy < 0) cur_energy = 0;
-            
             if (cur_energy < max_energy && diff_sec > 0) {
                 cur_energy += (eng_regen * diff_sec);
                 if (cur_energy > max_energy) cur_energy = max_energy;
@@ -1136,173 +1035,92 @@
                     
                     let el = document.getElementById('offline-amount');
                     let modal = document.getElementById('offline-modal');
-                    if (el && modal) { 
-                        el.innerText = "+" + fmt(offline_earn); 
-                        modal.style.display = 'flex'; 
-                    }
+                    if (el && modal) { el.innerText = "+" + fmt(offline_earn); modal.style.display = 'flex'; }
                 } else if (diff_sec > 0) {
                     vrgk += (profit / 3600) * diff_sec;
                 }
             }
 
-            last_time = now; 
-            upd_ui(); 
-            save_data();
-            
-            // ЭКОНОМИЯ БД: СОХРАНЯЕМ В ФОНЕ РАЗ В 3 МИНУТЫ
-            if (nickname && my_pin && (now - last_sync > 180000)) {
-                sync_cloud(true);
-            }
+            last_time = now; upd_ui(); save_data();
+            if (nickname && my_pin && (now - last_sync > 180000)) { sync_cloud(true); }
         }
 
-        game_tick(); 
-        setInterval(game_tick, 1000);
+        game_tick(); setInterval(game_tick, 1000);
 
         window.buy_upg = function(type) { 
-            if (type === 'tap' && vrgk >= tap_price) { 
-                vrgk -= tap_price; 
-                tap_power += 1; 
-                tap_lvl += 1; 
-                tap_price = Math.floor(tap_price * 2.1); 
-            }
-            else if (type === 'eng' && vrgk >= eng_price) { 
-                vrgk -= eng_price; 
-                max_energy += 500; 
-                eng_lvl += 1; 
-                eng_price = Math.floor(eng_price * 2.1); 
-            }
-            else if (type === 'regen' && vrgk >= regen_price) { 
-                vrgk -= regen_price; 
-                eng_regen += 1; 
-                regen_price = Math.floor(regen_price * 1.5); 
-            }
-            else { 
-                alert('мало денег'); 
-                return; 
-            }
-            upd_ui(); 
-            save_data();
+            if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); }
+            else if (type === 'eng' && vrgk >= eng_price) { vrgk -= eng_price; max_energy += 500; eng_lvl += 1; eng_price = Math.floor(eng_price * 2.1); }
+            else if (type === 'regen' && vrgk >= regen_price) { vrgk -= regen_price; eng_regen += 1; regen_price = Math.floor(regen_price * 1.5); }
+            else { alert('мало денег'); return; }
+            upd_ui(); save_data();
         };
 
         window.buy_card = function(id, prof) {
             let p = 0;
-            if(id === 'c1') p = c1_price;
-            if(id === 'c2') p = c2_price;
-            if(id === 'c3') p = c3_price;
-            if(id === 'c4') p = c4_price;
-            if(id === 'c5') p = c5_price;
-            if(id === 'c6') p = c6_price;
+            if(id === 'c1') p = c1_price; if(id === 'c2') p = c2_price;
+            if(id === 'c3') p = c3_price; if(id === 'c4') p = c4_price;
+            if(id === 'c5') p = c5_price; if(id === 'c6') p = c6_price;
             if(id === 'c7') p = c7_price;
             
             if (vrgk >= p) {
-                vrgk -= p; 
-                profit += prof; 
-                let np = Math.floor(p * 1.5);
+                vrgk -= p; profit += prof; let np = Math.floor(p * 1.5);
                 
-                if(id === 'c1') { c1_price = np; c1_lvl++; } 
-                if(id === 'c2') { c2_price = np; c2_lvl++; }
-                if(id === 'c3') { c3_price = np; c3_lvl++; } 
-                if(id === 'c4') { c4_price = np; c4_lvl++; }
-                if(id === 'c5') { c5_price = np; c5_lvl++; } 
-                if(id === 'c6') { c6_price = np; c6_lvl++; }
+                if(id === 'c1') { c1_price = np; c1_lvl++; } if(id === 'c2') { c2_price = np; c2_lvl++; }
+                if(id === 'c3') { c3_price = np; c3_lvl++; } if(id === 'c4') { c4_price = np; c4_lvl++; }
+                if(id === 'c5') { c5_price = np; c5_lvl++; } if(id === 'c6') { c6_price = np; c6_lvl++; }
                 if(id === 'c7') { c7_price = np; c7_lvl++; }
                 
-                upd_ui(); 
-                save_data();
-            } else { 
-                alert('мало денег'); 
-            }
+                upd_ui(); save_data();
+            } else { alert('мало денег'); }
         };
-
+        
         window.craft = function() { 
-            if (vrgk >= 1000000) { 
-                vrgk -= 1000000; 
-                skrepki += 1; 
-                upd_ui(); 
-                save_data(); 
-                alert('+1 скрепка'); 
-            } else {
-                alert('нужен 1 000 000'); 
-            }
+            if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } 
+            else { alert('нужен 1 000 000'); }
         };
 
         async function fetch_cloud() {
             try {
-                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { 
-                    headers: { 'X-Master-Key': API_KEY } 
-                });
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } });
                 if(!res.ok) return null; 
-                
-                let d = await res.json(); 
-                let rec = d.record || {};
-                return { 
-                    players: rec.players || (rec.record && rec.record.players) || {}, 
-                    clubs: rec.clubs || (rec.record && rec.record.clubs) || {}, 
-                    event: rec.event || (rec.record && rec.record.event) || { active: false, name: "", scores: {} } 
-                };
-            } catch (e) { 
-                return null; 
-            }
+                let d = await res.json(); let rec = d.record || {};
+                return { players: rec.players || (rec.record && rec.record.players) || {}, clubs: rec.clubs || (rec.record && rec.record.clubs) || {} };
+            } catch (e) { return null; }
         }
 
         async function put_cloud(data) {
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
-                method: 'PUT', 
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'X-Master-Key': API_KEY 
-                }, 
-                body: JSON.stringify(data) 
+                method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data) 
             });
         }
 
         async function sync_cloud(is_bg = false) {
             if (!nickname || !my_pin) return;
-            
             try {
                 let d = await fetch_cloud();
                 if(!d) return; 
-                
-                let players = d.players; 
-                let clubs = d.clubs; 
-                global_event_data = d.event;
+                let players = d.players; let clubs = d.clubs;
                 
                 let my_cloud_data = players[nickname];
-                
                 if (my_cloud_data && my_cloud_data.club && clubs[my_cloud_data.club] && clubs[my_cloud_data.club].members.includes(nickname)) {
                     localStorage.setItem(PREFIX + 'club', my_cloud_data.club);
                 } else {
-                    localStorage.removeItem(PREFIX + 'club'); 
-                    if (my_cloud_data) delete my_cloud_data.club;
+                    localStorage.removeItem(PREFIX + 'club'); if (my_cloud_data) delete my_cloud_data.club;
                 }
 
                 players[nickname] = players[nickname] || {};
                 players[nickname].pin = my_pin;
-                players[nickname].vrgk = Math.floor(vrgk); 
-                players[nickname].skrepki = skrepki;
-                players[nickname].rank = player_rank; 
-                players[nickname].last_seen = Date.now();
-                players[nickname].stats = [
-                    profit, tap_power, max_energy, eng_regen, 
-                    tap_price, tap_lvl, eng_price, eng_lvl, regen_price, 
-                    c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, 
-                    c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl
-                ];
+                players[nickname].vrgk = Math.floor(vrgk); players[nickname].skrepki = skrepki;
+                players[nickname].rank = player_rank; players[nickname].last_seen = Date.now();
+                players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl];
                 
                 let my_c = localStorage.getItem(PREFIX + 'club');
                 if (my_c) players[nickname].club = my_c;
                 
-                cached_players = players; 
-                cached_clubs = clubs;
-                
-                await put_cloud({players, clubs, event: global_event_data}); 
-                last_sync = Date.now();
+                cached_players = players; cached_clubs = clubs;
+                await put_cloud({players, clubs}); last_sync = Date.now();
 
-                if(!is_bg) { 
-                    render_leaderboard(); 
-                    render_clubs_list(); 
-                }
-
+                if(!is_bg) { render_leaderboard(); render_clubs_list(); }
             } catch (e) {}
         }
 
@@ -1317,82 +1135,29 @@
 
         function render_leaderboard() {
             if (Object.keys(cached_players).length === 0 && current_top_tab !== 'clubs') { 
-                document.getElementById('leaderboard-content').innerHTML = '<div style="text-align:center; color:#555;">загрузка или нет данных...</div>'; 
-                return; 
+                document.getElementById('leaderboard-content').innerHTML = '<div style="text-align:center; color:#555;">загрузка или нет данных...</div>'; return; 
             }
-            
             let html = '';
-            
             if (current_top_tab === 'players') {
-                let sorted = Object.keys(cached_players).map(k => { 
-                    return { name: k, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club }; 
-                }).sort((a, b) => b.vrgk - a.vrgk);
-                
-                sorted.forEach((p, i) => { 
-                    let pos = i + 1; 
-                    let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
-                    
-                    html += `
-                    <div class="upgrade-item">
-                        <div class="rank-pos ${c_cls}">${pos}</div>
-                        <div class="upgrade-info" style="flex: 1; margin-left: 10px;">
-                            <span class="upgrade-name">${p.name}</span>
-                            ${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}
-                        </div>
-                        <div class="upgrade-price">${fmt(p.vrgk)}</div>
-                    </div>`; 
+                let sorted = Object.keys(cached_players).map(k => { return { name: k, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club }; }).sort((a, b) => b.vrgk - a.vrgk);
+                sorted.forEach((p, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
+                    html += `<div class="upgrade-item"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${p.name}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price">${fmt(p.vrgk)}</div></div>`; 
                 });
             } else if (current_top_tab === 'clubs') {
                 let club_arr = [];
                 for (let cname in cached_clubs) {
-                    let c = cached_clubs[cname]; 
-                    let total = 0;
-                    c.members.forEach(m => { 
-                        if(cached_players[m]) total += (cached_players[m].vrgk || 0); 
-                    });
+                    let c = cached_clubs[cname]; let total = 0;
+                    c.members.forEach(m => { if(cached_players[m]) total += (cached_players[m].vrgk || 0); });
                     club_arr.push({name: cname, vrgk: total, mems: c.members.length});
                 }
-                
-                club_arr.sort((a,b) => b.vrgk - a.vrgk).forEach((c, i) => { 
-                    let pos = i + 1; 
-                    let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
-                    
-                    html += `
-                    <div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${c.name}')">
-                        <div class="rank-pos ${c_cls}">${pos}</div>
-                        <div class="upgrade-info" style="flex: 1; margin-left: 10px;">
-                            <span class="upgrade-name">${c.name}</span>
-                            <span style="font-size: 10px; color: #888; margin-top: -3px;">${c.mems} чел.</span>
-                        </div>
-                        <div class="upgrade-price">🏆 ${fmt(c.vrgk)}</div>
-                    </div>`; 
+                club_arr.sort((a,b) => b.vrgk - a.vrgk).forEach((c, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
+                    html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${c.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${c.name}</span><span style="font-size: 10px; color: #888; margin-top: -3px;">${c.mems} чел.</span></div><div class="upgrade-price">🏆 ${fmt(c.vrgk)}</div></div>`; 
                 });
-                
-                if (club_arr.length === 0) {
-                    html = '<div style="text-align:center; color:#555;">клубов пока нет</div>';
-                }
+                if (club_arr.length === 0) html = '<div style="text-align:center; color:#555;">клубов пока нет</div>';
             } else if (current_top_tab === 'ranked') {
-                let sorted = Object.keys(cached_players).map(k => { 
-                    return { name: k, rank: cached_players[k].rank || 0, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club }; 
-                }).sort((a, b) => { 
-                    if (b.rank !== a.rank) return b.rank - a.rank; 
-                    return b.vrgk - a.vrgk; 
-                });
-                
-                sorted.forEach((p, i) => { 
-                    let pos = i + 1; 
-                    let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; 
-                    let rank_name = RANKS[p.rank] || "Бронза I"; 
-                    
-                    html += `
-                    <div class="upgrade-item">
-                        <div class="rank-pos ${c_cls}">${pos}</div>
-                        <div class="upgrade-info" style="flex: 1; margin-left: 10px;">
-                            <span class="upgrade-name">${p.name}</span>
-                            ${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}
-                        </div>
-                        <div class="upgrade-price" style="color: #0f0;">${rank_name}</div>
-                    </div>`; 
+                let sorted = Object.keys(cached_players).map(k => { return { name: k, rank: cached_players[k].rank || 0, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club }; }).sort((a, b) => { if (b.rank !== a.rank) return b.rank - a.rank; return b.vrgk - a.vrgk; });
+                sorted.forEach((p, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; let rank_name = RANKS[p.rank] || "Бронза I"; 
+                    html += `<div class="upgrade-item"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${p.name}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price" style="color: #0f0;">${rank_name}</div></div>`; 
                 });
             }
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет данных</div>';
@@ -1403,7 +1168,6 @@
 
         window.start_ranked_search = function() {
             if(player_rank >= RANKS.length - 1) return alert('Ты уже взял максимальный ранг ПРО!');
-            
             document.getElementById('ranked-modal').style.display = 'flex';
             document.getElementById('ranked-status').innerText = 'Поиск противника...';
             document.getElementById('arena-container').style.display = 'none';
@@ -1416,129 +1180,73 @@
         }
 
         function start_arena() {
-            arena_my = 0; 
-            arena_bot = 0; 
-            click_times = []; 
-            arena_locked_until = 0;
-            
-            document.getElementById('arena-my-score').innerText = 'Ты: 0'; 
-            document.getElementById('arena-bot-score').innerText = 'Бот: 0';
+            arena_my = 0; arena_bot = 0; click_times = []; arena_locked_until = 0;
+            document.getElementById('arena-my-score').innerText = 'Ты: 0'; document.getElementById('arena-bot-score').innerText = 'Бот: 0';
             document.getElementById('arena-container').style.display = 'block';
             
             if (player_rank >= 13 && Math.random() > 0.5) { 
-                arena_mode = 2; 
-                arena_target_max = 15; 
-                arena_dots_left = 3; 
+                arena_mode = 2; arena_target_max = 15; arena_dots_left = 3; 
                 document.getElementById('ranked-status').innerText = 'Режим: РЕАКЦИЯ (Сломай 15 точек)'; 
             } else { 
-                arena_mode = 1; 
-                arena_target_max = 100; 
+                arena_mode = 1; arena_target_max = 100; 
                 document.getElementById('ranked-status').innerText = 'Режим: СПАМ (Нажми 100 раз)'; 
             }
             
             spawn_arena_target();
             
-            let bot_time_to_finish = 25 - (player_rank * 0.8); 
+            // НОВАЯ ФОРМУЛА БОТА (28 - ранг * 0.8)
+            let bot_time_to_finish = 28 - (player_rank * 0.8); 
             let bot_interval_ms = (bot_time_to_finish * 1000) / arena_target_max;
             
             bot_int = setInterval(() => { 
-                arena_bot++; 
-                document.getElementById('arena-bot-score').innerText = 'Бот: ' + arena_bot; 
+                arena_bot++; document.getElementById('arena-bot-score').innerText = 'Бот: ' + arena_bot; 
                 if(arena_bot >= arena_target_max) end_arena(false); 
             }, bot_interval_ms);
         }
 
         function spawn_arena_target() {
             let container = document.getElementById('arena-container');
-            let existing = document.getElementById('arena-btn-active'); 
-            if(existing) existing.remove();
+            let existing = document.getElementById('arena-btn-active'); if(existing) existing.remove();
             
-            let btn = document.createElement('div'); 
-            btn.id = 'arena-btn-active';
-            
+            let btn = document.createElement('div'); btn.id = 'arena-btn-active';
             if (arena_mode === 1) { 
-                btn.className = 'arena-target-1'; 
-                btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target(btn); }; 
-                btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target(btn); }; 
+                btn.className = 'arena-target-1'; btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target(btn); }; btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target(btn); }; 
             } else { 
-                btn.className = 'arena-target-2'; 
-                btn.innerText = arena_dots_left; 
-                btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
-                btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
+                btn.className = 'arena-target-2'; btn.innerText = arena_dots_left; btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
             }
-            
-            btn.style.left = `${10 + Math.random() * 70}%`; 
-            btn.style.top = `${20 + Math.random() * 60}%`;
+            btn.style.left = `${10 + Math.random() * 70}%`; btn.style.top = `${20 + Math.random() * 60}%`;
             container.appendChild(btn);
         }
 
         function check_autoclicker() {
-            let now = Date.now(); 
-            if (now < arena_locked_until) return false;
-            
-            click_times.push(now); 
-            if (click_times.length > 8) click_times.shift();
+            let now = Date.now(); if (now < arena_locked_until) return false;
+            click_times.push(now); if (click_times.length > 8) click_times.shift();
             
             if (click_times.length === 8 && (click_times[7] - click_times[0]) < 450) {
-                document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑'; 
-                document.getElementById('ranked-status').style.color = '#f00';
-                
-                arena_locked_until = now + 3000; 
-                click_times = []; 
-                if(navigator.vibrate) navigator.vibrate([100, 100, 100]);
-                
-                setTimeout(() => { 
-                    let el = document.getElementById('ranked-status'); 
-                    if(el) { 
-                        el.style.color = '#aaa'; 
-                        el.innerText = arena_mode === 1 ? 'Режим: СПАМ (Нажми 100 раз)' : 'Режим: РЕАКЦИЯ (Сломай 15 точек)'; 
-                    } 
-                }, 3000);
-                
+                document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑'; document.getElementById('ranked-status').style.color = '#f00';
+                arena_locked_until = now + 3000; click_times = []; if(navigator.vibrate) navigator.vibrate([100, 100, 100]);
+                setTimeout(() => { let el = document.getElementById('ranked-status'); if(el) { el.style.color = '#aaa'; el.innerText = arena_mode === 1 ? 'Режим: СПАМ (Нажми 100 раз)' : 'Режим: РЕАКЦИЯ (Сломай 15 точек)'; } }, 3000);
                 return false;
             }
             return true;
         }
 
         function hit_arena_target(btn) {
-            let now = Date.now(); 
-            if (now - last_hit_time < 20) return; 
-            last_hit_time = now;
-            
+            let now = Date.now(); if (now - last_hit_time < 20) return; last_hit_time = now;
             if(!check_autoclicker()) return;
-            
-            arena_my++; 
-            document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
-            
-            if(arena_my % 5 === 0) spawn_arena_target(); 
-            if(navigator.vibrate) navigator.vibrate(10);
-            
+            arena_my++; document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
+            if(arena_my % 5 === 0) spawn_arena_target(); if(navigator.vibrate) navigator.vibrate(10);
             if(arena_my >= arena_target_max) end_arena(true);
         }
 
         function hit_arena_target_dot(btn) {
-            let now = Date.now(); 
-            if (now - last_hit_time < 20) return; 
-            last_hit_time = now;
-            
+            let now = Date.now(); if (now - last_hit_time < 20) return; last_hit_time = now;
             if(!check_autoclicker()) return;
-            
-            arena_dots_left--; 
-            if(navigator.vibrate) navigator.vibrate(10);
-            
+            arena_dots_left--; if(navigator.vibrate) navigator.vibrate(10);
             if(arena_dots_left <= 0) { 
-                arena_my++; 
-                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
-                
-                if(arena_my >= arena_target_max) {
-                    end_arena(true); 
-                } else { 
-                    arena_dots_left = 3; 
-                    spawn_arena_target(); 
-                } 
-            } else { 
-                btn.innerText = arena_dots_left; 
-            }
+                arena_my++; document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
+                if(arena_my >= arena_target_max) { end_arena(true); } else { arena_dots_left = 3; spawn_arena_target(); } 
+            } else { btn.innerText = arena_dots_left; }
         }
 
         function end_arena(is_win) {
@@ -1550,435 +1258,120 @@
             
             if (is_win) {
                 document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
-                let old_rank = player_rank; 
-                player_rank++; 
-                save_data(); 
-                upd_ui();
                 
-                if(old_rank < 12 && player_rank >= 12) { 
-                    alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); 
-                    profit += 5000; 
-                    save_data(); 
-                    upd_ui(); 
-                }
-                if(old_rank < 15 && player_rank >= 15) { 
-                    alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); 
-                    profit += 15000; 
-                    save_data(); 
-                    upd_ui(); 
-                }
-                if(old_rank < 18 && player_rank >= 18) { 
-                    alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); 
-                    profit += 45000; 
-                    save_data(); 
-                    upd_ui(); 
-                }
-                if(old_rank < 21 && player_rank >= 21) { 
-                    alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); 
-                    profit += 65000; 
-                    save_data(); 
-                    upd_ui(); 
-                }
+                // ВОСПРОИЗВЕДЕНИЕ ЗВУКА BRAWL STARS RANKUP
+                try {
+                    let snd = new Audio('rankup.mp3');
+                    snd.play().catch(e => console.log('Аудио не загружено. Добавь rankup.mp3 на сервер.'));
+                } catch(e) {}
+
+                let old_rank = player_rank; player_rank++; save_data(); upd_ui();
+                
+                if(old_rank < 12 && player_rank >= 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; save_data(); upd_ui(); }
+                if(old_rank < 15 && player_rank >= 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit += 15000; save_data(); upd_ui(); }
+                if(old_rank < 18 && player_rank >= 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; save_data(); upd_ui(); }
+                if(old_rank < 21 && player_rank >= 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; save_data(); upd_ui(); }
             } else { 
                 document.getElementById('ranked-status').innerText = 'ПОРАЖЕНИЕ! Ты потерял ранг.'; 
-                if(player_rank > 0) player_rank--; 
-                save_data(); 
-                upd_ui(); 
+                if(player_rank > 0) player_rank--; save_data(); upd_ui(); 
             }
         }
 
-        window.exit_arena = function() { 
-            document.getElementById('ranked-modal').style.display = 'none'; 
-            sync_cloud(); 
-        }
+        window.exit_arena = function() { document.getElementById('ranked-modal').style.display = 'none'; sync_cloud(); }
 
         function render_clubs_list() {
-            let my_c = localStorage.getItem(PREFIX + 'club'); 
-            let html = '';
+            let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
+            if (my_c && cached_clubs[my_c]) { html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`; } 
+            else { html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`; }
             
-            if (my_c && cached_clubs[my_c]) {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`;
-            } else {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`;
-            }
-            
-            html += `<div class="section-title">список клубов</div>`; 
-            let count = 0;
-            
-            for (let name in cached_clubs) {
-                count++; 
-                let c = cached_clubs[name];
-                html += `
-                <div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">${name}</span>
-                        <span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span>
-                    </div>
-                    <div style="font-size: 20px;">ℹ️</div>
-                </div>`;
-            }
-            
-            if(count === 0) {
-                html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`;
-            }
+            html += `<div class="section-title">список клубов</div>`; let count = 0;
+            for (let name in cached_clubs) { count++; let c = cached_clubs[name]; html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')"><div class="upgrade-info"><span class="upgrade-name">${name}</span><span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span></div><div style="font-size: 20px;">ℹ️</div></div>`; }
+            if(count === 0) { html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`; }
             document.getElementById('club-content').innerHTML = html;
         }
 
         window.open_club_details = function(name, is_silent_update = false) {
-            let c = cached_clubs[name]; 
-            if(!c) return;
+            let c = cached_clubs[name]; if(!c) return;
+            let total_vrgk = 0; c.members.forEach(m => { if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); });
             
-            let total_vrgk = 0; 
-            c.members.forEach(m => { 
-                if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); 
-            });
-            
-            let html = `
-            <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>
-                ${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}
-            </div>`;
-            
-            html += `
-            <div class="club-card">
-                <div class="club-badge">🔥</div>
-                <div class="club-name-big">${name}</div>
-                <div class="club-trophies">🏆 ${fmt(total_vrgk)}</div>
-                <div class="club-desc-box">${c.desc || 'нет описания'}</div>
-                <div class="club-stats-grid">
-                    <div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div>
-                    <div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div>
-                    <div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div>
-                </div>`;
-                
-            if (localStorage.getItem(PREFIX + 'club') !== name) {
-                html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`;
-            }
+            let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;"><button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}</div>`;
+            html += `<div class="club-card"><div class="club-badge">🔥</div><div class="club-name-big">${name}</div><div class="club-trophies">🏆 ${fmt(total_vrgk)}</div><div class="club-desc-box">${c.desc || 'нет описания'}</div><div class="club-stats-grid"><div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div><div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div><div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div></div>`;
+            if (localStorage.getItem(PREFIX + 'club') !== name) { html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`; }
             html += `</div>`;
             
-            if (global_event_data && global_event_data.active) {
-                html += `
-                <div style="text-align: left; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Клубное событие:</div>
-                <div class="event-banner" onclick="open_event()">
-                    🏆 ${global_event_data.name.toUpperCase()} 🏆<br>
-                    <span style="font-size: 11px; font-weight: normal; color: #333;">нажми, чтобы участвовать</span>
-                </div>`;
-            }
-
             html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`;
-            
-            let mems = c.members.map(m => { 
-                return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; 
-            }).sort((a,b) => b.vrgk - a.vrgk);
-            
-            mems.forEach((m, idx) => {
-                let is_online = timeAgo(m.ls) === "в сети";
-                html += `
-                <div class="member-list-item">
-                    <div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div>
-                    <div class="ml-info" style="flex: 1; padding-left: 10px;">
-                        <div class="ml-name">${m.name}</div>
-                        <div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="ml-score">🪙 ${fmt(m.vrgk)}</div>
-                        <div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div>
-                    </div>
-                </div>`;
-            });
+            let mems = c.members.map(m => { return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; }).sort((a,b) => b.vrgk - a.vrgk);
+            mems.forEach((m, idx) => { let is_online = timeAgo(m.ls) === "в сети"; html += `<div class="member-list-item"><div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div><div class="ml-info" style="flex: 1; padding-left: 10px;"><div class="ml-name">${m.name}</div><div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div></div><div style="text-align: right;"><div class="ml-score">🪙 ${fmt(m.vrgk)}</div><div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div></div></div>`; });
             
             if (c.owner === nickname && c.reqs && c.reqs.length > 0) {
                 html += `<div style="text-align: left; font-weight: bold; margin-top: 10px; font-size: 12px; color: #d4af37;">Заявки (${c.reqs.length}):</div>`;
-                c.reqs.forEach(r => { 
-                    html += `
-                    <div class="member-list-item">
-                        <div style="flex: 1; text-align: left; font-weight: bold;">${r}</div>
-                        <button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button>
-                        <button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button>
-                    </div>`; 
-                });
+                c.reqs.forEach(r => { html += `<div class="member-list-item"><div style="flex: 1; text-align: left; font-weight: bold;">${r}</div><button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button><button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button></div>`; });
             }
             
             if (localStorage.getItem(PREFIX + 'club') === name) {
-                html += `
-                <div class="chat-container">
-                    <div class="chat-msgs" id="chat-msgs-box">`;
-                
-                if(c.chat && c.chat.length > 0) {
-                    c.chat.forEach(msg => { 
-                        html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; 
-                    });
-                } else { 
-                    html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; 
-                }
-                
-                html += `
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="сообщение..." maxlength="100">
-                        <button class="buy-btn gold" onclick="send_chat('${name}')">></button>
-                    </div>
-                </div>`;
+                html += `<div class="chat-container"><div class="chat-msgs" id="chat-msgs-box">`;
+                if(c.chat && c.chat.length > 0) { c.chat.forEach(msg => { html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; }); } else { html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; }
+                html += `</div><div class="chat-input-area"><input type="text" id="chat-input" placeholder="сообщение..." maxlength="100"><button class="buy-btn gold" onclick="send_chat('${name}')">></button></div></div>`;
             }
             
-            let modal = document.getElementById('view-club-modal'); 
-            modal.setAttribute('data-club', name);
-            document.getElementById('view-club-content').innerHTML = html; 
-            modal.style.display = 'flex';
-            
-            if(!is_silent_update) { 
-                let chatBox = document.getElementById('chat-msgs-box'); 
-                if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
-            }
+            let modal = document.getElementById('view-club-modal'); modal.setAttribute('data-club', name);
+            document.getElementById('view-club-content').innerHTML = html; modal.style.display = 'flex';
+            if(!is_silent_update) { let chatBox = document.getElementById('chat-msgs-box'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }
         }
 
         window.submit_club = async function() {
-            let name = document.getElementById('c-name').value.trim(); 
-            let desc = document.getElementById('c-desc').value.trim();
-            let req = parseInt(document.getElementById('c-req').value) || 0; 
-            let type = document.getElementById('c-type').value;
-            
-            if(!name) return alert('введи название!'); 
-            
-            document.getElementById('create-club-modal').style.display = 'none';
-            
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!');
-            
+            let name = document.getElementById('c-name').value.trim(); let desc = document.getElementById('c-desc').value.trim();
+            let req = parseInt(document.getElementById('c-req').value) || 0; let type = document.getElementById('c-type').value;
+            if(!name) return alert('введи название!'); document.getElementById('create-club-modal').style.display = 'none';
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!');
             if(d.clubs[name]) return alert('клуб с таким именем уже есть!');
-            
-            d.clubs[name] = { 
-                desc: desc, 
-                req: req, 
-                type: type, 
-                owner: nickname, 
-                members: [nickname], 
-                reqs: [], 
-                tag: gen_tag(), 
-                chat: [] 
-            };
-            d.players[nickname].club = name; 
-            localStorage.setItem(PREFIX + 'club', name);
-            
-            await put_cloud(d); 
-            sync_cloud();
+            d.clubs[name] = { desc: desc, req: req, type: type, owner: nickname, members: [nickname], reqs: [], tag: gen_tag(), chat: [] };
+            d.players[nickname].club = name; localStorage.setItem(PREFIX + 'club', name); await put_cloud(d); sync_cloud();
         };
 
         window.join_club = async function(name) {
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            
-            let c = d.clubs[name]; 
-            if(!c) return;
-            
-            if(vrgk < c.req) return alert('мало воргиков для входа!'); 
-            if(c.type === 'закрытый') return alert('клуб закрыт');
-            
-            if(c.type === 'по заявкам') { 
-                if(!c.reqs) c.reqs = []; 
-                if(!c.reqs.includes(nickname)) c.reqs.push(nickname); 
-                await put_cloud(d); 
-                alert('заявка отправлена!'); 
-                return; 
-            }
-            
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); let c = d.clubs[name]; if(!c) return;
+            if(vrgk < c.req) return alert('мало воргиков для входа!'); if(c.type === 'закрытый') return alert('клуб закрыт');
+            if(c.type === 'по заявкам') { if(!c.reqs) c.reqs = []; if(!c.reqs.includes(nickname)) c.reqs.push(nickname); await put_cloud(d); alert('заявка отправлена!'); return; }
             if(!c.members.includes(nickname)) c.members.push(nickname);
-            
-            d.players[nickname].club = name; 
-            localStorage.setItem(PREFIX + 'club', name);
-            
-            await put_cloud(d); 
-            document.getElementById('view-club-modal').style.display = 'none'; 
-            sync_cloud();
+            d.players[nickname].club = name; localStorage.setItem(PREFIX + 'club', name); await put_cloud(d); document.getElementById('view-club-modal').style.display = 'none'; sync_cloud();
         };
 
         window.leave_club = async function() {
-            if(!confirm('точно выйти из клуба?')) return; 
-            
-            let my_c = localStorage.getItem(PREFIX + 'club');
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!');
-            
-            if (d.clubs[my_c]) { 
-                let c = d.clubs[my_c]; 
-                c.members = c.members.filter(m => m !== nickname); 
-                if (c.owner === nickname) { 
-                    if (c.members.length > 0) {
-                        c.owner = c.members[0]; 
-                    } else {
-                        delete d.clubs[my_c]; 
-                    }
-                } 
-            }
-            
-            delete d.players[nickname].club; 
-            localStorage.removeItem(PREFIX + 'club');
-            
-            await put_cloud(d); 
-            document.getElementById('view-club-modal').style.display = 'none'; 
-            sync_cloud();
+            if(!confirm('точно выйти из клуба?')) return; let my_c = localStorage.getItem(PREFIX + 'club');
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!');
+            if (d.clubs[my_c]) { let c = d.clubs[my_c]; c.members = c.members.filter(m => m !== nickname); if (c.owner === nickname) { if (c.members.length > 0) { c.owner = c.members[0]; } else { delete d.clubs[my_c]; } } }
+            delete d.players[nickname].club; localStorage.removeItem(PREFIX + 'club'); await put_cloud(d); document.getElementById('view-club-modal').style.display = 'none'; sync_cloud();
         };
 
         window.acc_req = async function(cname, user) {
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            
-            let c = d.clubs[cname];
-            if (c) { 
-                c.reqs = c.reqs.filter(r => r !== user); 
-                if(!c.members.includes(user)) c.members.push(user); 
-                if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0, rank:0}; 
-                d.players[user].club = cname; 
-                await put_cloud(d); 
-                open_club_details(cname); 
-            }
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); let c = d.clubs[cname];
+            if (c) { c.reqs = c.reqs.filter(r => r !== user); if(!c.members.includes(user)) c.members.push(user); if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0, rank:0}; d.players[user].club = cname; await put_cloud(d); open_club_details(cname); }
         };
 
-        window.rej_req = async function(cname, user) { 
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            
-            let c = d.clubs[cname]; 
-            if (c) { 
-                c.reqs = c.reqs.filter(r => r !== user); 
-                await put_cloud(d); 
-                open_club_details(cname); 
-            } 
-        };
+        window.rej_req = async function(cname, user) { let d = await fetch_cloud(); if(!d) return; let c = d.clubs[cname]; if (c) { c.reqs = c.reqs.filter(r => r !== user); await put_cloud(d); open_club_details(cname); } };
 
         window.send_chat = async function(cname) {
-            let inp = document.getElementById('chat-input'); 
-            let txt = inp.value.trim(); 
-            if(!txt) return; 
-            inp.value = '';
-            
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            
-            let c = d.clubs[cname];
-            if(c) { 
-                if(!c.chat) c.chat = []; 
-                c.chat.push({a: nickname, t: txt}); 
-                if(c.chat.length > 30) c.chat.shift(); 
-                await put_cloud(d); 
-                open_club_details(cname); 
-                setTimeout(() => { 
-                    let chatBox = document.getElementById('chat-msgs-box'); 
-                    if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
-                }, 50); 
-            }
-        }
-
-        window.toggle_event = async function() {
-            let d = await fetch_cloud(); 
-            if(!d) return;
-            
-            if(d.event && d.event.active) { 
-                if(confirm('Остановить текущее событие?')) { 
-                    d.event.active = false; 
-                    await put_cloud(d); 
-                    alert('Событие остановлено!'); 
-                    sync_cloud(); 
-                } 
-            } 
-            else { 
-                let n = prompt('Введи название события:'); 
-                if(n) { 
-                    d.event = { active: true, name: n, scores: {} }; 
-                    await put_cloud(d); 
-                    alert('Событие запущено!'); 
-                    sync_cloud(); 
-                } 
-            }
-        };
-        
-        window.open_event = function() { 
-            document.getElementById('event-title').innerText = global_event_data.name; 
-            document.getElementById('event-modal').style.display = 'flex'; 
-            my_event_score = global_event_data.scores[nickname] || 0; 
-            document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score; 
-            render_event_top(); 
-        };
-        
-        window.tap_event = function() {
-            my_event_score += 1; 
-            document.getElementById('event-my-score').innerText = 'твой счет: ' + my_event_score; 
-            if(navigator.vibrate) navigator.vibrate(15);
-            
-            if(!window.eventSyncTimer) { 
-                window.eventSyncTimer = setTimeout(async () => { 
-                    let d = await fetch_cloud(); 
-                    if(d) { 
-                        d.event.scores[nickname] = my_event_score; 
-                        await put_cloud(d); 
-                        global_event_data = d.event; 
-                        render_event_top(); 
-                    } 
-                    window.eventSyncTimer = null; 
-                }, 2000); 
-            }
-        };
-        
-        function render_event_top() {
-            if(!global_event_data || !global_event_data.scores) return;
-            
-            let sorted = Object.keys(global_event_data.scores).map(k => { 
-                return {n: k, s: global_event_data.scores[k]}; 
-            }).sort((a,b) => b.s - a.s);
-            
-            let html = ''; 
-            sorted.slice(0, 10).forEach((p, i) => { 
-                html += `<div>${i+1}. <b>${p.n}</b> - ${p.s} очков</div>`; 
-            });
-            
-            if(html === '') html = 'пока никто не тапал'; 
-            document.getElementById('event-top').innerHTML = html;
+            let inp = document.getElementById('chat-input'); let txt = inp.value.trim(); if(!txt) return; inp.value = '';
+            let d = await fetch_cloud(); if(!d) return; let c = d.clubs[cname];
+            if(c) { if(!c.chat) c.chat = []; c.chat.push({a: nickname, t: txt}); if(c.chat.length > 30) c.chat.shift(); await put_cloud(d); open_club_details(cname); setTimeout(() => { let chatBox = document.getElementById('chat-msgs-box'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }, 50); }
         }
 
         window.sw_tab = function(tabid, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            document.getElementById(`tab-${tabid}`).classList.add('active'); 
-            el.classList.add('active');
-            
-            if (tabid === 'rating' || tabid === 'clubs') { 
-                sync_cloud(); 
-            }
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`tab-${tabid}`).classList.add('active'); el.classList.add('active');
+            if (tabid === 'rating' || tabid === 'clubs') { sync_cloud(); }
         };
 
-        window.change_nick = async function() { 
-            alert('Смена ника временно отключена для безопасности ПИН-кодов. Создай новый акк, если нужно.'); 
-        }
-        
+        window.change_nick = async function() { alert('Смена ника временно отключена для безопасности ПИН-кодов. Создай новый акк, если нужно.'); }
         window.delete_acc = async function() {
             if(!confirm('удалить аккаунт?')) return;
-            
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            
-            let players = d.players || {}; 
-            let clubs = d.clubs || {};
-            
+            let d = await fetch_cloud(); if(!d) return; let players = d.players || {}; let clubs = d.clubs || {};
             if(nickname && players[nickname]) delete players[nickname];
-            
             let my_c = localStorage.getItem(PREFIX + 'club');
-            if(my_c && clubs[my_c]) { 
-                clubs[my_c].members = clubs[my_c].members.filter(m => m !== nickname); 
-                if(clubs[my_c].owner === nickname) { 
-                    if (clubs[my_c].members.length > 0) {
-                        clubs[my_c].owner = clubs[my_c].members[0]; 
-                    } else {
-                        delete clubs[my_c]; 
-                    }
-                } 
-            }
-            
-            await put_cloud({players, clubs, event: d.event}); 
-            localStorage.clear(); 
-            location.reload();
+            if(my_c && clubs[my_c]) { clubs[my_c].members = clubs[my_c].members.filter(m => m !== nickname); if(clubs[my_c].owner === nickname) { if (clubs[my_c].members.length > 0) { clubs[my_c].owner = clubs[my_c].members[0]; } else { delete clubs[my_c]; } } }
+            await put_cloud({players, clubs}); localStorage.clear(); location.reload();
         };
-
     </script>
 </body>
 </html>
