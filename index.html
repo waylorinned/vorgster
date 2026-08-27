@@ -673,8 +673,8 @@
                     <div style="font-size: 14px; color: #888;">Текущий ранг</div>
                     <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
                     <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота, чтобы подняться!</div>
-                    <!-- КНОПКА ОТКЛЮЧЕНА -->
-                    <button class="buy-btn disabled" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">РАНКЕД ВРЕМЕННО ОТКЛЮЧЕН</button>
+                    <!-- РАНКЕД СНОВА ОТКРЫТ -->
+                    <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
                 <div style="font-size: 11px; color: #aaa; background: #111; padding: 10px; border-radius: 8px;">
@@ -824,6 +824,10 @@
         let c7_lvl = parseInt(localStorage.getItem(PREFIX+'c7_lvl')) || 0;
 
         let player_rank = parseInt(localStorage.getItem(PREFIX + 'rank')) || 0;
+        
+        let saved_max_rank = parseInt(localStorage.getItem(PREFIX + 'max_rank'));
+        let max_rank = isNaN(saved_max_rank) ? player_rank : saved_max_rank;
+        
         const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
@@ -899,11 +903,13 @@
                     c3_lvl = parseInt(s[18]) || 0; c4_lvl = parseInt(s[19]) || 0;
                     c5_lvl = parseInt(s[20]) || 0; c6_lvl = parseInt(s[21]) || 0;
                     c7_lvl = parseInt(s[22]) || 0;
+                    
+                    max_rank = (s.length > 23 && !isNaN(parseInt(s[23]))) ? parseInt(s[23]) : player_rank;
                 }
                 if(players[n].club) { localStorage.setItem(PREFIX+'club', players[n].club); } 
                 else { localStorage.removeItem(PREFIX+'club'); }
             } else {
-                nickname = n; my_pin = p;
+                nickname = n; my_pin = p; max_rank = 0;
             }
 
             localStorage.setItem(PREFIX + 'nickname', nickname);
@@ -959,6 +965,7 @@
             localStorage.setItem(PREFIX + 'cur_energy', cur_energy);
             localStorage.setItem(PREFIX + 'eng_regen', eng_regen); 
             localStorage.setItem(PREFIX + 'rank', player_rank);
+            localStorage.setItem(PREFIX + 'max_rank', max_rank);
             localStorage.setItem(PREFIX + 'last_time', Date.now());
             
             localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl);
@@ -1120,7 +1127,7 @@
                 players[nickname].pin = my_pin;
                 players[nickname].vrgk = Math.floor(vrgk); players[nickname].skrepki = skrepki;
                 players[nickname].rank = player_rank; players[nickname].last_seen = Date.now();
-                players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl];
+                players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank];
                 
                 let my_c = localStorage.getItem(PREFIX + 'club');
                 if (my_c) players[nickname].club = my_c;
@@ -1175,11 +1182,6 @@
         let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0;
 
         window.start_ranked_search = function() {
-            // ФУНКЦИЯ ЗАБЛОКИРОВАНА
-            alert('Ранкед временно закрыт на тех. работы!');
-            return;
-            
-            /* Оригинальный код закомментирован на время тех. работ
             if(player_rank >= RANKS.length - 1) return alert('Ты уже взял максимальный ранг ПРО!');
             document.getElementById('ranked-modal').style.display = 'flex';
             document.getElementById('ranked-status').innerText = 'Поиск противника...';
@@ -1190,7 +1192,6 @@
                 document.getElementById('ranked-status').innerText = `Противник найден: Bot_${Math.floor(Math.random()*9999)}`; 
                 setTimeout(start_arena, 1500); 
             }, 2000);
-            */
         }
 
         function start_arena() {
@@ -1208,7 +1209,6 @@
             
             spawn_arena_target();
             
-            // НОВАЯ ФОРМУЛА БОТА (28 - ранг * 0.8)
             let bot_time_to_finish = 28 - (player_rank * 0.8); 
             let bot_interval_ms = (bot_time_to_finish * 1000) / arena_target_max;
             
@@ -1273,18 +1273,33 @@
             if (is_win) {
                 document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
                 
-                // ВОСПРОИЗВЕДЕНИЕ ЗВУКА BRAWL STARS RANKUP
+                player_rank++;
+                
+                // ВОСПРОИЗВЕДЕНИЕ КОНКРЕТНОГО ЗВУКА ДЛЯ КАЖДОГО РАНГА
+                let sound_name = 'bronze.mp3';
+                if(player_rank >= 3 && player_rank <= 5) sound_name = 'silver.mp3';
+                else if(player_rank >= 6 && player_rank <= 8) sound_name = 'gold.mp3';
+                else if(player_rank >= 9 && player_rank <= 11) sound_name = 'diamond.mp3';
+                else if(player_rank >= 12 && player_rank <= 14) sound_name = 'mythic.mp3';
+                else if(player_rank >= 15 && player_rank <= 17) sound_name = 'legendary.mp3';
+                else if(player_rank >= 18 && player_rank <= 20) sound_name = 'masters.mp3';
+                else if(player_rank === 21) sound_name = 'pro.mp3';
+
                 try {
-                    let snd = new Audio('rankup.mp3');
-                    snd.play().catch(e => console.log('Аудио не загружено. Добавь rankup.mp3 на сервер.'));
+                    let snd = new Audio(sound_name);
+                    snd.play().catch(e => console.log('Нет файла: ' + sound_name));
                 } catch(e) {}
 
-                let old_rank = player_rank; player_rank++; save_data(); upd_ui();
-                
-                if(old_rank < 12 && player_rank >= 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; save_data(); upd_ui(); }
-                if(old_rank < 15 && player_rank >= 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit += 15000; save_data(); upd_ui(); }
-                if(old_rank < 18 && player_rank >= 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; save_data(); upd_ui(); }
-                if(old_rank < 21 && player_rank >= 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; save_data(); upd_ui(); }
+                // ВЫДАЧА НАГРАДЫ С ЗАЩИТОЙ ОТ АБУЗА
+                if (player_rank > max_rank) {
+                    max_rank = player_rank;
+                    if(player_rank === 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; }
+                    if(player_rank === 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit += 15000; }
+                    if(player_rank === 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; }
+                    if(player_rank === 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; }
+                }
+
+                save_data(); upd_ui();
             } else { 
                 document.getElementById('ranked-status').innerText = 'ПОРАЖЕНИЕ! Ты потерял ранг.'; 
                 if(player_rank > 0) player_rank--; save_data(); upd_ui(); 
