@@ -673,7 +673,6 @@
                     <div style="font-size: 14px; color: #888;">Текущий ранг</div>
                     <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
                     <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота, чтобы подняться!</div>
-                    <!-- РАНКЕД СНОВА ОТКРЫТ -->
                     <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
@@ -1020,17 +1019,6 @@
             upd_ui(); save_data();
         }
 
-        function spawn_txt(x, y, txt) {
-            const el = document.createElement('div'); 
-            el.classList.add('floating-text'); 
-            el.innerText = txt;
-            const rect = tap_area.getBoundingClientRect();
-            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; 
-            el.style.top = `${y - rect.top - 20}px`;
-            tap_area.appendChild(el); 
-            setTimeout(() => el.remove(), 800);
-        }
-
         function game_tick() {
             let now = Date.now();
             let diff_sec = (now - last_time) / 1000;
@@ -1057,10 +1045,19 @@
             }
 
             last_time = now; upd_ui(); save_data();
-            if (nickname && my_pin && (now - last_sync > 180000)) { sync_cloud(true); }
+            
+            // ОПТИМИЗАЦИЯ 1: Фоновое сохранение раз в 5 МИНУТ (300 000 мс)
+            if (nickname && my_pin && (now - last_sync > 300000)) { sync_cloud(true); }
         }
 
         game_tick(); setInterval(game_tick, 1000);
+        
+        // ОПТИМИЗАЦИЯ 3: Сохранение при сворачивании игры или закрытии вкладки
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && nickname && my_pin) {
+                if (Date.now() - last_sync > 10000) { sync_cloud(true); }
+            }
+        });
 
         window.buy_upg = function(type) { 
             if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); }
@@ -1104,9 +1101,14 @@
         }
 
         async function put_cloud(data) {
-            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
-                method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, body: JSON.stringify(data) 
-            });
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY }, 
+                    body: JSON.stringify(data),
+                    keepalive: true // Защита от прерывания при закрытии вкладки
+                });
+            } catch(e) {}
         }
 
         async function sync_cloud(is_bg = false) {
@@ -1275,7 +1277,6 @@
                 
                 player_rank++;
                 
-                // ВОСПРОИЗВЕДЕНИЕ КОНКРЕТНОГО ЗВУКА ДЛЯ КАЖДОГО РАНГА
                 let sound_name = 'bronze.mp3';
                 if(player_rank >= 3 && player_rank <= 5) sound_name = 'silver.mp3';
                 else if(player_rank >= 6 && player_rank <= 8) sound_name = 'gold.mp3';
@@ -1285,12 +1286,14 @@
                 else if(player_rank >= 18 && player_rank <= 20) sound_name = 'masters.mp3';
                 else if(player_rank === 21) sound_name = 'pro.mp3';
 
-                try {
-                    let snd = new Audio(sound_name);
-                    snd.play().catch(e => console.log('Нет файла: ' + sound_name));
-                } catch(e) {}
+                // Звук играет при переходе на любую лигу
+                if (player_rank % 3 === 0 || player_rank === 21) {
+                    try {
+                        let snd = new Audio(sound_name);
+                        snd.play().catch(e => console.log('Нет файла: ' + sound_name));
+                    } catch(e) {}
+                }
 
-                // ВЫДАЧА НАГРАДЫ С ЗАЩИТОЙ ОТ АБУЗА
                 if (player_rank > max_rank) {
                     max_rank = player_rank;
                     if(player_rank === 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; }
@@ -1389,7 +1392,16 @@
         window.sw_tab = function(tabid, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(`tab-${tabid}`).classList.add('active'); el.classList.add('active');
-            if (tabid === 'rating' || tabid === 'clubs') { sync_cloud(); }
+            
+            // ОПТИМИЗАЦИЯ 2: Анти-спам запросов при переключении вкладок. Синхронизируем максимум 1 раз в 60 секунд.
+            if (tabid === 'rating' || tabid === 'clubs') { 
+                if (Date.now() - last_sync > 60000) { 
+                    sync_cloud(); 
+                } else {
+                    if (tabid === 'rating') render_leaderboard();
+                    if (tabid === 'clubs') render_clubs_list();
+                }
+            }
         };
 
         window.change_nick = async function() { alert('Смена ника временно отключена для безопасности ПИН-кодов. Создай новый акк, если нужно.'); }
