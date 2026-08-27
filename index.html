@@ -673,7 +673,8 @@
                     <b>Мифик I:</b> +5к/ч пассива<br>
                     <b>Лега I:</b> +15к/ч пассива<br>
                     <b>Мастер I:</b> +45к/ч пассива<br>
-                    <b>ПРО:</b> +65к/ч пассива
+                    <b>ПРО:</b> +65к/ч пассива<br>
+                    <i>В лиге ПРО всего 5 мест!</i>
                 </div>
             </div>
         </div>
@@ -1277,6 +1278,18 @@
 
         window.start_ranked_search = function() {
             if(player_rank >= RANKS.length - 1) return alert('Ты уже взял максимальный ранг ПРО!');
+            
+            // 🔥 ЖЕСТКИЙ ЛИМИТ НА 5 ИГРОКОВ В "ПРО"
+            if (player_rank === 20) {
+                let pro_count = 0;
+                for (let k in cached_players) {
+                    if (cached_players[k].rank >= 21) pro_count++;
+                }
+                if (pro_count >= 5) {
+                    return alert('🛑 Лимит исчерпан! В лиге ПРО уже есть 5 игроков. Мест больше нет!');
+                }
+            }
+
             document.getElementById('ranked-modal').style.display = 'flex';
             document.getElementById('ranked-status').innerText = 'Поиск противника...';
             document.getElementById('arena-container').style.display = 'none';
@@ -1365,6 +1378,19 @@
             document.getElementById('arena-exit-btn').style.display = 'block';
             
             if (is_win) {
+                // 🔥 ВТОРАЯ ПРОВЕРКА ЛИМИТА ПРЯМО ПЕРЕД ВЫДАЧЕЙ РАНГА
+                if (player_rank === 20) {
+                    let pro_count = 0;
+                    for (let k in cached_players) {
+                        if (cached_players[k].rank >= 21) pro_count++;
+                    }
+                    if (pro_count >= 5) {
+                        document.getElementById('ranked-status').innerText = 'ПОБЕДА! Но места в лиге ПРО только что закончились 😭';
+                        save_data(); upd_ui();
+                        return;
+                    }
+                }
+
                 document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
                 
                 player_rank++;
@@ -1519,7 +1545,6 @@
 
         window.change_nick = async function() { alert('Смена ника временно отключена для безопасности ПИН-кодов. Создай новый акк, если нужно.'); }
         
-        // ВАЖНО: Финальный фикс функции удаления аккаунта
         window.delete_acc = async function() {
             if(!confirm('удалить аккаунт?')) return;
             let d = await fetch_cloud(); if(!d) return; 
