@@ -241,6 +241,13 @@
             color: #fff; 
             border: none; 
         }
+        
+        .buy-btn.disabled {
+            background: #444 !important;
+            color: #888 !important;
+            border: 1px solid #333 !important;
+            cursor: not-allowed;
+        }
 
         .floating-text { 
             position: absolute; 
@@ -844,7 +851,6 @@
             <div class="nav-item" onclick="sw_tab('rating', this)">рейтинг</div>
         </div>
 
-        <!-- Модальные окна -->
         <div id="offline-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-title">офлайн прибыль</div>
@@ -870,7 +876,6 @@
                     <div style="color: #d4af37; font-weight: bold; margin-bottom: 5px;">панель админа</div>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="toggle_event()">управление событием</button>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="create_promo()">выдать промокод</button>
-                    <!-- НОВЫЕ КНОПКИ ГЛОБАЛЬНОГО СБРОСА -->
                     <button class="buy-btn" style="width: 100%; margin-bottom: 5px; background: #411;" onclick="admin_reset_ranks(false)">мягкий сброс рангов</button>
                     <button class="buy-btn" style="width: 100%; margin-bottom: 5px; background: #711;" onclick="admin_reset_ranks(true)">жесткий сброс (минус баго-пассив)</button>
                 </div>
@@ -939,7 +944,6 @@
             </div>
         </div>
 
-        <!-- Оверлей Ранкапа -->
         <div id="rankup-overlay">
             <div class="rankup-glow" id="rankup-glow"></div>
             <div class="rankup-sub">НОВАЯ ЛИГА ДОСТИГНУТА!</div>
@@ -1273,7 +1277,8 @@
                     clubs: rec.clubs || (rec.record && rec.record.clubs) || {}, 
                     global_event: rec.global_event || (rec.record && rec.record.global_event) || {active:false}, 
                     last_winner: rec.last_winner || (rec.record && rec.record.last_winner) || "",
-                    promocodes: rec.promocodes || (rec.record && rec.record.promocodes) || {}
+                    promocodes: rec.promocodes || (rec.record && rec.record.promocodes) || {},
+                    force_wipe_time: rec.force_wipe_time || (rec.record && rec.record.force_wipe_time) || 0
                 };
             } catch (e) { return null; }
         }
@@ -1287,6 +1292,22 @@
             try {
                 let d = await fetch_cloud(); 
                 if(!d) return; 
+                
+                // 🔴 ЗАЩИТА ОТ ВОЗВРАТА РАНГА (СЛУШАЕМ СИГНАЛ АДМИНА)
+                let wipe_time = d.force_wipe_time || 0;
+                let local_wipe = parseInt(localStorage.getItem(PREFIX + 'wipe_time')) || 0;
+                
+                if (wipe_time > local_wipe && d.players[nickname]) {
+                    // Сервер скомандовал сброс - принимаем его данные ПЕРЕД отправкой своих!
+                    player_rank = d.players[nickname].rank || 0;
+                    if (d.players[nickname].stats) {
+                        profit = d.players[nickname].stats[0] || profit;
+                        max_rank = d.players[nickname].stats[23] || 0;
+                    }
+                    localStorage.setItem(PREFIX + 'wipe_time', wipe_time);
+                    save_data();
+                    upd_ui();
+                }
                 
                 let players = d.players; 
                 let clubs = d.clubs; 
@@ -1325,32 +1346,34 @@
             } catch (e) {}
         }
         
-        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС (Прямо в Базе Данных)
+        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС С СИГНАЛОМ ДЛЯ ТЕЛЕФОНОВ
         window.admin_reset_ranks = async function(is_hard) {
             if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять баго-прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0 (без потери прибыли)?')) return;
             let d = await fetch_cloud();
             if(!d) return alert("Ошибка связи с БД!");
             
+            d.force_wipe_time = Date.now(); // СИГНАЛ ВСЕМ КЛИЕНТАМ НА СБРОС
+            
             let count = 0;
             for (let k in d.players) {
                 let p = d.players[k];
-                p.rank = 0; // Сбрасываем ранг в 0 (Бронза I)
+                p.rank = 0; 
                 if(is_hard && p.stats) {
-                    let mr = p.stats[23] || 0; // max_rank
+                    let mr = p.stats[23] || 0; 
                     let rm = 0;
                     if(mr >= 12) rm += 5000;
                     if(mr >= 15) rm += 15000;
                     if(mr >= 18) rm += 45000;
                     if(mr >= 21) rm += 65000;
                     
-                    p.stats[0] = Math.max(0, (p.stats[0]||0) - rm); // Срезаем пассив
-                    p.stats[23] = 0; // Обнуляем max_rank
+                    p.stats[0] = Math.max(0, (p.stats[0]||0) - rm);
+                    p.stats[23] = 0; 
                 }
                 count++;
             }
             await put_cloud(d);
             
-            // Локальный сброс для себя, чтобы не перезаписать облако старыми данными
+            localStorage.setItem(PREFIX + 'wipe_time', d.force_wipe_time);
             player_rank = 0;
             if(is_hard) {
                 let rm = 0;
@@ -1363,7 +1386,7 @@
             }
             save_data(); 
             upd_ui();
-            alert(`Глобальный сброс применен к ${count} игрокам прямо в БД!`);
+            alert(`Глобальный сброс применен к ${count} игрокам прямо в БД! Теперь ни один телефон не вернет старый ранг.`);
         }
 
         window.open_profile = function(user) {
@@ -1482,14 +1505,11 @@
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет данных</div>';
         }
 
-        // 🔴 ИСПРАВЛЕННЫЙ РАНКЕД
         let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_mode = 1, arena_target_max = 100;
         let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0;
-        let is_game_over = false; // Бетонный флаг для защиты от кликов после победы
+        let is_game_over = false; 
 
         window.start_ranked_search = function() {
-            if(player_rank >= RANKS.length - 1) return alert('Ты уже взял ПРО!');
-            
             // АНТИ-ДОДЖ
             localStorage.setItem(PREFIX + 'in_match', '1');
 
