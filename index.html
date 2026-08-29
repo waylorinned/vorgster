@@ -844,6 +844,7 @@
             <div class="nav-item" onclick="sw_tab('rating', this)">рейтинг</div>
         </div>
 
+        <!-- Модальные окна -->
         <div id="offline-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-title">офлайн прибыль</div>
@@ -928,6 +929,7 @@
             </div>
         </div>
 
+        <!-- Оверлей Ранкапа -->
         <div id="rankup-overlay">
             <div class="rankup-glow" id="rankup-glow"></div>
             <div class="rankup-sub">НОВАЯ ЛИГА ДОСТИГНУТА!</div>
@@ -974,7 +976,7 @@
         let c6_lvl = parseInt(localStorage.getItem(PREFIX+'c6_lvl')) || 0;
         let c7_lvl = parseInt(localStorage.getItem(PREFIX+'c7_lvl')) || 0;
 
-        // ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ И СБРОС (исправлен баг, теперь сбросит всем)
+        // ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ И СБРОС
         let player_rank = parseInt(localStorage.getItem(PREFIX + 'rank')) || 0;
         let max_rank = parseInt(localStorage.getItem(PREFIX + 'max_rank')) || 0;
         let my_color = localStorage.getItem(PREFIX + 'color') || '#ffffff';
@@ -1586,6 +1588,7 @@
 
         let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_mode = 1, arena_target_max = 100;
         let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0;
+        let is_game_over = false;
 
         window.start_ranked_search = function() {
             // АНТИ-ДОДЖ: Ставим метку "в матче"
@@ -1607,6 +1610,7 @@
             arena_bot = 0; 
             click_times = []; 
             arena_locked_until = 0;
+            is_game_over = false;
             
             document.getElementById('arena-my-score').innerText = 'Ты: 0'; 
             document.getElementById('arena-bot-score').innerText = 'Бот: 0';
@@ -1707,6 +1711,7 @@
         }
 
         function hit_arena_target() {
+            if (is_game_over) return;
             let now = Date.now(); 
             if (now - last_hit_time < 20) return; 
             last_hit_time = now;
@@ -1721,6 +1726,7 @@
         }
 
         function hit_arena_target_dot(btn) {
+            if (is_game_over) return;
             let now = Date.now(); 
             if (now - last_hit_time < 20) return; 
             last_hit_time = now;
@@ -1745,6 +1751,7 @@
         }
 
         function hit_mine(type) {
+            if (is_game_over) return;
             let now = Date.now(); 
             if (now < arena_locked_until) return;
             
@@ -1782,8 +1789,15 @@
         }
 
         function end_arena(is_win) {
+            if (is_game_over) return;
+            is_game_over = true;
+            
             clearInterval(bot_int); 
             localStorage.removeItem(PREFIX + 'in_match'); // Снимаем флаг лива
+            
+            // Очищаем арену от любых кнопок/мин, чтобы по ним больше нельзя было кликнуть
+            document.getElementById('arena-container').innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`;
+            
             document.getElementById('arena-exit-btn').style.display = 'block';
             
             if (is_win) {
