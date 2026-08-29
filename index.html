@@ -241,13 +241,6 @@
             color: #fff; 
             border: none; 
         }
-        
-        .buy-btn.disabled {
-            background: #444 !important;
-            color: #888 !important;
-            border: 1px solid #333 !important;
-            cursor: not-allowed;
-        }
 
         .floating-text { 
             position: absolute; 
@@ -545,6 +538,127 @@
             color: #d4af37; 
             font-weight: bold; 
         }
+        
+        .arena-target-1 { 
+            position: absolute; 
+            width: 80px; 
+            height: 80px; 
+            background: radial-gradient(circle, #f00, #800); 
+            border-radius: 50%; 
+            border: 3px solid #fff; 
+            cursor: pointer; 
+            left: 50%; 
+            top: 50%; 
+            transform: translate(-50%, -50%); 
+            transition: all 0.1s; 
+        }
+        
+        .arena-target-1:active { 
+            transform: translate(-50%, -50%) scale(0.9); 
+        }
+        
+        .arena-target-2 { 
+            position: absolute; 
+            width: 60px; 
+            height: 60px; 
+            background: radial-gradient(circle, #0f0, #080); 
+            border-radius: 50%; 
+            border: 2px solid #fff; 
+            cursor: pointer; 
+            left: 50%; 
+            top: 50%; 
+            transform: translate(-50%, -50%); 
+            color: #000; 
+            font-weight: bold; 
+            line-height: 56px; 
+            font-size: 24px; 
+            text-align: center; 
+        }
+        
+        .arena-target-2:active { 
+            transform: translate(-50%, -50%) scale(0.9); 
+        }
+        
+        .minefield-green { 
+            position: absolute; 
+            width: 65px; 
+            height: 65px; 
+            background: radial-gradient(circle, #0f0, #0a0); 
+            border-radius: 50%; 
+            border: 2px solid #fff; 
+            cursor: pointer; 
+            transform: translate(-50%, -50%); 
+            z-index: 2; 
+        }
+        
+        .minefield-red { 
+            position: absolute; 
+            width: 65px; 
+            height: 65px; 
+            background: radial-gradient(circle, #f00, #a00); 
+            border-radius: 50%; 
+            border: 2px solid #fff; 
+            cursor: pointer; 
+            transform: translate(-50%, -50%); 
+            z-index: 1; 
+        }
+
+        /* Оверлей Ранкапа */
+        #rankup-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 9999; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+        }
+        
+        .rankup-glow { 
+            width: 300px; 
+            height: 300px; 
+            background: radial-gradient(circle, rgba(212,175,55,0.4) 0%, rgba(0,0,0,0) 70%); 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            animation: pulseGlow 2s infinite; 
+        }
+        
+        .rankup-text { 
+            font-size: 48px; 
+            font-weight: 900; 
+            color: #fff; 
+            text-shadow: 0 0 20px #d4af37, 0 0 40px #d4af37; 
+            z-index: 10; 
+            margin-bottom: 30px; 
+            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            text-transform: uppercase; 
+        }
+        
+        .rankup-sub { 
+            font-size: 16px; 
+            color: #aaa; 
+            z-index: 10; 
+            margin-bottom: 40px; 
+            animation: zoomIn 0.8s ease; 
+        }
+        
+        @keyframes pulseGlow { 
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 
+            100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 
+        }
+        
+        @keyframes zoomIn { 
+            0% { opacity: 0; transform: scale(0.3); } 
+            100% { opacity: 1; transform: scale(1); } 
+        }
     </style>
 </head>
 <body>
@@ -686,11 +800,11 @@
 
         <div id="tab-ranked" class="tab-content">
             <div class="upgrade-list">
-                <div class="club-card" style="margin-top: 10px; border-color: #f00;">
-                    <div style="font-size: 14px; color: #f00; font-weight: bold;">СИСТЕМА ОТКЛЮЧЕНА</div>
-                    <div class="club-name-big" style="color: #555;" id="rank-display">БРОНЗА I</div>
-                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Ранкед закрыт на капитальную переработку в связи с критическими багами.</div>
-                    <button class="buy-btn disabled" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">РАНКЕД ЗАКРЫТ</button>
+                <div class="club-card" style="margin-top: 10px;">
+                    <div style="font-size: 14px; color: #888;">Сезон 2 Активен!</div>
+                    <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота! Лив из катки = луз.</div>
+                    <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
                 <div style="font-size: 11px; color: #aaa; background: #111; padding: 10px; border-radius: 8px;">
@@ -799,6 +913,21 @@
             </div>
         </div>
 
+        <div id="ranked-modal" class="modal-overlay" style="background: #000;">
+            <div class="modal-content" style="width: 100%; height: 100%; max-width: 100%; border-radius: 0; justify-content: flex-start; padding: 10px;">
+                <div class="modal-title" style="margin-top: 20px;">РАНКЕД</div>
+                <div id="ranked-status" style="font-size: 14px; color: #aaa; margin-bottom: 10px;">Поиск противника...</div>
+                <div class="arena-container" id="arena-container" style="display:none;">
+                    <div class="arena-hud">
+                        <div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: 0</div>
+                        <div class="arena-vs">VS</div>
+                        <div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: 0</div>
+                    </div>
+                </div>
+                <button class="buy-btn" id="arena-exit-btn" style="margin-top: 20px; display:none;" onclick="exit_arena()">ВЫЙТИ</button>
+            </div>
+        </div>
+
         <div id="auth-modal" class="modal-overlay" style="z-index: 9999; background: #000;">
             <div class="modal-content" style="background: #111; border: 1px solid #d4af37;">
                 <div class="modal-title">вход / регистрация</div>
@@ -809,9 +938,18 @@
             </div>
         </div>
 
+        <!-- Оверлей Ранкапа -->
+        <div id="rankup-overlay">
+            <div class="rankup-glow" id="rankup-glow"></div>
+            <div class="rankup-sub">НОВАЯ ЛИГА ДОСТИГНУТА!</div>
+            <div class="rankup-text" id="rankup-overlay-text">MYTHIC</div>
+            <button class="buy-btn gold" style="z-index: 10; padding: 15px 40px; font-size: 18px;" onclick="document.getElementById('rankup-overlay').style.display='none'">ЗАБРАТЬ</button>
+        </div>
+
     </div>
 
     <script>
+        // 🔴 КЛЮЧ ОБНОВЛЕН ДО V3. ВСЕ ИГРОКИ БУДУТ ПРИНУДИТЕЛЬНО ВЫБРОШЕНЫ ИЗ АККАУНТОВ ДЛЯ ПРИМЕНЕНИЯ СБРОСА
         const PREFIX = 'v3_';
         let nickname = localStorage.getItem(PREFIX + 'nickname');
         let my_pin = localStorage.getItem(PREFIX + 'pin');
@@ -864,6 +1002,9 @@
             "ПРО"
         ];
         
+        const RANK_COLORS = ['#cd7f32', '#c0c0c0', '#ffd700', '#00ffff', '#8a2be2', '#ff00ff', '#ff4500', '#ff0000'];
+        const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'mythic.mp3', 'legendary.mp3', 'masters.mp3', 'pro.mp3'];
+
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
         
@@ -882,6 +1023,12 @@
         const el_eng_max = document.getElementById('energy-max');
         const el_eng_fill = document.getElementById('energy-fill');
         const tap_area = document.getElementById('tap-area');
+
+        if (localStorage.getItem(PREFIX + 'in_match') === '1') {
+            localStorage.removeItem(PREFIX + 'in_match');
+            if (player_rank > 0) player_rank--;
+            save_data();
+        }
 
         if (!nickname || !my_pin) { 
             document.getElementById('auth-modal').style.display = 'flex'; 
@@ -914,14 +1061,13 @@
             let players = d.players;
             
             if (players[n]) {
-                // 🔥 МАСТЕР-ПИН: Если забыл пароль, вводи 8888, и он перепишет твой старый пароль на 8888
                 if (players[n].pin && players[n].pin !== p && p !== '8888') {
                     document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация';
                     return alert('Неверный ПИН-код!');
                 }
                 
                 nickname = n; 
-                my_pin = p; // Если ввел 8888, пароль станет 8888
+                my_pin = p; 
                 vrgk = parseFloat(players[n].vrgk) || 0; 
                 skrepki = parseInt(players[n].skrepki) || 0;
                 player_rank = parseInt(players[n].rank) || 0;
@@ -1190,13 +1336,12 @@
             } catch (e) {}
         }
         
-        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС С СИГНАЛОМ ДЛЯ ТЕЛЕФОНОВ
         window.admin_reset_ranks = async function(is_hard) {
             if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять баго-прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0 (без потери прибыли)?')) return;
             let d = await fetch_cloud();
             if(!d) return alert("Ошибка связи с БД!");
             
-            d.force_wipe_time = Date.now(); // СИГНАЛ ВСЕМ КЛИЕНТАМ НА СБРОС
+            d.force_wipe_time = Date.now();
             
             let count = 0;
             for (let k in d.players) {
@@ -1230,7 +1375,7 @@
             }
             save_data(); 
             upd_ui();
-            alert(`Глобальный сброс применен к ${count} игрокам прямо в БД! Теперь ни один телефон не вернет старый ранг.`);
+            alert(`Глобальный сброс применен к ${count} игрокам прямо в БД!`);
             location.reload();
         }
 
@@ -1349,19 +1494,258 @@
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет данных</div>';
         }
 
+        // 🔴 РАНКЕД ОТКРЫТ И ЗАЩИЩЕН
+        let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_mode = 1, arena_target_max = 100;
+        let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0;
+        let is_game_over = false;
+
         window.start_ranked_search = function() {
-            alert('РАНКЕД ВРЕМЕННО ЗАКРЫТ НА ТЕХ. РАБОТЫ!');
-            return;
+            // АНТИ-ДОДЖ
+            localStorage.setItem(PREFIX + 'in_match', '1');
+
+            document.getElementById('ranked-modal').style.display = 'flex';
+            document.getElementById('ranked-status').innerText = 'Поиск противника...';
+            document.getElementById('arena-container').style.display = 'none';
+            document.getElementById('arena-exit-btn').style.display = 'none';
+            
+            setTimeout(() => { 
+                document.getElementById('ranked-status').innerText = `Противник найден: Bot_${Math.floor(Math.random()*9999)}`; 
+                setTimeout(start_arena, 1500); 
+            }, 2000);
         }
-        function start_arena() {}
-        function spawn_arena_target() {}
-        function check_autoclicker() { return true; }
-        function hit_arena_target() {}
-        function hit_arena_target_dot(btn) {}
-        function hit_mine(type) {}
-        function show_rankup_screen(rank_str, sound_file, glow_color) {}
-        function end_arena(is_win) {}
-        window.exit_arena = function() { document.getElementById('ranked-modal').style.display = 'none'; sync_cloud(); }
+
+        function start_arena() {
+            arena_my = 0; 
+            arena_bot = 0; 
+            click_times = []; 
+            arena_locked_until = 0;
+            is_game_over = false;
+            
+            document.getElementById('arena-my-score').innerText = 'Ты: 0'; 
+            document.getElementById('arena-bot-score').innerText = 'Бот: 0';
+            document.getElementById('arena-container').style.display = 'block';
+            
+            arena_mode = Math.floor(Math.random() * 3) + 1;
+            
+            if (arena_mode === 1) { 
+                arena_target_max = 100; 
+                document.getElementById('ranked-status').innerText = 'Режим: СПАМ (Нажми 100 раз)'; 
+            } else if (arena_mode === 2) { 
+                arena_target_max = 15; 
+                arena_dots_left = 3; 
+                document.getElementById('ranked-status').innerText = 'Режим: РЕАКЦИЯ (Сломай 15 точек)'; 
+            } else if (arena_mode === 3) { 
+                arena_target_max = 20; 
+                document.getElementById('ranked-status').innerText = 'Режим: МИННОЕ ПОЛЕ (Только зеленые!)'; 
+            }
+            
+            spawn_arena_target();
+            
+            // Защищенная формула бота
+            let bot_time_to_finish = Math.max(5, 28 - (Math.min(player_rank, 21) * 0.8)); 
+            let bot_interval_ms = (bot_time_to_finish * 1000) / arena_target_max;
+            
+            bot_int = setInterval(() => { 
+                arena_bot++; 
+                document.getElementById('arena-bot-score').innerText = 'Бот: ' + arena_bot; 
+                if(arena_bot >= arena_target_max) end_arena(false); 
+            }, bot_interval_ms);
+        }
+
+        function spawn_arena_target() {
+            let container = document.getElementById('arena-container');
+            container.innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`;
+            
+            if (arena_mode === 1 || arena_mode === 2) {
+                let btn = document.createElement('div'); 
+                btn.id = 'arena-btn-active';
+                if (arena_mode === 1) { 
+                    btn.className = 'arena-target-1'; 
+                    btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target(); }; 
+                    btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target(); }; 
+                } else { 
+                    btn.className = 'arena-target-2'; 
+                    btn.innerText = arena_dots_left; 
+                    btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
+                    btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
+                }
+                btn.style.left = `${10 + Math.random() * 70}%`; 
+                btn.style.top = `${20 + Math.random() * 60}%`; 
+                container.appendChild(btn);
+            } else if (arena_mode === 3) {
+                let g = document.createElement('div'); 
+                g.className = 'minefield-green'; 
+                g.onmousedown = (e) => { e.preventDefault(); hit_mine('green'); }; 
+                g.ontouchstart = (e) => { e.preventDefault(); hit_mine('green'); };
+                g.style.left = `${10 + Math.random() * 80}%`; 
+                g.style.top = `${20 + Math.random() * 70}%`; 
+                container.appendChild(g);
+                
+                for(let i=0; i<3; i++) {
+                    let r = document.createElement('div'); 
+                    r.className = 'minefield-red'; 
+                    r.onmousedown = (e) => { e.preventDefault(); hit_mine('red'); }; 
+                    r.ontouchstart = (e) => { e.preventDefault(); hit_mine('red'); };
+                    r.style.left = `${10 + Math.random() * 80}%`; 
+                    r.style.top = `${20 + Math.random() * 70}%`; 
+                    container.appendChild(r);
+                }
+            }
+        }
+
+        function check_autoclicker() {
+            let now = Date.now(); 
+            if (now < arena_locked_until) return false;
+            
+            click_times.push(now); 
+            if (click_times.length > 8) click_times.shift();
+            
+            if (click_times.length === 8 && (click_times[7] - click_times[0]) < 450) {
+                document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑'; 
+                document.getElementById('ranked-status').style.color = '#f00';
+                arena_locked_until = now + 3000; 
+                click_times = []; 
+                if(navigator.vibrate) navigator.vibrate([100, 100, 100]);
+                
+                setTimeout(() => { 
+                    let el = document.getElementById('ranked-status'); 
+                    if(el) { 
+                        el.style.color = '#aaa'; 
+                        el.innerText = 'В ИГРЕ...'; 
+                    } 
+                }, 3000);
+                return false;
+            } 
+            return true;
+        }
+
+        function hit_arena_target() {
+            if (is_game_over) return;
+            let now = Date.now(); 
+            if (now - last_hit_time < 20) return; 
+            last_hit_time = now;
+            
+            if(!check_autoclicker()) return; 
+            
+            arena_my++; 
+            document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
+            if(arena_my % 5 === 0) spawn_arena_target(); 
+            if(navigator.vibrate) navigator.vibrate(10);
+            if(arena_my >= arena_target_max) end_arena(true);
+        }
+
+        function hit_arena_target_dot(btn) {
+            if (is_game_over) return;
+            let now = Date.now(); 
+            if (now - last_hit_time < 20) return; 
+            last_hit_time = now;
+            
+            if(!check_autoclicker()) return; 
+            
+            arena_dots_left--; 
+            if(navigator.vibrate) navigator.vibrate(10);
+            
+            if(arena_dots_left <= 0) { 
+                arena_my++; 
+                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
+                if(arena_my >= arena_target_max) {
+                    end_arena(true); 
+                } else { 
+                    arena_dots_left = 3; 
+                    spawn_arena_target(); 
+                } 
+            } else {
+                btn.innerText = arena_dots_left;
+            }
+        }
+
+        function hit_mine(type) {
+            if (is_game_over) return;
+            let now = Date.now(); 
+            if (now < arena_locked_until) return;
+            
+            if (type === 'red') {
+                arena_my = Math.max(0, arena_my - 3); 
+                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
+                arena_locked_until = now + 1000; 
+                document.getElementById('arena-container').style.background = '#300';
+                
+                setTimeout(()=> {
+                    document.getElementById('arena-container').style.background = '#050505';
+                }, 1000);
+                
+                if(navigator.vibrate) navigator.vibrate([100, 100]);
+            } else {
+                arena_my++; 
+                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
+                if(navigator.vibrate) navigator.vibrate(10);
+                if(arena_my >= arena_target_max) {
+                    end_arena(true); 
+                } else {
+                    spawn_arena_target();
+                }
+            }
+        }
+
+        function show_rankup_screen(rank_str, sound_file, glow_color) {
+            document.getElementById('rankup-overlay-text').innerText = rank_str;
+            document.getElementById('rankup-glow').style.background = `radial-gradient(circle, ${glow_color} 0%, rgba(0,0,0,0) 70%)`;
+            document.getElementById('rankup-overlay-text').style.textShadow = `0 0 20px ${glow_color}, 0 0 40px ${glow_color}`;
+            document.getElementById('rankup-overlay').style.display = 'flex';
+            try { new Audio(sound_file).play(); } catch(e) {}
+        }
+
+        function end_arena(is_win) {
+            if (is_game_over) return;
+            is_game_over = true;
+            
+            clearInterval(bot_int); 
+            localStorage.removeItem(PREFIX + 'in_match');
+            
+            document.getElementById('arena-container').innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`;
+            document.getElementById('arena-exit-btn').style.display = 'block';
+            
+            if (is_win) {
+                document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
+                player_rank++;
+                
+                let is_major = (player_rank % 3 === 0 || player_rank === 21);
+                let l_idx = Math.floor(player_rank / 3); 
+                if(player_rank === 21) l_idx = 7;
+                let s_name = RANK_SOUNDS[Math.min(l_idx, 7)];
+                let s_col = RANK_COLORS[Math.min(l_idx, 7)];
+                
+                if (is_major) {
+                    show_rankup_screen(RANKS[player_rank], s_name, s_col);
+                }
+
+                if (player_rank > max_rank) {
+                    max_rank = player_rank;
+                    if(player_rank === 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; }
+                    if(player_rank === 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit += 15000; }
+                    if(player_rank === 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; }
+                    if(player_rank === 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; }
+                }
+                
+                if (global_event_data && global_event_data.active) { 
+                    let p = parseInt(localStorage.getItem(PREFIX+'pending_event_pts')) || 0; 
+                    localStorage.setItem(PREFIX+'pending_event_pts', p + 1); 
+                }
+                
+                save_data(); 
+                upd_ui();
+            } else { 
+                document.getElementById('ranked-status').innerText = 'ПОРАЖЕНИЕ! Ты потерял ранг.'; 
+                if(player_rank > 0) player_rank--; 
+                save_data(); 
+                upd_ui(); 
+            }
+        }
+
+        window.exit_arena = function() { 
+            document.getElementById('ranked-modal').style.display = 'none'; 
+            sync_cloud(); 
+        }
 
         function render_clubs_list() {
             let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
