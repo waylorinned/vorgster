@@ -511,161 +511,6 @@
             font-size: 12px; 
             margin-bottom: 0; 
         }
-
-        /* Арена */
-        .arena-container { 
-            width: 100%; 
-            height: 350px; 
-            background: #050505; 
-            border: 2px solid #444; 
-            border-radius: 15px; 
-            position: relative; 
-            margin-top: 15px; 
-            overflow: hidden; 
-        }
-        
-        .arena-hud { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 10px; 
-            background: #111; 
-            border-bottom: 1px solid #333; 
-            z-index: 5; 
-            position: relative; 
-        }
-        
-        .arena-score { 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #fff; 
-        }
-        
-        .arena-vs { 
-            font-size: 14px; 
-            color: #d4af37; 
-            font-weight: bold; 
-        }
-        
-        .arena-target-1 { 
-            position: absolute; 
-            width: 80px; 
-            height: 80px; 
-            background: radial-gradient(circle, #f00, #800); 
-            border-radius: 50%; 
-            border: 3px solid #fff; 
-            cursor: pointer; 
-            left: 50%; 
-            top: 50%; 
-            transform: translate(-50%, -50%); 
-            transition: all 0.1s; 
-        }
-        
-        .arena-target-1:active { 
-            transform: translate(-50%, -50%) scale(0.9); 
-        }
-        
-        .arena-target-2 { 
-            position: absolute; 
-            width: 60px; 
-            height: 60px; 
-            background: radial-gradient(circle, #0f0, #080); 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            cursor: pointer; 
-            left: 50%; 
-            top: 50%; 
-            transform: translate(-50%, -50%); 
-            color: #000; 
-            font-weight: bold; 
-            line-height: 56px; 
-            font-size: 24px; 
-            text-align: center; 
-        }
-        
-        .arena-target-2:active { 
-            transform: translate(-50%, -50%) scale(0.9); 
-        }
-        
-        .minefield-green { 
-            position: absolute; 
-            width: 65px; 
-            height: 65px; 
-            background: radial-gradient(circle, #0f0, #0a0); 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            cursor: pointer; 
-            transform: translate(-50%, -50%); 
-            z-index: 2; 
-        }
-        
-        .minefield-red { 
-            position: absolute; 
-            width: 65px; 
-            height: 65px; 
-            background: radial-gradient(circle, #f00, #a00); 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            cursor: pointer; 
-            transform: translate(-50%, -50%); 
-            z-index: 1; 
-        }
-
-        /* Оверлей Ранкапа */
-        #rankup-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 9999; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            text-align: center; 
-        }
-        
-        .rankup-glow { 
-            width: 300px; 
-            height: 300px; 
-            background: radial-gradient(circle, rgba(212,175,55,0.4) 0%, rgba(0,0,0,0) 70%); 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            animation: pulseGlow 2s infinite; 
-        }
-        
-        .rankup-text { 
-            font-size: 48px; 
-            font-weight: 900; 
-            color: #fff; 
-            text-shadow: 0 0 20px #d4af37, 0 0 40px #d4af37; 
-            z-index: 10; 
-            margin-bottom: 30px; 
-            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            text-transform: uppercase; 
-        }
-        
-        .rankup-sub { 
-            font-size: 16px; 
-            color: #aaa; 
-            z-index: 10; 
-            margin-bottom: 40px; 
-            animation: zoomIn 0.8s ease; 
-        }
-        
-        @keyframes pulseGlow { 
-            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 
-            100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 
-        }
-        
-        @keyframes zoomIn { 
-            0% { opacity: 0; transform: scale(0.3); } 
-            100% { opacity: 1; transform: scale(1); } 
-        }
     </style>
 </head>
 <body>
@@ -807,11 +652,11 @@
 
         <div id="tab-ranked" class="tab-content">
             <div class="upgrade-list">
-                <div class="club-card" style="margin-top: 10px;">
-                    <div style="font-size: 14px; color: #888;">Сезон 2 Активен!</div>
-                    <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
-                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота! Лив из катки = луз.</div>
-                    <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
+                <div class="club-card" style="margin-top: 10px; border-color: #f00;">
+                    <div style="font-size: 14px; color: #f00; font-weight: bold;">СИСТЕМА ОТКЛЮЧЕНА</div>
+                    <div class="club-name-big" style="color: #555;" id="rank-display">БРОНЗА I</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Ранкед закрыт на капитальную переработку в связи с критическими багами.</div>
+                    <button class="buy-btn disabled" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">РАНКЕД ЗАКРЫТ</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
                 <div style="font-size: 11px; color: #aaa; background: #111; padding: 10px; border-radius: 8px;">
@@ -851,6 +696,7 @@
             <div class="nav-item" onclick="sw_tab('rating', this)">рейтинг</div>
         </div>
 
+        <!-- Модальные окна -->
         <div id="offline-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-title">офлайн прибыль</div>
@@ -876,6 +722,7 @@
                     <div style="color: #d4af37; font-weight: bold; margin-bottom: 5px;">панель админа</div>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="toggle_event()">управление событием</button>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="create_promo()">выдать промокод</button>
+                    <!-- НОВЫЕ КНОПКИ ГЛОБАЛЬНОГО СБРОСА -->
                     <button class="buy-btn" style="width: 100%; margin-bottom: 5px; background: #411;" onclick="admin_reset_ranks(false)">мягкий сброс рангов</button>
                     <button class="buy-btn" style="width: 100%; margin-bottom: 5px; background: #711;" onclick="admin_reset_ranks(true)">жесткий сброс (минус баго-пассив)</button>
                 </div>
@@ -919,21 +766,6 @@
             </div>
         </div>
 
-        <div id="ranked-modal" class="modal-overlay" style="background: #000;">
-            <div class="modal-content" style="width: 100%; height: 100%; max-width: 100%; border-radius: 0; justify-content: flex-start; padding: 10px;">
-                <div class="modal-title" style="margin-top: 20px;">РАНКЕД</div>
-                <div id="ranked-status" style="font-size: 14px; color: #aaa; margin-bottom: 10px;">Поиск противника...</div>
-                <div class="arena-container" id="arena-container" style="display:none;">
-                    <div class="arena-hud">
-                        <div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: 0</div>
-                        <div class="arena-vs">VS</div>
-                        <div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: 0</div>
-                    </div>
-                </div>
-                <button class="buy-btn" id="arena-exit-btn" style="margin-top: 20px; display:none;" onclick="exit_arena()">ВЫЙТИ</button>
-            </div>
-        </div>
-
         <div id="auth-modal" class="modal-overlay" style="z-index: 9999; background: #000;">
             <div class="modal-content" style="background: #111; border: 1px solid #d4af37;">
                 <div class="modal-title">вход / регистрация</div>
@@ -944,17 +776,11 @@
             </div>
         </div>
 
-        <div id="rankup-overlay">
-            <div class="rankup-glow" id="rankup-glow"></div>
-            <div class="rankup-sub">НОВАЯ ЛИГА ДОСТИГНУТА!</div>
-            <div class="rankup-text" id="rankup-overlay-text">MYTHIC</div>
-            <button class="buy-btn gold" style="z-index: 10; padding: 15px 40px; font-size: 18px;" onclick="document.getElementById('rankup-overlay').style.display='none'">ЗАБРАТЬ</button>
-        </div>
-
     </div>
 
     <script>
-        const PREFIX = 'v2_';
+        // 🔴 ВАЖНО: СМЕНА КЛЮЧА. ВЫКИДЫВАЕТ ВСЕХ СТАРЫХ ИГРОКОВ НА ЭКРАН ВХОДА!
+        const PREFIX = 'v3_';
         let nickname = localStorage.getItem(PREFIX + 'nickname');
         let my_pin = localStorage.getItem(PREFIX + 'pin');
         
@@ -1005,9 +831,6 @@
             "Мастер I", "Мастер II", "Мастер III", 
             "ПРО"
         ];
-        
-        const RANK_COLORS = ['#cd7f32', '#c0c0c0', '#ffd700', '#00ffff', '#8a2be2', '#ff00ff', '#ff4500', '#ff0000'];
-        const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'mythic.mp3', 'legendary.mp3', 'masters.mp3', 'pro.mp3'];
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
@@ -1027,16 +850,6 @@
         const el_eng_max = document.getElementById('energy-max');
         const el_eng_fill = document.getElementById('energy-fill');
         const tap_area = document.getElementById('tap-area');
-
-        // АНТИ ДОДЖ ФИКС ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
-        if (localStorage.getItem(PREFIX + 'in_match') === '1') {
-            localStorage.removeItem(PREFIX + 'in_match');
-            if (player_rank > 0) {
-                player_rank--;
-            }
-            alert('🛑 Ты ливнул из ранкеда! Штраф: снят 1 ранг.');
-            save_data();
-        }
 
         if (!nickname || !my_pin) { 
             document.getElementById('auth-modal').style.display = 'flex'; 
@@ -1277,8 +1090,7 @@
                     clubs: rec.clubs || (rec.record && rec.record.clubs) || {}, 
                     global_event: rec.global_event || (rec.record && rec.record.global_event) || {active:false}, 
                     last_winner: rec.last_winner || (rec.record && rec.record.last_winner) || "",
-                    promocodes: rec.promocodes || (rec.record && rec.record.promocodes) || {},
-                    force_wipe_time: rec.force_wipe_time || (rec.record && rec.record.force_wipe_time) || 0
+                    promocodes: rec.promocodes || (rec.record && rec.record.promocodes) || {}
                 };
             } catch (e) { return null; }
         }
@@ -1292,22 +1104,6 @@
             try {
                 let d = await fetch_cloud(); 
                 if(!d) return; 
-                
-                // 🔴 ЗАЩИТА ОТ ВОЗВРАТА РАНГА (СЛУШАЕМ СИГНАЛ АДМИНА)
-                let wipe_time = d.force_wipe_time || 0;
-                let local_wipe = parseInt(localStorage.getItem(PREFIX + 'wipe_time')) || 0;
-                
-                if (wipe_time > local_wipe && d.players[nickname]) {
-                    // Сервер скомандовал сброс - принимаем его данные ПЕРЕД отправкой своих!
-                    player_rank = d.players[nickname].rank || 0;
-                    if (d.players[nickname].stats) {
-                        profit = d.players[nickname].stats[0] || profit;
-                        max_rank = d.players[nickname].stats[23] || 0;
-                    }
-                    localStorage.setItem(PREFIX + 'wipe_time', wipe_time);
-                    save_data();
-                    upd_ui();
-                }
                 
                 let players = d.players; 
                 let clubs = d.clubs; 
@@ -1346,13 +1142,11 @@
             } catch (e) {}
         }
         
-        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС С СИГНАЛОМ ДЛЯ ТЕЛЕФОНОВ
+        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС (И В БАЗЕ, И ЗАПРЕТИТЬ СОХРАНЕНИЕ)
         window.admin_reset_ranks = async function(is_hard) {
-            if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять баго-прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0 (без потери прибыли)?')) return;
+            if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять баго-прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0?')) return;
             let d = await fetch_cloud();
             if(!d) return alert("Ошибка связи с БД!");
-            
-            d.force_wipe_time = Date.now(); // СИГНАЛ ВСЕМ КЛИЕНТАМ НА СБРОС
             
             let count = 0;
             for (let k in d.players) {
@@ -1373,7 +1167,6 @@
             }
             await put_cloud(d);
             
-            localStorage.setItem(PREFIX + 'wipe_time', d.force_wipe_time);
             player_rank = 0;
             if(is_hard) {
                 let rm = 0;
@@ -1386,7 +1179,8 @@
             }
             save_data(); 
             upd_ui();
-            alert(`Глобальный сброс применен к ${count} игрокам прямо в БД! Теперь ни один телефон не вернет старый ранг.`);
+            alert(`Глобальный сброс применен к ${count} игрокам! База данных зачищена.`);
+            location.reload();
         }
 
         window.open_profile = function(user) {
@@ -1423,7 +1217,6 @@
             sync_cloud(true);
         };
 
-        // 🔴 ПРОМОКОДЫ
         window.create_promo = async function() {
             let amt = parseInt(prompt("Сколько воргиков дать за этот промокод?"));
             if (!amt || amt <= 0) return;
@@ -1505,508 +1298,88 @@
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет данных</div>';
         }
 
-        let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_mode = 1, arena_target_max = 100;
-        let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0;
-        let is_game_over = false; 
-
+        // 🔴 РАНКЕД ЗАКРЫТ НАГЛУХО
         window.start_ranked_search = function() {
-            // АНТИ-ДОДЖ
-            localStorage.setItem(PREFIX + 'in_match', '1');
-
-            document.getElementById('ranked-modal').style.display = 'flex';
-            document.getElementById('ranked-status').innerText = 'Поиск противника...';
-            document.getElementById('arena-container').style.display = 'none';
-            document.getElementById('arena-exit-btn').style.display = 'none';
-            
-            setTimeout(() => { 
-                document.getElementById('ranked-status').innerText = `Противник найден: Bot_${Math.floor(Math.random()*9999)}`; 
-                setTimeout(start_arena, 1500); 
-            }, 2000);
-        }
-
-        function start_arena() {
-            arena_my = 0; 
-            arena_bot = 0; 
-            click_times = []; 
-            arena_locked_until = 0;
-            is_game_over = false;
-            
-            document.getElementById('arena-my-score').innerText = 'Ты: 0'; 
-            document.getElementById('arena-bot-score').innerText = 'Бот: 0';
-            document.getElementById('arena-container').style.display = 'block';
-            
-            arena_mode = Math.floor(Math.random() * 3) + 1; // 1, 2, 3
-            
-            if (arena_mode === 1) { 
-                arena_target_max = 100; 
-                document.getElementById('ranked-status').innerText = 'Режим: СПАМ (Нажми 100 раз)'; 
-            } else if (arena_mode === 2) { 
-                arena_target_max = 15; 
-                arena_dots_left = 3; 
-                document.getElementById('ranked-status').innerText = 'Режим: РЕАКЦИЯ (Сломай 15 точек)'; 
-            } else if (arena_mode === 3) { 
-                arena_target_max = 20; 
-                document.getElementById('ranked-status').innerText = 'Режим: МИННОЕ ПОЛЕ (Только зеленые!)'; 
-            }
-            
-            spawn_arena_target();
-            
-            // 🔴 ФИКС СКОРОСТИ БОТА (никогда не уйдет в минус)
-            let bot_time_to_finish = Math.max(5, 28 - (Math.min(player_rank, 21) * 0.8)); 
-            let bot_interval_ms = (bot_time_to_finish * 1000) / arena_target_max;
-            
-            bot_int = setInterval(() => { 
-                arena_bot++; 
-                document.getElementById('arena-bot-score').innerText = 'Бот: ' + arena_bot; 
-                if(arena_bot >= arena_target_max) end_arena(false); 
-            }, bot_interval_ms);
-        }
-
-        function spawn_arena_target() {
-            let container = document.getElementById('arena-container');
-            container.innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`;
-            
-            if (arena_mode === 1 || arena_mode === 2) {
-                let btn = document.createElement('div'); 
-                btn.id = 'arena-btn-active';
-                if (arena_mode === 1) { 
-                    btn.className = 'arena-target-1'; 
-                    btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target(); }; 
-                    btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target(); }; 
-                } else { 
-                    btn.className = 'arena-target-2'; 
-                    btn.innerText = arena_dots_left; 
-                    btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
-                    btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
-                }
-                btn.style.left = `${10 + Math.random() * 70}%`; 
-                btn.style.top = `${20 + Math.random() * 60}%`; 
-                container.appendChild(btn);
-            } else if (arena_mode === 3) {
-                let g = document.createElement('div'); 
-                g.className = 'minefield-green'; 
-                g.onmousedown = (e) => { e.preventDefault(); hit_mine('green'); }; 
-                g.ontouchstart = (e) => { e.preventDefault(); hit_mine('green'); };
-                g.style.left = `${10 + Math.random() * 80}%`; 
-                g.style.top = `${20 + Math.random() * 70}%`; 
-                container.appendChild(g);
-                
-                for(let i=0; i<3; i++) {
-                    let r = document.createElement('div'); 
-                    r.className = 'minefield-red'; 
-                    r.onmousedown = (e) => { e.preventDefault(); hit_mine('red'); }; 
-                    r.ontouchstart = (e) => { e.preventDefault(); hit_mine('red'); };
-                    r.style.left = `${10 + Math.random() * 80}%`; 
-                    r.style.top = `${20 + Math.random() * 70}%`; 
-                    container.appendChild(r);
-                }
-            }
-        }
-
-        function check_autoclicker() {
-            let now = Date.now(); 
-            if (now < arena_locked_until) return false;
-            
-            click_times.push(now); 
-            if (click_times.length > 8) click_times.shift();
-            
-            if (click_times.length === 8 && (click_times[7] - click_times[0]) < 450) {
-                document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑'; 
-                document.getElementById('ranked-status').style.color = '#f00';
-                arena_locked_until = now + 3000; 
-                click_times = []; 
-                if(navigator.vibrate) navigator.vibrate([100, 100, 100]);
-                
-                setTimeout(() => { 
-                    let el = document.getElementById('ranked-status'); 
-                    if(el) { 
-                        el.style.color = '#aaa'; 
-                        el.innerText = 'В ИГРЕ...'; 
-                    } 
-                }, 3000);
-                return false;
-            } 
-            return true;
-        }
-
-        function hit_arena_target() {
-            if (is_game_over) return;
-            let now = Date.now(); 
-            if (now - last_hit_time < 20) return; 
-            last_hit_time = now;
-            
-            if(!check_autoclicker()) return; 
-            
-            arena_my++; 
-            document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
-            if(arena_my % 5 === 0) spawn_arena_target(); 
-            if(navigator.vibrate) navigator.vibrate(10);
-            if(arena_my >= arena_target_max) end_arena(true);
-        }
-
-        function hit_arena_target_dot(btn) {
-            if (is_game_over) return;
-            let now = Date.now(); 
-            if (now - last_hit_time < 20) return; 
-            last_hit_time = now;
-            
-            if(!check_autoclicker()) return; 
-            
-            arena_dots_left--; 
-            if(navigator.vibrate) navigator.vibrate(10);
-            
-            if(arena_dots_left <= 0) { 
-                arena_my++; 
-                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
-                if(arena_my >= arena_target_max) {
-                    end_arena(true); 
-                } else { 
-                    arena_dots_left = 3; 
-                    spawn_arena_target(); 
-                } 
-            } else {
-                btn.innerText = arena_dots_left;
-            }
-        }
-
-        function hit_mine(type) {
-            if (is_game_over) return;
-            let now = Date.now(); 
-            if (now < arena_locked_until) return;
-            
-            if (type === 'red') {
-                arena_my = Math.max(0, arena_my - 3); 
-                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
-                arena_locked_until = now + 1000; 
-                document.getElementById('arena-container').style.background = '#300';
-                
-                setTimeout(()=> {
-                    document.getElementById('arena-container').style.background = '#050505';
-                }, 1000);
-                
-                if(navigator.vibrate) navigator.vibrate([100, 100]);
-            } else {
-                arena_my++; 
-                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my;
-                if(navigator.vibrate) navigator.vibrate(10);
-                if(arena_my >= arena_target_max) {
-                    end_arena(true); 
-                } else {
-                    spawn_arena_target();
-                }
-            }
-        }
-
-        function show_rankup_screen(rank_str, sound_file, glow_color) {
-            document.getElementById('rankup-overlay-text').innerText = rank_str;
-            document.getElementById('rankup-glow').style.background = `radial-gradient(circle, ${glow_color} 0%, rgba(0,0,0,0) 70%)`;
-            document.getElementById('rankup-overlay-text').style.textShadow = `0 0 20px ${glow_color}, 0 0 40px ${glow_color}`;
-            document.getElementById('rankup-overlay').style.display = 'flex';
-            try { 
-                new Audio(sound_file).play(); 
-            } catch(e) {}
-        }
-
-        function end_arena(is_win) {
-            if (is_game_over) return;
-            is_game_over = true;
-            
-            clearInterval(bot_int); 
-            localStorage.removeItem(PREFIX + 'in_match'); // Снимаем флаг лива
-            
-            // 🔴 ФИКС МНОЖЕСТВЕННЫХ КЛИКОВ: Очищаем арену от любых кнопок/мин
-            document.getElementById('arena-container').innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`;
-            
-            document.getElementById('arena-exit-btn').style.display = 'block';
-            
-            if (is_win) {
-                document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!';
-                player_rank++;
-                
-                let is_major = (player_rank % 3 === 0 || player_rank === 21);
-                let l_idx = Math.floor(player_rank / 3); 
-                if(player_rank === 21) l_idx = 7;
-                let s_name = RANK_SOUNDS[Math.min(l_idx, 7)];
-                let s_col = RANK_COLORS[Math.min(l_idx, 7)];
-                
-                if (is_major) {
-                    show_rankup_screen(RANKS[player_rank], s_name, s_col);
-                }
-
-                if (player_rank > max_rank) {
-                    max_rank = player_rank;
-                    if(player_rank === 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; }
-                    if(player_rank === 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit += 15000; }
-                    if(player_rank === 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; }
-                    if(player_rank === 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; }
-                }
-                
-                if (global_event_data && global_event_data.active) { 
-                    let p = parseInt(localStorage.getItem(PREFIX+'pending_event_pts')) || 0; 
-                    localStorage.setItem(PREFIX+'pending_event_pts', p + 1); 
-                }
-                
-                save_data(); 
-                upd_ui();
-            } else { 
-                document.getElementById('ranked-status').innerText = 'ПОРАЖЕНИЕ! Ты потерял ранг.'; 
-                if(player_rank > 0) player_rank--; 
-                save_data(); 
-                upd_ui(); 
-            }
-        }
-
-        window.exit_arena = function() { 
-            document.getElementById('ranked-modal').style.display = 'none'; 
-            sync_cloud(); 
+            alert('РАНКЕД ВРЕМЕННО ЗАКРЫТ НА ТЕХ. РАБОТЫ!');
+            return;
         }
 
         function render_clubs_list() {
-            let my_c = localStorage.getItem(PREFIX + 'club'); 
-            let html = '';
-            
-            if (global_event_data && global_event_data.active) { 
-                html += `<div style="background: #2a1100; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;"><div style="color: #d4af37; font-weight: bold; text-transform: uppercase;">🔥 ИВЕНТ: ${global_event_data.name} 🔥</div><div style="font-size: 11px; color: #aaa; margin-top: 5px;">1 победа в ранкеде = 1 очко клубу. Топ-3 получают бафф пассива на 3 дня и золотую корону!</div></div>`; 
-            }
-            
-            if (my_c && cached_clubs[my_c]) { 
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`; 
-            } else { 
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`; 
-            }
-            
-            html += `<div class="section-title">список клубов</div>`; 
-            let count = 0;
-            
+            let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
+            if (global_event_data && global_event_data.active) { html += `<div style="background: #2a1100; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;"><div style="color: #d4af37; font-weight: bold; text-transform: uppercase;">🔥 ИВЕНТ: ${global_event_data.name} 🔥</div><div style="font-size: 11px; color: #aaa; margin-top: 5px;">1 победа в ранкеде = 1 очко клубу. Топ-3 получают бафф пассива на 3 дня и золотую корону!</div></div>`; }
+            if (my_c && cached_clubs[my_c]) { html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`; } 
+            else { html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`; }
+            html += `<div class="section-title">список клубов</div>`; let count = 0;
             for (let name in cached_clubs) { 
-                count++; 
-                let c = cached_clubs[name]; 
-                let crown = (name === cached_last_winner) ? ' 👑' : '';
+                count++; let c = cached_clubs[name]; let crown = (name === cached_last_winner) ? ' 👑' : '';
                 html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')"><div class="upgrade-info"><span class="upgrade-name">${name}${crown}</span><span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span></div><div style="font-size: 20px;">ℹ️</div></div>`; 
             }
-            
-            if(count === 0) { 
-                html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`; 
-            }
+            if(count === 0) { html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`; }
             document.getElementById('club-content').innerHTML = html;
         }
 
         window.open_club_details = function(name, is_silent_update = false) {
-            let c = cached_clubs[name]; 
-            if(!c) return;
-            
-            let total_vrgk = 0; 
-            c.members.forEach(m => { 
-                if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); 
-            }); 
-            
-            let crown = (name === cached_last_winner) ? ' 👑' : '';
-            
+            let c = cached_clubs[name]; if(!c) return;
+            let total_vrgk = 0; c.members.forEach(m => { if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); }); let crown = (name === cached_last_winner) ? ' 👑' : '';
             let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;"><button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}</div>`;
             html += `<div class="club-card"><div class="club-badge">🔥</div><div class="club-name-big">${name}${crown}</div><div class="club-trophies">🏆 ${fmt(total_vrgk)}</div><div class="club-desc-box">${c.desc || 'нет описания'}</div><div class="club-stats-grid"><div class="cs-box"><div class="cs-title">тег клуба</div><div class="cs-val">${c.tag || gen_tag()}</div></div><div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div><div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div>`;
-            
-            if (global_event_data && global_event_data.active) { 
-                html += `<div class="cs-box" style="background: #311; border-color: #d4af37; grid-column: span 2;"><div class="cs-title" style="color: #d4af37;">очки ивента</div><div class="cs-val" style="color: #fff;">${c.event_pts || 0} 🏆</div></div>`; 
-            }
-            
+            if (global_event_data && global_event_data.active) { html += `<div class="cs-box" style="background: #311; border-color: #d4af37; grid-column: span 2;"><div class="cs-title" style="color: #d4af37;">очки ивента</div><div class="cs-val" style="color: #fff;">${c.event_pts || 0} 🏆</div></div>`; }
             html += `</div>`;
-            
-            if (localStorage.getItem(PREFIX + 'club') !== name) { 
-                html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`; 
-            }
-            
+            if (localStorage.getItem(PREFIX + 'club') !== name) { html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`; }
             html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`;
             let mems = c.members.map(m => { return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; }).sort((a,b) => b.vrgk - a.vrgk);
-            
-            mems.forEach((m, idx) => { 
-                let is_online = timeAgo(m.ls) === "в сети"; 
-                html += `<div class="member-list-item" onclick="open_profile('${m.name}')"><div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div><div class="ml-info" style="flex: 1; padding-left: 10px;"><div class="ml-name">${m.name}</div><div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div></div><div style="text-align: right;"><div class="ml-score">🪙 ${fmt(m.vrgk)}</div><div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div></div></div>`; 
-            });
-            
+            mems.forEach((m, idx) => { let is_online = timeAgo(m.ls) === "в сети"; html += `<div class="member-list-item" onclick="open_profile('${m.name}')"><div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div><div class="ml-info" style="flex: 1; padding-left: 10px;"><div class="ml-name">${m.name}</div><div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div></div><div style="text-align: right;"><div class="ml-score">🪙 ${fmt(m.vrgk)}</div><div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div></div></div>`; });
             if (c.owner === nickname && c.reqs && c.reqs.length > 0) {
                 html += `<div style="text-align: left; font-weight: bold; margin-top: 10px; font-size: 12px; color: #d4af37;">Заявки (${c.reqs.length}):</div>`;
-                c.reqs.forEach(r => { 
-                    html += `<div class="member-list-item"><div style="flex: 1; text-align: left; font-weight: bold;">${r}</div><button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button><button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button></div>`; 
-                });
+                c.reqs.forEach(r => { html += `<div class="member-list-item"><div style="flex: 1; text-align: left; font-weight: bold;">${r}</div><button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button><button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button></div>`; });
             }
-            
             if (localStorage.getItem(PREFIX + 'club') === name) {
                 html += `<div class="chat-container"><div class="chat-msgs" id="chat-msgs-box">`;
-                if(c.chat && c.chat.length > 0) { 
-                    c.chat.forEach(msg => { html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; }); 
-                } else { 
-                    html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; 
-                }
+                if(c.chat && c.chat.length > 0) { c.chat.forEach(msg => { html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; }); } else { html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; }
                 html += `</div><div class="chat-input-area"><input type="text" id="chat-input" placeholder="сообщение..." maxlength="100"><button class="buy-btn gold" onclick="send_chat('${name}')">></button></div></div>`;
             }
-            
-            let modal = document.getElementById('view-club-modal'); 
-            modal.setAttribute('data-club', name); 
-            document.getElementById('view-club-content').innerHTML = html; 
-            modal.style.display = 'flex';
-            
-            if(!is_silent_update) { 
-                let chatBox = document.getElementById('chat-msgs-box'); 
-                if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
-            }
+            let modal = document.getElementById('view-club-modal'); modal.setAttribute('data-club', name); document.getElementById('view-club-content').innerHTML = html; modal.style.display = 'flex';
+            if(!is_silent_update) { let chatBox = document.getElementById('chat-msgs-box'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }
         }
 
         window.submit_club = async function() {
-            let name = document.getElementById('c-name').value.trim(); 
-            let desc = document.getElementById('c-desc').value.trim();
-            let req = parseInt(document.getElementById('c-req').value) || 0; 
-            let type = document.getElementById('c-type').value;
-            
-            if(!name) return alert('введи название!'); 
-            document.getElementById('create-club-modal').style.display = 'none';
-            
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            if(d.clubs[name]) return alert('клуб с таким именем уже есть!');
-            
+            let name = document.getElementById('c-name').value.trim(); let desc = document.getElementById('c-desc').value.trim(); let req = parseInt(document.getElementById('c-req').value) || 0; let type = document.getElementById('c-type').value;
+            if(!name) return alert('введи название!'); document.getElementById('create-club-modal').style.display = 'none';
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); if(d.clubs[name]) return alert('клуб с таким именем уже есть!');
             d.clubs[name] = { desc: desc, req: req, type: type, owner: nickname, members: [nickname], reqs: [], tag: gen_tag(), chat: [] };
-            d.players[nickname].club = name; 
-            localStorage.setItem(PREFIX + 'club', name); 
-            await put_cloud(d); 
-            sync_cloud();
+            d.players[nickname].club = name; localStorage.setItem(PREFIX + 'club', name); await put_cloud(d); sync_cloud();
         };
 
         window.join_club = async function(name) {
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            let c = d.clubs[name]; 
-            if(!c) return;
-            
-            if(vrgk < c.req) return alert('мало воргиков для входа!'); 
-            if(c.type === 'закрытый') return alert('клуб закрыт');
-            if(c.type === 'по заявкам') { 
-                if(!c.reqs) c.reqs = []; 
-                if(!c.reqs.includes(nickname)) c.reqs.push(nickname); 
-                await put_cloud(d); 
-                alert('заявка отправлена!'); 
-                return; 
-            }
-            
+            let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); let c = d.clubs[name]; if(!c) return;
+            if(vrgk < c.req) return alert('мало воргиков для входа!'); if(c.type === 'закрытый') return alert('клуб закрыт');
+            if(c.type === 'по заявкам') { if(!c.reqs) c.reqs = []; if(!c.reqs.includes(nickname)) c.reqs.push(nickname); await put_cloud(d); alert('заявка отправлена!'); return; }
             if(!c.members.includes(nickname)) c.members.push(nickname);
-            d.players[nickname].club = name; 
-            localStorage.setItem(PREFIX + 'club', name); 
-            await put_cloud(d); 
-            document.getElementById('view-club-modal').style.display = 'none'; 
-            sync_cloud();
+            d.players[nickname].club = name; localStorage.setItem(PREFIX + 'club', name); await put_cloud(d); document.getElementById('view-club-modal').style.display = 'none'; sync_cloud();
         };
 
         window.leave_club = async function() {
-            if(!confirm('точно выйти из клуба?')) return; 
-            let my_c = localStorage.getItem(PREFIX + 'club');
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!');
-            
-            if (d.clubs[my_c]) { 
-                let c = d.clubs[my_c]; 
-                c.members = c.members.filter(m => m !== nickname); 
-                if (c.owner === nickname) { 
-                    if (c.members.length > 0) { 
-                        c.owner = c.members[0]; 
-                    } else { 
-                        delete d.clubs[my_c]; 
-                    } 
-                } 
-            }
-            
-            delete d.players[nickname].club; 
-            localStorage.removeItem(PREFIX + 'club'); 
-            await put_cloud(d); 
-            document.getElementById('view-club-modal').style.display = 'none'; 
-            sync_cloud();
+            if(!confirm('точно выйти из клуба?')) return; let my_c = localStorage.getItem(PREFIX + 'club'); let d = await fetch_cloud(); if(!d) return alert('Ошибка!');
+            if (d.clubs[my_c]) { let c = d.clubs[my_c]; c.members = c.members.filter(m => m !== nickname); if (c.owner === nickname) { if (c.members.length > 0) { c.owner = c.members[0]; } else { delete d.clubs[my_c]; } } }
+            delete d.players[nickname].club; localStorage.removeItem(PREFIX + 'club'); await put_cloud(d); document.getElementById('view-club-modal').style.display = 'none'; sync_cloud();
         };
 
-        window.acc_req = async function(cname, user) { 
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            let c = d.clubs[cname]; 
-            if (c) { 
-                c.reqs = c.reqs.filter(r => r !== user); 
-                if(!c.members.includes(user)) c.members.push(user); 
-                if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0, rank:0}; 
-                d.players[user].club = cname; 
-                await put_cloud(d); 
-                open_club_details(cname); 
-            } 
-        };
-        
-        window.rej_req = async function(cname, user) { 
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            let c = d.clubs[cname]; 
-            if (c) { 
-                c.reqs = c.reqs.filter(r => r !== user); 
-                await put_cloud(d); 
-                open_club_details(cname); 
-            } 
-        };
-        
-        window.send_chat = async function(cname) { 
-            let inp = document.getElementById('chat-input'); 
-            let txt = inp.value.trim(); 
-            if(!txt) return; 
-            inp.value = ''; 
-            
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            let c = d.clubs[cname]; 
-            if(c) { 
-                if(!c.chat) c.chat = []; 
-                c.chat.push({a: nickname, t: txt}); 
-                if(c.chat.length > 30) c.chat.shift(); 
-                await put_cloud(d); 
-                open_club_details(cname); 
-                setTimeout(() => { 
-                    let chatBox = document.getElementById('chat-msgs-box'); 
-                    if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
-                }, 50); 
-            } 
-        }
+        window.acc_req = async function(cname, user) { let d = await fetch_cloud(); if(!d) return alert('Ошибка!'); let c = d.clubs[cname]; if (c) { c.reqs = c.reqs.filter(r => r !== user); if(!c.members.includes(user)) c.members.push(user); if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0, rank:0}; d.players[user].club = cname; await put_cloud(d); open_club_details(cname); } };
+        window.rej_req = async function(cname, user) { let d = await fetch_cloud(); if(!d) return; let c = d.clubs[cname]; if (c) { c.reqs = c.reqs.filter(r => r !== user); await put_cloud(d); open_club_details(cname); } };
+        window.send_chat = async function(cname) { let inp = document.getElementById('chat-input'); let txt = inp.value.trim(); if(!txt) return; inp.value = ''; let d = await fetch_cloud(); if(!d) return; let c = d.clubs[cname]; if(c) { if(!c.chat) c.chat = []; c.chat.push({a: nickname, t: txt}); if(c.chat.length > 30) c.chat.shift(); await put_cloud(d); open_club_details(cname); setTimeout(() => { let chatBox = document.getElementById('chat-msgs-box'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }, 50); } }
 
         window.sw_tab = function(tabid, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`tab-${tabid}`).classList.add('active'); 
-            el.classList.add('active');
-            
-            if (tabid === 'rating' || tabid === 'clubs') { 
-                if (Date.now() - last_sync > 60000) { 
-                    sync_cloud(); 
-                } else { 
-                    if (tabid === 'rating') render_leaderboard(); 
-                    if (tabid === 'clubs') render_clubs_list(); 
-                } 
-            }
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`tab-${tabid}`).classList.add('active'); el.classList.add('active');
+            if (tabid === 'rating' || tabid === 'clubs') { if (Date.now() - last_sync > 60000) { sync_cloud(); } else { if (tabid === 'rating') render_leaderboard(); if (tabid === 'clubs') render_clubs_list(); } }
         };
 
-        window.change_nick = async function() { 
-            alert('Смена ника временно отключена.'); 
-        }
-        
+        window.change_nick = async function() { alert('Смена ника временно отключена.'); }
         window.delete_acc = async function() {
-            if(!confirm('удалить аккаунт?')) return; 
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            
+            if(!confirm('удалить аккаунт?')) return; let d = await fetch_cloud(); if(!d) return; 
             if(nickname && d.players[nickname]) delete d.players[nickname];
-            let my_c = localStorage.getItem(PREFIX + 'club'); 
-            if(my_c && d.clubs[my_c]) { 
-                d.clubs[my_c].members = d.clubs[my_c].members.filter(m => m !== nickname); 
-                if(d.clubs[my_c].owner === nickname) { 
-                    if (d.clubs[my_c].members.length > 0) { 
-                        d.clubs[my_c].owner = d.clubs[my_c].members[0]; 
-                    } else { 
-                        delete d.clubs[my_c]; 
-                    } 
-                } 
-            }
-            await put_cloud(d); 
-            localStorage.clear(); 
-            location.reload();
+            let my_c = localStorage.getItem(PREFIX + 'club'); if(my_c && d.clubs[my_c]) { d.clubs[my_c].members = d.clubs[my_c].members.filter(m => m !== nickname); if(d.clubs[my_c].owner === nickname) { if (d.clubs[my_c].members.length > 0) { d.clubs[my_c].owner = d.clubs[my_c].members[0]; } else { delete d.clubs[my_c]; } } }
+            await put_cloud(d); localStorage.clear(); location.reload();
         };
     </script>
 </body>
