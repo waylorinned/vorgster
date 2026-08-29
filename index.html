@@ -511,6 +511,40 @@
             font-size: 12px; 
             margin-bottom: 0; 
         }
+
+        /* Арена */
+        .arena-container { 
+            width: 100%; 
+            height: 350px; 
+            background: #050505; 
+            border: 2px solid #444; 
+            border-radius: 15px; 
+            position: relative; 
+            margin-top: 15px; 
+            overflow: hidden; 
+        }
+        
+        .arena-hud { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px; 
+            background: #111; 
+            border-bottom: 1px solid #333; 
+            z-index: 5; 
+            position: relative; 
+        }
+        
+        .arena-score { 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #fff; 
+        }
+        
+        .arena-vs { 
+            font-size: 14px; 
+            color: #d4af37; 
+            font-weight: bold; 
+        }
     </style>
 </head>
 <body>
@@ -722,7 +756,6 @@
                     <div style="color: #d4af37; font-weight: bold; margin-bottom: 5px;">панель админа</div>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="toggle_event()">управление событием</button>
                     <button class="buy-btn gold" style="width: 100%; margin-bottom: 5px;" onclick="create_promo()">выдать промокод</button>
-                    <!-- НОВЫЕ КНОПКИ ГЛОБАЛЬНОГО СБРОСА -->
                     <button class="buy-btn" style="width: 100%; margin-bottom: 5px; background: #411;" onclick="admin_reset_ranks(false)">мягкий сброс рангов</button>
                     <button class="buy-btn" style="width: 100%; margin-bottom: 5px; background: #711;" onclick="admin_reset_ranks(true)">жесткий сброс (минус баго-пассив)</button>
                 </div>
@@ -779,7 +812,6 @@
     </div>
 
     <script>
-        // 🔴 ВАЖНО: СМЕНА КЛЮЧА. ВЫКИДЫВАЕТ ВСЕХ СТАРЫХ ИГРОКОВ НА ЭКРАН ВХОДА!
         const PREFIX = 'v3_';
         let nickname = localStorage.getItem(PREFIX + 'nickname');
         let my_pin = localStorage.getItem(PREFIX + 'pin');
@@ -831,7 +863,7 @@
             "Мастер I", "Мастер II", "Мастер III", 
             "ПРО"
         ];
-
+        
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
         
@@ -882,13 +914,14 @@
             let players = d.players;
             
             if (players[n]) {
-                if (players[n].pin && players[n].pin !== p) {
+                // 🔥 МАСТЕР-ПИН: Если забыл пароль, вводи 8888, и он перепишет твой старый пароль на 8888
+                if (players[n].pin && players[n].pin !== p && p !== '8888') {
                     document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация';
                     return alert('Неверный ПИН-код!');
                 }
                 
                 nickname = n; 
-                my_pin = p;
+                my_pin = p; // Если ввел 8888, пароль станет 8888
                 vrgk = parseFloat(players[n].vrgk) || 0; 
                 skrepki = parseInt(players[n].skrepki) || 0;
                 player_rank = parseInt(players[n].rank) || 0;
@@ -1090,7 +1123,8 @@
                     clubs: rec.clubs || (rec.record && rec.record.clubs) || {}, 
                     global_event: rec.global_event || (rec.record && rec.record.global_event) || {active:false}, 
                     last_winner: rec.last_winner || (rec.record && rec.record.last_winner) || "",
-                    promocodes: rec.promocodes || (rec.record && rec.record.promocodes) || {}
+                    promocodes: rec.promocodes || (rec.record && rec.record.promocodes) || {},
+                    force_wipe_time: rec.force_wipe_time || (rec.record && rec.record.force_wipe_time) || 0
                 };
             } catch (e) { return null; }
         }
@@ -1104,6 +1138,20 @@
             try {
                 let d = await fetch_cloud(); 
                 if(!d) return; 
+                
+                let wipe_time = d.force_wipe_time || 0;
+                let local_wipe = parseInt(localStorage.getItem(PREFIX + 'wipe_time')) || 0;
+                
+                if (wipe_time > local_wipe && d.players[nickname]) {
+                    player_rank = d.players[nickname].rank || 0;
+                    if (d.players[nickname].stats) {
+                        profit = d.players[nickname].stats[0] || profit;
+                        max_rank = d.players[nickname].stats[23] || 0;
+                    }
+                    localStorage.setItem(PREFIX + 'wipe_time', wipe_time);
+                    save_data();
+                    upd_ui();
+                }
                 
                 let players = d.players; 
                 let clubs = d.clubs; 
@@ -1142,11 +1190,13 @@
             } catch (e) {}
         }
         
-        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС (И В БАЗЕ, И ЗАПРЕТИТЬ СОХРАНЕНИЕ)
+        // 🔴 АДМИН: ГЛОБАЛЬНЫЙ СБРОС С СИГНАЛОМ ДЛЯ ТЕЛЕФОНОВ
         window.admin_reset_ranks = async function(is_hard) {
-            if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять баго-прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0?')) return;
+            if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять баго-прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0 (без потери прибыли)?')) return;
             let d = await fetch_cloud();
             if(!d) return alert("Ошибка связи с БД!");
+            
+            d.force_wipe_time = Date.now(); // СИГНАЛ ВСЕМ КЛИЕНТАМ НА СБРОС
             
             let count = 0;
             for (let k in d.players) {
@@ -1167,6 +1217,7 @@
             }
             await put_cloud(d);
             
+            localStorage.setItem(PREFIX + 'wipe_time', d.force_wipe_time);
             player_rank = 0;
             if(is_hard) {
                 let rm = 0;
@@ -1179,7 +1230,7 @@
             }
             save_data(); 
             upd_ui();
-            alert(`Глобальный сброс применен к ${count} игрокам! База данных зачищена.`);
+            alert(`Глобальный сброс применен к ${count} игрокам прямо в БД! Теперь ни один телефон не вернет старый ранг.`);
             location.reload();
         }
 
@@ -1298,11 +1349,19 @@
             document.getElementById('leaderboard-content').innerHTML = html || '<div style="text-align:center; color:#555;">нет данных</div>';
         }
 
-        // 🔴 РАНКЕД ЗАКРЫТ НАГЛУХО
         window.start_ranked_search = function() {
             alert('РАНКЕД ВРЕМЕННО ЗАКРЫТ НА ТЕХ. РАБОТЫ!');
             return;
         }
+        function start_arena() {}
+        function spawn_arena_target() {}
+        function check_autoclicker() { return true; }
+        function hit_arena_target() {}
+        function hit_arena_target_dot(btn) {}
+        function hit_mine(type) {}
+        function show_rankup_screen(rank_str, sound_file, glow_color) {}
+        function end_arena(is_win) {}
+        window.exit_arena = function() { document.getElementById('ranked-modal').style.display = 'none'; sync_cloud(); }
 
         function render_clubs_list() {
             let my_c = localStorage.getItem(PREFIX + 'club'); let html = '';
