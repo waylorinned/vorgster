@@ -810,8 +810,8 @@
                 <div class="club-card" style="margin-top: 10px;">
                     <div style="font-size: 14px; color: #888;">Сезон 2: Идет фикс багов</div>
                     <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
-                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота! Лив из катки = луз.</div>
-                    <button class="buy-btn disabled" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">РАНКЕД ОТКЛЮЧЕН</button>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Ранкед на техобслуживании. Скоро вернемся!</div>
+                    <button class="buy-btn disabled" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">РАНКЕД ЗАКРЫТ</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
                 <div style="font-size: 11px; color: #aaa; background: #111; padding: 10px; border-radius: 8px;">
@@ -921,15 +921,7 @@
         <div id="ranked-modal" class="modal-overlay" style="background: #000;">
             <div class="modal-content" style="width: 100%; height: 100%; max-width: 100%; border-radius: 0; justify-content: flex-start; padding: 10px;">
                 <div class="modal-title" style="margin-top: 20px;">РАНКЕД</div>
-                <div id="ranked-status" style="font-size: 14px; color: #aaa; margin-bottom: 10px;">Поиск противника...</div>
-                <div class="arena-container" id="arena-container" style="display:none;">
-                    <div class="arena-hud">
-                        <div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: 0</div>
-                        <div class="arena-vs">VS</div>
-                        <div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: 0</div>
-                    </div>
-                </div>
-                <button class="buy-btn" id="arena-exit-btn" style="margin-top: 20px; display:none;" onclick="exit_arena()">ВЫЙТИ</button>
+                <div id="ranked-status" style="font-size: 14px; color: #aaa; margin-bottom: 10px;">Ранкед на техобслуживании</div>
             </div>
         </div>
 
@@ -1048,12 +1040,6 @@
         const el_eng_fill = document.getElementById('energy-fill');
         const tap_area = document.getElementById('tap-area');
 
-        if (localStorage.getItem(PREFIX + 'in_match') === '1') {
-            localStorage.removeItem(PREFIX + 'in_match');
-            if (player_rank > 0) player_rank--;
-            save_data();
-        }
-
         if (!nickname || !my_pin) { 
             document.getElementById('auth-modal').style.display = 'flex'; 
         } else { 
@@ -1149,9 +1135,8 @@
             check_admin(); 
             sync_cloud();
             
-            // Если он залогинился и у него не было жесткого фикса:
             if (!localStorage.getItem(PREFIX + 's2_reset_v3')) {
-                location.reload(); // Перезапустит страницу, чтобы отработал код отката сверху
+                location.reload();
             }
         };
 
@@ -1471,34 +1456,16 @@
         let is_game_over = false;
 
         window.start_ranked_search = function() {
-            // РАНКЕД ЗАКРЫТ НА ФИКС МЕХАНИКИ
             alert('РАНКЕД ВРЕМЕННО ЗАКРЫТ НА ТЕХ. РАБОТЫ!');
             return;
         }
 
-        function start_arena() {
-            // ФУНКЦИОНАЛ ОТКЛЮЧЕН
-        }
-
-        function spawn_arena_target() {
-            // ФУНКЦИОНАЛ ОТКЛЮЧЕН
-        }
-
-        function check_autoclicker() {
-            return true;
-        }
-
-        function hit_arena_target() {
-            // ФУНКЦИОНАЛ ОТКЛЮЧЕН
-        }
-
-        function hit_arena_target_dot(btn) {
-             // ФУНКЦИОНАЛ ОТКЛЮЧЕН
-        }
-
-        function hit_mine(type) {
-             // ФУНКЦИОНАЛ ОТКЛЮЧЕН
-        }
+        function start_arena() {}
+        function spawn_arena_target() {}
+        function check_autoclicker() { return true; }
+        function hit_arena_target() {}
+        function hit_arena_target_dot(btn) {}
+        function hit_mine(type) {}
 
         function show_rankup_screen(rank_str, sound_file, glow_color) {
             document.getElementById('rankup-overlay-text').innerText = rank_str;
@@ -1508,9 +1475,7 @@
             try { new Audio(sound_file).play(); } catch(e) {}
         }
 
-        function end_arena(is_win) {
-             // ФУНКЦИОНАЛ ОТКЛЮЧЕН
-        }
+        function end_arena(is_win) {}
 
         window.exit_arena = function() { document.getElementById('ranked-modal').style.display = 'none'; sync_cloud(); }
 
