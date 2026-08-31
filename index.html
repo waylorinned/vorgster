@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Жесткий запрет кэширования -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>vorgster kombat</title>
     <style>
         * { 
@@ -1182,7 +1186,6 @@
             save_data(); 
         }
 
-        // Жесткая загрузка из облака при старте для фикса рассинхрона APK и Браузера
         if (!nickname || !my_pin) { 
             document.getElementById('auth-modal').style.display = 'flex'; 
         } else { 
@@ -1190,19 +1193,13 @@
             initial_sync(); 
         }
 
+        // БЕЗУСЛОВНАЯ ЗАГРУЗКА ДАННЫХ ИЗ БАЗЫ ПРИ СТАРТЕ 
         async function initial_sync() {
             let d = await fetch_cloud();
             if(d && d.players && d.players[nickname]) {
-                let p = d.players[nickname];
-                let cloud_time = p.last_seen || 0;
-                let local_time = parseInt(localStorage.getItem(PREFIX + 'last_seen')) || 0;
-                
-                // Если облако свежее локальных данных, загружаем всё из базы
-                if (cloud_time > local_time + 10000) {
-                    apply_cloud_data(p);
-                    save_data();
-                    upd_ui();
-                }
+                apply_cloud_data(d.players[nickname]);
+                save_data();
+                upd_ui();
             }
             sync_cloud(true);
         }
