@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>vorgster kombat</title>
     <style>
         * { 
@@ -136,6 +139,18 @@
         .vorg-coin:active { 
             transform: scale(0.95); 
         }
+
+        /* МЯГКАЯ НЕОНОВАЯ РАМКА ДЛЯ ПРО */
+        .neon-pro {
+            box-shadow: 0 0 10px #d4af37, 0 0 20px #0ff, inset 0 0 15px #0ff !important;
+            border-color: #0ff !important;
+            animation: proPulse 2s infinite alternate;
+        }
+
+        @keyframes proPulse {
+            from { box-shadow: 0 0 5px #0ff, inset 0 0 5px #0ff; }
+            to { box-shadow: 0 0 15px #0ff, 0 0 25px #0ff, inset 0 0 15px #0ff; }
+        }
         
         .energy-container { 
             padding: 0 20px 20px 20px; 
@@ -227,21 +242,9 @@
             text-align: center; 
         }
         
-        .buy-btn:active { 
-            background: #555; 
-        }
-        
-        .buy-btn.gold { 
-            background: #d4af37; 
-            color: #000; 
-            border: none; 
-        }
-        
-        .buy-btn.blue { 
-            background: #2a52be; 
-            color: #fff; 
-            border: none; 
-        }
+        .buy-btn:active { background: #555; }
+        .buy-btn.gold { background: #d4af37; color: #000; border: none; }
+        .buy-btn.blue { background: #2a52be; color: #fff; border: none; }
 
         .floating-text { 
             position: absolute; 
@@ -278,11 +281,7 @@
             text-transform: lowercase; 
         }
         
-        .nav-item.active { 
-            color: #d4af37; 
-            background: #1a1508; 
-            border-radius: 8px; 
-        }
+        .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 8px; }
 
         .modal-overlay { 
             display: none; 
@@ -312,354 +311,65 @@
             overflow-y: auto; 
         }
         
-        .modal-title { 
-            font-size: 18px; 
-            color: #d4af37; 
-            margin-bottom: 5px; 
-            text-transform: lowercase; 
-            font-weight: bold; 
-        }
-        
-        input, select, textarea { 
-            width: 100%; 
-            background: #0a0a0a; 
-            border: 1px solid #444; 
-            color: #fff; 
-            padding: 12px; 
-            border-radius: 8px; 
-            font-family: 'segoe ui', sans-serif; 
-            font-size: 14px; 
-            margin-bottom: 5px; 
-        }
-        
-        input::placeholder, textarea::placeholder { 
-            color: #666; 
-        }
+        .modal-title { font-size: 18px; color: #d4af37; margin-bottom: 5px; text-transform: lowercase; font-weight: bold; }
+        input, select, textarea { width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-family: 'segoe ui', sans-serif; font-size: 14px; margin-bottom: 5px; }
+        input::placeholder, textarea::placeholder { color: #666; }
+        .rank-pos { font-size: 18px; font-weight: 900; color: #555; width: 25px; text-align: center; }
+        .rank-pos.gold-pos { color: #d4af37; } .rank-pos.silver-pos { color: #aaa; } .rank-pos.bronze-pos { color: #cd7f32; }
 
-        .rank-pos { 
-            font-size: 18px; 
-            font-weight: 900; 
-            color: #555; 
-            width: 25px; 
-            text-align: center; 
-        }
-        
-        .rank-pos.gold-pos { color: #d4af37; } 
-        .rank-pos.silver-pos { color: #aaa; } 
-        .rank-pos.bronze-pos { color: #cd7f32; }
+        .club-card { background: #111; border: 2px solid #d4af37; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; position: relative; }
+        .club-badge { font-size: 32px; background: #222; border: 2px solid #d4af37; border-radius: 12px; width: 60px; height: 60px; line-height: 56px; margin: 0 auto 10px auto; }
+        .club-name-big { font-size: 24px; font-weight: 900; color: #fff; }
+        .club-trophies { font-size: 18px; color: #d4af37; font-weight: bold; margin-bottom: 10px; }
+        .club-desc-box { font-size: 12px; color: #aaa; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 15px; word-wrap: break-word; }
+        .club-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cs-box { background: #222; border: 1px solid #333; padding: 8px; border-radius: 8px; }
+        .cs-title { font-size: 10px; color: #888; text-transform: uppercase; }
+        .cs-val { font-size: 13px; font-weight: bold; color: #fff; }
+        .member-list-item { background: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; cursor: pointer; }
+        .ml-info { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+        .ml-name { font-weight: bold; font-size: 14px; }
+        .ml-role { font-size: 10px; color: #d4af37; }
+        .ml-status { font-size: 11px; color: #888; } .ml-status.online { color: #4CAF50; }
+        .ml-score { font-weight: bold; color: #d4af37; font-size: 14px; }
 
-        /* Клубы */
-        .club-card { 
-            background: #111; 
-            border: 2px solid #d4af37; 
-            border-radius: 12px; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            text-align: center; 
-            position: relative; 
-        }
-        
-        .club-badge { 
-            font-size: 32px; 
-            background: #222; 
-            border: 2px solid #d4af37; 
-            border-radius: 12px; 
-            width: 60px; 
-            height: 60px; 
-            line-height: 56px; 
-            margin: 0 auto 10px auto; 
-        }
-        
-        .club-name-big { 
-            font-size: 24px; 
-            font-weight: 900; 
-            color: #fff; 
-        }
-        
-        .club-trophies { 
-            font-size: 18px; 
-            color: #d4af37; 
-            font-weight: bold; 
-            margin-bottom: 10px; 
-        }
-        
-        .club-desc-box { 
-            font-size: 12px; 
-            color: #aaa; 
-            background: #000; 
-            padding: 10px; 
-            border-radius: 8px; 
-            margin-bottom: 15px; 
-            word-wrap: break-word; 
-        }
-        
-        .club-stats-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-        }
-        
-        .cs-box { 
-            background: #222; 
-            border: 1px solid #333; 
-            padding: 8px; 
-            border-radius: 8px; 
-        }
-        
-        .cs-title { 
-            font-size: 10px; 
-            color: #888; 
-            text-transform: uppercase; 
-        }
-        
-        .cs-val { 
-            font-size: 13px; 
-            font-weight: bold; 
-            color: #fff; 
-        }
-        
-        .member-list-item { 
-            background: #111; 
-            border: 1px solid #333; 
-            padding: 10px; 
-            border-radius: 8px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            margin-bottom: 5px; 
-            cursor: pointer; 
-        }
-        
-        .ml-info { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-start; 
-            text-align: left; 
-        }
-        
-        .ml-name { 
-            font-weight: bold; 
-            font-size: 14px; 
-        }
-        
-        .ml-role { 
-            font-size: 10px; 
-            color: #d4af37; 
-        }
-        
-        .ml-status { 
-            font-size: 11px; 
-            color: #888; 
-        } 
-        
-        .ml-status.online { 
-            color: #4CAF50; 
-        }
-        
-        .ml-score { 
-            font-weight: bold; 
-            color: #d4af37; 
-            font-size: 14px; 
-        }
+        .chat-container { background: #000; border: 1px solid #333; border-radius: 12px; height: 200px; display: flex; flex-direction: column; margin-top: 15px; }
+        .chat-msgs { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        .chat-msg { font-size: 12px; word-wrap: break-word; } 
+        .chat-author { color: #d4af37; font-weight: bold; margin-right: 5px; }
+        .chat-input-area { display: flex; padding: 5px; border-top: 1px solid #333; gap: 5px; } 
+        .chat-input-area input { padding: 8px; font-size: 12px; margin-bottom: 0; }
 
-        .chat-container { 
-            background: #000; 
-            border: 1px solid #333; 
-            border-radius: 12px; 
-            height: 200px; 
-            display: flex; 
-            flex-direction: column; 
-            margin-top: 15px; 
-        }
-        
-        .chat-msgs { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 10px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            text-align: left; 
-        }
-        
-        .chat-msg { 
-            font-size: 12px; 
-            word-wrap: break-word; 
-        } 
-        
-        .chat-author { 
-            color: #d4af37; 
-            font-weight: bold; 
-            margin-right: 5px; 
-        }
-        
-        .chat-input-area { 
-            display: flex; 
-            padding: 5px; 
-            border-top: 1px solid #333; 
-            gap: 5px; 
-        } 
-        
-        .chat-input-area input { 
-            padding: 8px; 
-            font-size: 12px; 
-            margin-bottom: 0; 
-        }
-
-        /* Арена */
+        /* АРЕНА SEASON 3 */
         .arena-container { 
-            width: 100%; 
-            height: 350px; 
-            background: #050505; 
-            border: 2px solid #444; 
-            border-radius: 15px; 
-            position: relative; 
-            margin-top: 15px; 
-            overflow: hidden; 
+            width: 100%; height: 350px; background: #050505; border: 2px solid #444; border-radius: 15px; position: relative; margin-top: 15px; overflow: hidden; 
         }
+        .arena-hud { display: flex; justify-content: space-between; padding: 10px; background: #111; border-bottom: 1px solid #333; z-index: 5; position: relative; }
+        .arena-score { font-size: 16px; font-weight: bold; color: #fff; }
+        .arena-vs { font-size: 14px; color: #d4af37; font-weight: bold; }
         
-        .arena-hud { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 10px; 
-            background: #111; 
-            border-bottom: 1px solid #333; 
-            z-index: 5; 
-            position: relative; 
-        }
+        .arena-target-1 { position: absolute; width: 80px; height: 80px; background: radial-gradient(circle, #f00, #800); border-radius: 50%; border: 3px solid #fff; cursor: pointer; transform: translate(-50%, -50%); transition: all 0.1s; }
+        .arena-target-1:active { transform: translate(-50%, -50%) scale(0.9); }
         
-        .arena-score { 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #fff; 
-        }
+        .arena-target-2 { position: absolute; width: 65px; height: 65px; background: radial-gradient(circle, #0f0, #080); border-radius: 50%; border: 2px solid #fff; cursor: pointer; transform: translate(-50%, -50%); color: #000; font-weight: bold; line-height: 61px; font-size: 28px; text-align: center; }
+        .arena-target-2:active { transform: translate(-50%, -50%) scale(0.9); }
         
-        .arena-vs { 
-            font-size: 14px; 
-            color: #d4af37; 
-            font-weight: bold; 
-        }
-        
-        .arena-target-1 { 
-            position: absolute; 
-            width: 80px; 
-            height: 80px; 
-            background: radial-gradient(circle, #f00, #800); 
-            border-radius: 50%; 
-            border: 3px solid #fff; 
-            cursor: pointer; 
-            left: 50%; 
-            top: 50%; 
-            transform: translate(-50%, -50%); 
-            transition: all 0.1s; 
-        }
-        
-        .arena-target-1:active { 
-            transform: translate(-50%, -50%) scale(0.9); 
-        }
-        
-        .arena-target-2 { 
-            position: absolute; 
-            width: 60px; 
-            height: 60px; 
-            background: radial-gradient(circle, #0f0, #080); 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            cursor: pointer; 
-            left: 50%; 
-            top: 50%; 
-            transform: translate(-50%, -50%); 
-            color: #000; 
-            font-weight: bold; 
-            line-height: 56px; 
-            font-size: 24px; 
-            text-align: center; 
-        }
-        
-        .arena-target-2:active { 
-            transform: translate(-50%, -50%) scale(0.9); 
-        }
-        
-        .minefield-green { 
-            position: absolute; 
-            width: 65px; 
-            height: 65px; 
-            background: radial-gradient(circle, #0f0, #0a0); 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            cursor: pointer; 
-            transform: translate(-50%, -50%); 
-            z-index: 2; 
-        }
-        
-        .minefield-red { 
-            position: absolute; 
-            width: 65px; 
-            height: 65px; 
-            background: radial-gradient(circle, #f00, #a00); 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            cursor: pointer; 
-            transform: translate(-50%, -50%); 
-            z-index: 1; 
-        }
+        .minefield-green { position: absolute; width: 65px; height: 65px; background: radial-gradient(circle, #0f0, #0a0); border-radius: 50%; border: 2px solid #fff; cursor: pointer; transform: translate(-50%, -50%); z-index: 2; }
+        .minefield-red { position: absolute; width: 65px; height: 65px; background: radial-gradient(circle, #f00, #a00); border-radius: 50%; border: 2px solid #fff; cursor: pointer; transform: translate(-50%, -50%); z-index: 1; }
 
-        /* Оверлей Ранкапа */
-        #rankup-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 9999; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            text-align: center; 
-        }
-        
-        .rankup-glow { 
-            width: 300px; 
-            height: 300px; 
-            background: radial-gradient(circle, rgba(212,175,55,0.4) 0%, rgba(0,0,0,0) 70%); 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            animation: pulseGlow 2s infinite; 
-        }
-        
-        .rankup-text { 
-            font-size: 48px; 
-            font-weight: 900; 
-            color: #fff; 
-            text-shadow: 0 0 20px #d4af37, 0 0 40px #d4af37; 
-            z-index: 10; 
-            margin-bottom: 30px; 
-            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            text-transform: uppercase; 
-        }
-        
-        .rankup-sub { 
-            font-size: 16px; 
-            color: #aaa; 
-            z-index: 10; 
-            margin-bottom: 40px; 
-            animation: zoomIn 0.8s ease; 
-        }
-        
-        @keyframes pulseGlow { 
-            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 
-            100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 
-        }
-        
-        @keyframes zoomIn { 
-            0% { opacity: 0; transform: scale(0.3); } 
-            100% { opacity: 1; transform: scale(1); } 
-        }
+        .tug-container { width: 90%; height: 30px; background: #800; border: 2px solid #fff; border-radius: 15px; margin: 0 auto; overflow: hidden; position: relative; margin-top: 20px; }
+        .tug-fill { height: 100%; background: #080; width: 50%; transition: width 0.1s linear; }
+        .tug-marker { position: absolute; width: 4px; height: 30px; background: #fff; left: 50%; top: 0; transform: translateX(-50%); }
+
+        #rankup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .rankup-glow { width: 300px; height: 300px; background: radial-gradient(circle, rgba(212,175,55,0.4) 0%, rgba(0,0,0,0) 70%); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: pulseGlow 2s infinite; }
+        .rankup-text { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #d4af37, 0 0 40px #d4af37; z-index: 10; margin-bottom: 30px; animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; }
+        .rankup-sub { font-size: 16px; color: #aaa; z-index: 10; margin-bottom: 40px; animation: zoomIn 0.8s ease; }
+        @keyframes pulseGlow { 0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } }
+        @keyframes zoomIn { 0% { opacity: 0; transform: scale(0.3); } 100% { opacity: 1; transform: scale(1); } }
+
+        .ban-btn { background: #222; border: 1px solid #555; padding: 10px; border-radius: 8px; color: #fff; font-weight: bold; width: 100%; margin-bottom: 5px; cursor: pointer; }
+        .ban-btn:hover { background: #444; }
     </style>
 </head>
 <body>
@@ -701,164 +411,53 @@
             <div class="upgrade-list">
                 <div class="section-title">бусты</div>
                 <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">сила тапа</span>
-                        <span class="upgrade-desc" id="multitap-lvl">ур 1 (+1 за тап)</span>
-                        <span class="upgrade-price" id="multitap-price">цена: 500</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">сила тапа</span><span class="upgrade-desc" id="multitap-lvl">ур 1 (+1 за тап)</span><span class="upgrade-price" id="multitap-price">цена: 500</span></div>
                     <button class="buy-btn" onclick="buy_upg('tap')">купить</button>
                 </div>
                 <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">макс энергия</span>
-                        <span class="upgrade-desc" id="energy-lvl">ур 1 (+500 энг)</span>
-                        <span class="upgrade-price" id="energy-price">цена: 1000</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">макс энергия</span><span class="upgrade-desc" id="energy-lvl">ур 1 (+500 энг)</span><span class="upgrade-price" id="energy-price">цена: 1000</span></div>
                     <button class="buy-btn" onclick="buy_upg('eng')">купить</button>
                 </div>
                 <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">реген энергии</span>
-                        <span class="upgrade-desc" id="regen-lvl">+3 в сек</span>
-                        <span class="upgrade-price" id="regen-price">цена: 5 000</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">реген энергии</span><span class="upgrade-desc" id="regen-lvl">+3 в сек</span><span class="upgrade-price" id="regen-price">цена: 5 000</span></div>
                     <button class="buy-btn" onclick="buy_upg('regen')">купить</button>
                 </div>
                 
                 <div class="section-title">особое</div>
                 <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">цветной ник</span>
-                        <span class="upgrade-desc">выделяйся в топе</span>
-                        <span class="upgrade-price">цена: 5 000 000</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">цветной ник</span><span class="upgrade-desc">выделяйся в топе</span><span class="upgrade-price">цена: 5 000 000</span></div>
                     <button class="buy-btn gold" onclick="buy_color()">купить</button>
                 </div>
                 <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">крафт скрепок</span>
-                        <span class="upgrade-desc">сжигай воргики</span>
-                        <span class="upgrade-price">цена: 1 000 000</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">крафт скрепок</span><span class="upgrade-desc">сжигай воргики</span><span class="upgrade-price">цена: 1 000 000</span></div>
                     <button class="buy-btn blue" onclick="craft()">крафт</button>
                 </div>
                 
                 <div class="section-title">карточки (дешёвые)</div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">флуд в тг</span>
-                        <span class="upgrade-desc" id="card1-desc">ур 0 (+500/ч)</span>
-                        <span class="upgrade-price" id="card1-price">цена: 2000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c1', 500)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">энергетик</span>
-                        <span class="upgrade-desc" id="card8-desc">ур 0 (+1200/ч)</span>
-                        <span class="upgrade-price" id="card8-price">цена: 15 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c8', 1200)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">пиар от ворга</span>
-                        <span class="upgrade-desc" id="card2-desc">ур 0 (+3000/ч)</span>
-                        <span class="upgrade-price" id="card2-price">цена: 10 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c2', 3000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">твич-стрим</span>
-                        <span class="upgrade-desc" id="card9-desc">ур 0 (+3800/ч)</span>
-                        <span class="upgrade-price" id="card9-price">цена: 45 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c9', 3800)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">свой клан</span>
-                        <span class="upgrade-desc" id="card5-desc">ур 0 (+5000/ч)</span>
-                        <span class="upgrade-price" id="card5-price">цена: 20 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c5', 5000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">автокликер</span>
-                        <span class="upgrade-desc" id="card10-desc">ур 0 (+9500/ч)</span>
-                        <span class="upgrade-price" id="card10-price">цена: 120 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c10', 9500)">купить</button>
-                </div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">флуд в тг</span><span class="upgrade-desc" id="card1-desc">ур 0 (+500/ч)</span><span class="upgrade-price" id="card1-price">цена: 2000</span></div><button class="buy-btn" onclick="buy_card('c1', 500)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">энергетик</span><span class="upgrade-desc" id="card8-desc">ур 0 (+1200/ч)</span><span class="upgrade-price" id="card8-price">цена: 15 000</span></div><button class="buy-btn" onclick="buy_card('c8', 1200)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">пиар от ворга</span><span class="upgrade-desc" id="card2-desc">ур 0 (+3000/ч)</span><span class="upgrade-price" id="card2-price">цена: 10 000</span></div><button class="buy-btn" onclick="buy_card('c2', 3000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">твич-стрим</span><span class="upgrade-desc" id="card9-desc">ур 0 (+3800/ч)</span><span class="upgrade-price" id="card9-price">цена: 45 000</span></div><button class="buy-btn" onclick="buy_card('c9', 3800)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">свой клан</span><span class="upgrade-desc" id="card5-desc">ур 0 (+5000/ч)</span><span class="upgrade-price" id="card5-price">цена: 20 000</span></div><button class="buy-btn" onclick="buy_card('c5', 5000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">автокликер</span><span class="upgrade-desc" id="card10-desc">ур 0 (+9500/ч)</span><span class="upgrade-price" id="card10-price">цена: 120 000</span></div><button class="buy-btn" onclick="buy_card('c10', 9500)">купить</button></div>
 
                 <div class="section-title">карточки (средние)</div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">свой дс сервер</span>
-                        <span class="upgrade-desc" id="card3-desc">ур 0 (+15000/ч)</span>
-                        <span class="upgrade-price" id="card3-price">цена: 50 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c3', 15000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">доска позора</span>
-                        <span class="upgrade-desc" id="card4-desc">ур 0 (+20000/ч)</span>
-                        <span class="upgrade-price" id="card4-price">цена: 100 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c4', 20000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">свой мерч</span>
-                        <span class="upgrade-desc" id="card11-desc">ур 0 (+24000/ч)</span>
-                        <span class="upgrade-price" id="card11-price">цена: 350 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c11', 24000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">личный пони</span>
-                        <span class="upgrade-desc" id="card7-desc">ур 0 (+25000/ч)</span>
-                        <span class="upgrade-price" id="card7-price">цена: 130 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c7', 25000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">админка</span>
-                        <span class="upgrade-desc" id="card6-desc">ур 0 (+30000/ч)</span>
-                        <span class="upgrade-price" id="card6-price">цена: 200 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c6', 30000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">криптоферма</span>
-                        <span class="upgrade-desc" id="card12-desc">ур 0 (+55000/ч)</span>
-                        <span class="upgrade-price" id="card12-price">цена: 850 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c12', 55000)">купить</button>
-                </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">коллаб со звездой</span>
-                        <span class="upgrade-desc" id="card13-desc">ур 0 (+130000/ч)</span>
-                        <span class="upgrade-price" id="card13-price">цена: 2 200 000</span>
-                    </div>
-                    <button class="buy-btn" onclick="buy_card('c13', 130000)">купить</button>
-                </div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">свой дс сервер</span><span class="upgrade-desc" id="card3-desc">ур 0 (+15000/ч)</span><span class="upgrade-price" id="card3-price">цена: 50 000</span></div><button class="buy-btn" onclick="buy_card('c3', 15000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">доска позора</span><span class="upgrade-desc" id="card4-desc">ур 0 (+20000/ч)</span><span class="upgrade-price" id="card4-price">цена: 100 000</span></div><button class="buy-btn" onclick="buy_card('c4', 20000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">свой мерч</span><span class="upgrade-desc" id="card11-desc">ур 0 (+24000/ч)</span><span class="upgrade-price" id="card11-price">цена: 350 000</span></div><button class="buy-btn" onclick="buy_card('c11', 24000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">личный пони</span><span class="upgrade-desc" id="card7-desc">ур 0 (+25000/ч)</span><span class="upgrade-price" id="card7-price">цена: 130 000</span></div><button class="buy-btn" onclick="buy_card('c7', 25000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">админка</span><span class="upgrade-desc" id="card6-desc">ур 0 (+30000/ч)</span><span class="upgrade-price" id="card6-price">цена: 200 000</span></div><button class="buy-btn" onclick="buy_card('c6', 30000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">криптоферма</span><span class="upgrade-desc" id="card12-desc">ур 0 (+55000/ч)</span><span class="upgrade-price" id="card12-price">цена: 850 000</span></div><button class="buy-btn" onclick="buy_card('c12', 55000)">купить</button></div>
+                <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">коллаб со звездой</span><span class="upgrade-desc" id="card13-desc">ур 0 (+130000/ч)</span><span class="upgrade-price" id="card13-price">цена: 2 200 000</span></div><button class="buy-btn" onclick="buy_card('c13', 130000)">купить</button></div>
             </div>
         </div>
 
         <div id="tab-ranked" class="tab-content">
             <div class="upgrade-list">
                 <div class="club-card" style="margin-top: 10px;">
-                    <div style="font-size: 14px; color: #888;">Сезон 2 Активен!</div>
+                    <div style="font-size: 14px; color: #888;">Сезон 3: Best of 3!</div>
                     <div class="club-name-big" style="color: #d4af37;" id="rank-display">БРОНЗА I</div>
-                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Тапай быстрее бота! Лив из катки = луз.</div>
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">3 случайных режима. Лив из катки = луз.</div>
                     <button class="buy-btn blue" style="width: 100%; margin-top: 20px; font-size: 16px; padding: 15px;" onclick="start_ranked_search()">ИСКАТЬ КАТКУ</button>
                 </div>
                 <div class="section-title">награды за лиги</div>
@@ -866,15 +465,13 @@
                     <b>Мифик I:</b> +5к/ч пассива<br>
                     <b>Лега I:</b> +15к/ч пассива<br>
                     <b>Мастер I:</b> +45к/ч пассива<br>
-                    <b>ПРО:</b> +65к/ч пассива<br>
+                    <b>ПРО:</b> +65к/ч пассива + НЕОН РАМКА<br>
                 </div>
             </div>
         </div>
 
         <div id="tab-clubs" class="tab-content">
-            <div class="upgrade-list" id="club-content">
-                <div style="text-align: center; color: #888; margin-top: 20px;">загрузка...</div>
-            </div>
+            <div class="upgrade-list" id="club-content"><div style="text-align: center; color: #888; margin-top: 20px;">загрузка...</div></div>
         </div>
         
         <div id="tab-rating" class="tab-content">
@@ -898,9 +495,6 @@
             <div class="nav-item" onclick="sw_tab('rating', this)">рейтинг</div>
         </div>
 
-        <!-- МОДАЛКИ -->
-        
-        <!-- Ежедневные входы -->
         <div id="streak-modal" class="modal-overlay" style="z-index: 1000;">
             <div class="modal-content">
                 <div class="modal-title">ЕЖЕДНЕВНАЯ НАГРАДА</div>
@@ -911,7 +505,6 @@
             </div>
         </div>
 
-        <!-- Друзья и Лобби -->
         <div id="friends-modal" class="modal-overlay">
             <div class="modal-content" style="max-height: 90vh;">
                 <div class="modal-title">друзья и дуэли</div>
@@ -934,31 +527,21 @@
             </div>
         </div>
 
-        <!-- Квесты -->
         <div id="quests-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-title">ЕЖЕДНЕВНЫЕ КВЕСТЫ</div>
                 <div style="font-size:11px; color:#aaa; margin-bottom:10px;">Обновляются каждый день. Награда: 20 000 воргиков!</div>
                 
                 <div class="upgrade-item" style="margin-bottom:5px;">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">Тап-машина</span>
-                        <span class="upgrade-desc">Сделай 1500 тапов</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">Тап-машина</span><span class="upgrade-desc">Сделай 1500 тапов</span></div>
                     <div style="font-weight:bold; color:#d4af37;" id="q1-prog">0/1500</div>
                 </div>
                 <div class="upgrade-item" style="margin-bottom:5px;">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">Гладиатор</span>
-                        <span class="upgrade-desc">Победи 2 раза в ранкеде</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">Гладиатор</span><span class="upgrade-desc">Победи 2 раза в ранкеде</span></div>
                     <div style="font-weight:bold; color:#d4af37;" id="q2-prog">0/2</div>
                 </div>
                 <div class="upgrade-item" style="margin-bottom:15px;">
-                    <div class="upgrade-info">
-                        <span class="upgrade-name">Общительный</span>
-                        <span class="upgrade-desc">Отправь 1 сообщение в клуб</span>
-                    </div>
+                    <div class="upgrade-info"><span class="upgrade-name">Общительный</span><span class="upgrade-desc">Отправь 1 сообщение в клуб</span></div>
                     <div style="font-weight:bold; color:#d4af37;" id="q3-prog">0/1</div>
                 </div>
                 
@@ -1016,11 +599,7 @@
                 <input type="text" id="c-name" placeholder="название (без мата)" maxlength="15">
                 <textarea id="c-desc" placeholder="описание..." maxlength="150" rows="3"></textarea>
                 <input type="number" id="c-req" placeholder="мин. воргиков для входа">
-                <select id="c-type">
-                    <option value="открытый">открытый</option>
-                    <option value="по заявкам">по заявкам</option>
-                    <option value="закрытый">закрытый</option>
-                </select>
+                <select id="c-type"><option value="открытый">открытый</option><option value="по заявкам">по заявкам</option><option value="закрытый">закрытый</option></select>
                 <button class="buy-btn gold" onclick="submit_club()">создать</button>
                 <button class="buy-btn" onclick="document.getElementById('create-club-modal').style.display='none'">отмена</button>
             </div>
@@ -1032,6 +611,7 @@
         
         <div id="profile-modal" class="modal-overlay">
             <div class="modal-content" style="padding: 25px;">
+                <div id="prof-pic-wrap" style="width: 100px; height: 100px; margin: 0 auto 15px auto; border-radius: 50%; background: url('vorg.jpg') center/cover no-repeat; border: 3px solid #d4af37;"></div>
                 <div id="prof-name" style="font-size:28px; font-weight:900; word-wrap:break-word;">Name</div>
                 <div id="prof-title" style="color:#aaa; font-size:12px; margin-top: 5px; font-weight: bold; text-transform:uppercase;"></div>
                 <div id="prof-og" style="color:gold; font-size:12px; margin-top: 5px; font-weight: bold; display:none;">🌟 ВЕТЕРАН S1 ПРО 🌟</div>
@@ -1052,15 +632,15 @@
 
         <div id="ranked-modal" class="modal-overlay" style="background: #000;">
             <div class="modal-content" style="width: 100%; height: 100%; max-width: 100%; border-radius: 0; justify-content: flex-start; padding: 10px;">
-                <div class="modal-title" style="margin-top: 20px;">РАНКЕД</div>
+                <div class="modal-title" style="margin-top: 20px;">РАНКЕД S3</div>
                 <div id="ranked-status" style="font-size: 14px; color: #aaa; margin-bottom: 10px;">Поиск противника...</div>
-                <div class="arena-container" id="arena-container" style="display:none;">
-                    <div class="arena-hud">
-                        <div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: 0</div>
-                        <div class="arena-vs">VS</div>
-                        <div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: 0</div>
-                    </div>
+                
+                <div id="match-score" style="display:none; font-size: 20px; font-weight: bold; margin-top: 5px; color: #d4af37;">
+                    <span id="score-you" style="color:#0f0;">0</span> : <span id="score-bot" style="color:#f00;">0</span>
                 </div>
+
+                <div class="arena-container" id="arena-container" style="display:none;">
+                    </div>
                 <button class="buy-btn" id="arena-exit-btn" style="margin-top: 20px; display:none;" onclick="exit_arena()">ВЫЙТИ</button>
             </div>
         </div>
@@ -1098,58 +678,18 @@
         let cur_energy = (isNaN(ce) || ce < 0) ? max_energy : ce;
         let eng_regen = parseInt(localStorage.getItem(PREFIX + 'eng_regen')) || 3;
         
-        let tap_price = parseInt(localStorage.getItem(PREFIX + 'tap_price')) || 500;
-        let tap_lvl = parseInt(localStorage.getItem(PREFIX + 'tap_lvl')) || 1;
-        let eng_price = parseInt(localStorage.getItem(PREFIX + 'eng_price')) || 1000;
-        let eng_lvl = parseInt(localStorage.getItem(PREFIX + 'eng_lvl')) || 1;
-        let regen_price = parseInt(localStorage.getItem(PREFIX + 'regen_price')) || 5000;
-        
-        let c1_price = parseInt(localStorage.getItem(PREFIX + 'c1_price')) || 2000; 
-        let c2_price = parseInt(localStorage.getItem(PREFIX + 'c2_price')) || 10000; 
-        let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000; 
-        let c4_price = parseInt(localStorage.getItem(PREFIX + 'c4_price')) || 100000; 
-        let c5_price = parseInt(localStorage.getItem(PREFIX + 'c5_price')) || 20000; 
-        let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; 
-        let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; 
-        let c8_price = parseInt(localStorage.getItem(PREFIX + 'c8_price')) || 15000; 
-        let c9_price = parseInt(localStorage.getItem(PREFIX + 'c9_price')) || 45000; 
-        let c10_price = parseInt(localStorage.getItem(PREFIX + 'c10_price')) || 120000; 
-        let c11_price = parseInt(localStorage.getItem(PREFIX + 'c11_price')) || 350000; 
-        let c12_price = parseInt(localStorage.getItem(PREFIX + 'c12_price')) || 850000; 
-        let c13_price = parseInt(localStorage.getItem(PREFIX + 'c13_price')) || 2200000; 
-
-        let c1_lvl = parseInt(localStorage.getItem(PREFIX+'c1_lvl')) || 0; 
-        let c2_lvl = parseInt(localStorage.getItem(PREFIX+'c2_lvl')) || 0; 
-        let c3_lvl = parseInt(localStorage.getItem(PREFIX+'c3_lvl')) || 0; 
-        let c4_lvl = parseInt(localStorage.getItem(PREFIX+'c4_lvl')) || 0; 
-        let c5_lvl = parseInt(localStorage.getItem(PREFIX+'c5_lvl')) || 0; 
-        let c6_lvl = parseInt(localStorage.getItem(PREFIX+'c6_lvl')) || 0; 
-        let c7_lvl = parseInt(localStorage.getItem(PREFIX+'c7_lvl')) || 0; 
-        let c8_lvl = parseInt(localStorage.getItem(PREFIX+'c8_lvl')) || 0; 
-        let c9_lvl = parseInt(localStorage.getItem(PREFIX+'c9_lvl')) || 0; 
-        let c10_lvl = parseInt(localStorage.getItem(PREFIX+'c10_lvl')) || 0; 
-        let c11_lvl = parseInt(localStorage.getItem(PREFIX+'c11_lvl')) || 0; 
-        let c12_lvl = parseInt(localStorage.getItem(PREFIX+'c12_lvl')) || 0; 
-        let c13_lvl = parseInt(localStorage.getItem(PREFIX+'c13_lvl')) || 0;
+        let tap_price = parseInt(localStorage.getItem(PREFIX + 'tap_price')) || 500; let tap_lvl = parseInt(localStorage.getItem(PREFIX + 'tap_lvl')) || 1; let eng_price = parseInt(localStorage.getItem(PREFIX + 'eng_price')) || 1000; let eng_lvl = parseInt(localStorage.getItem(PREFIX + 'eng_lvl')) || 1; let regen_price = parseInt(localStorage.getItem(PREFIX + 'regen_price')) || 5000;
+        let c1_price = parseInt(localStorage.getItem(PREFIX + 'c1_price')) || 2000; let c2_price = parseInt(localStorage.getItem(PREFIX + 'c2_price')) || 10000; let c3_price = parseInt(localStorage.getItem(PREFIX + 'c3_price')) || 50000; let c4_price = parseInt(localStorage.getItem(PREFIX + 'c4_price')) || 100000; let c5_price = parseInt(localStorage.getItem(PREFIX + 'c5_price')) || 20000; let c6_price = parseInt(localStorage.getItem(PREFIX + 'c6_price')) || 200000; let c7_price = parseInt(localStorage.getItem(PREFIX + 'c7_price')) || 130000; let c8_price = parseInt(localStorage.getItem(PREFIX + 'c8_price')) || 15000; let c9_price = parseInt(localStorage.getItem(PREFIX + 'c9_price')) || 45000; let c10_price = parseInt(localStorage.getItem(PREFIX + 'c10_price')) || 120000; let c11_price = parseInt(localStorage.getItem(PREFIX + 'c11_price')) || 350000; let c12_price = parseInt(localStorage.getItem(PREFIX + 'c12_price')) || 850000; let c13_price = parseInt(localStorage.getItem(PREFIX + 'c13_price')) || 2200000; 
+        let c1_lvl = parseInt(localStorage.getItem(PREFIX+'c1_lvl')) || 0; let c2_lvl = parseInt(localStorage.getItem(PREFIX+'c2_lvl')) || 0; let c3_lvl = parseInt(localStorage.getItem(PREFIX+'c3_lvl')) || 0; let c4_lvl = parseInt(localStorage.getItem(PREFIX+'c4_lvl')) || 0; let c5_lvl = parseInt(localStorage.getItem(PREFIX+'c5_lvl')) || 0; let c6_lvl = parseInt(localStorage.getItem(PREFIX+'c6_lvl')) || 0; let c7_lvl = parseInt(localStorage.getItem(PREFIX+'c7_lvl')) || 0; let c8_lvl = parseInt(localStorage.getItem(PREFIX+'c8_lvl')) || 0; let c9_lvl = parseInt(localStorage.getItem(PREFIX+'c9_lvl')) || 0; let c10_lvl = parseInt(localStorage.getItem(PREFIX+'c10_lvl')) || 0; let c11_lvl = parseInt(localStorage.getItem(PREFIX+'c11_lvl')) || 0; let c12_lvl = parseInt(localStorage.getItem(PREFIX+'c12_lvl')) || 0; let c13_lvl = parseInt(localStorage.getItem(PREFIX+'c13_lvl')) || 0;
 
         let player_rank = parseInt(localStorage.getItem(PREFIX + 'rank')) || 0;
         let max_rank = parseInt(localStorage.getItem(PREFIX + 'max_rank')) || 0;
         let my_color = localStorage.getItem(PREFIX + 'color') || '#ffffff';
         let og_pro = parseInt(localStorage.getItem(PREFIX + 'og_pro')) || 0;
 
-        let total_taps = parseInt(localStorage.getItem(PREFIX+'tot_taps')) || 0; 
-        let r_wins = parseInt(localStorage.getItem(PREFIX+'r_wins')) || 0; 
-        let r_loss = parseInt(localStorage.getItem(PREFIX+'r_loss')) || 0; 
-        let r_streak = parseInt(localStorage.getItem(PREFIX+'r_streak')) || 0; 
-        let my_title = localStorage.getItem(PREFIX+'title') || "";
-        
-        let streak_days = parseInt(localStorage.getItem(PREFIX+'streak_days')) || 0; 
-        let streak_last = localStorage.getItem(PREFIX+'streak_last') || "";
-        let q_taps = parseInt(localStorage.getItem(PREFIX+'q_taps')) || 0; 
-        let q_wins = parseInt(localStorage.getItem(PREFIX+'q_wins')) || 0; 
-        let q_msgs = parseInt(localStorage.getItem(PREFIX+'q_msgs')) || 0; 
-        let q_date = localStorage.getItem(PREFIX+'q_date') || ""; 
-        let q_claimed = localStorage.getItem(PREFIX+'q_claimed') === '1';
+        let total_taps = parseInt(localStorage.getItem(PREFIX+'tot_taps')) || 0; let r_wins = parseInt(localStorage.getItem(PREFIX+'r_wins')) || 0; let r_loss = parseInt(localStorage.getItem(PREFIX+'r_loss')) || 0; let r_streak = parseInt(localStorage.getItem(PREFIX+'r_streak')) || 0; let my_title = localStorage.getItem(PREFIX+'title') || "";
+        let streak_days = parseInt(localStorage.getItem(PREFIX+'streak_days')) || 0; let streak_last = localStorage.getItem(PREFIX+'streak_last') || "";
+        let q_taps = parseInt(localStorage.getItem(PREFIX+'q_taps')) || 0; let q_wins = parseInt(localStorage.getItem(PREFIX+'q_wins')) || 0; let q_msgs = parseInt(localStorage.getItem(PREFIX+'q_msgs')) || 0; let q_date = localStorage.getItem(PREFIX+'q_date') || ""; let q_claimed = localStorage.getItem(PREFIX+'q_claimed') === '1';
 
         let my_friends = JSON.parse(localStorage.getItem(PREFIX+'friends') || "[]");
 
@@ -1159,14 +699,10 @@
 
         let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now();
         let last_sync = 0;
-        
-        let global_event_data = null; 
-        let cached_last_winner = ""; 
-        let cached_players = {}; 
-        let cached_clubs = {};
-        
+        let global_event_data = null; let cached_last_winner = ""; let cached_players = {}; let cached_clubs = {};
         window.current_top_tab = 'players';
 
+        // ВОЗВРАЩЕНО РЕАЛЬНОЕ ОБЛАКО ДЛЯ РЕЛИЗА ИГРОКАМ
         const BIN_ID = '6a8f2d5cf5f4af5e2945ec3f'; 
         const API_KEY = '$2a$10$aaQQW4GHe/epejM6DjxqmubroFphtxyH7bfo30HN2R8zxaklID9fO';
         
@@ -1176,571 +712,147 @@
         const el_eng_fill = document.getElementById('energy-fill'); 
         const tap_area = document.getElementById('tap-area');
 
-        if (localStorage.getItem(PREFIX + 'in_match') === '1') { 
-            localStorage.removeItem(PREFIX + 'in_match'); 
-            if (player_rank > 0) player_rank--; 
-            save_data(); 
-        }
+        if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
-        if (!nickname || !my_pin) { 
-            document.getElementById('auth-modal').style.display = 'flex'; 
-        } else { 
-            check_admin(); 
-            sync_cloud(); 
-        }
+        if (!nickname || !my_pin) { document.getElementById('auth-modal').style.display = 'flex'; } else { check_admin(); sync_cloud(); }
 
-        function apply_cloud_data(p) {
-            if(!p) return;
-            vrgk = parseFloat(p.vrgk) || 0; 
-            skrepki = parseInt(p.skrepki) || 0; 
-            player_rank = parseInt(p.rank) || 0;
-            
-            if(p.stats) {
-                let s = p.stats;
-                profit = parseFloat(s[0]) || 0; 
-                tap_power = parseInt(s[1]) || 1; 
-                max_energy = parseInt(s[2]) || 1000; 
-                eng_regen = parseInt(s[3]) || 3;
-                tap_price = parseInt(s[4]) || 500; 
-                tap_lvl = parseInt(s[5]) || 1; 
-                eng_price = parseInt(s[6]) || 1000; 
-                eng_lvl = parseInt(s[7]) || 1; 
-                regen_price = parseInt(s[8]) || 5000;
-                c1_price = parseInt(s[9]) || 2000; 
-                c2_price = parseInt(s[10]) || 10000; 
-                c3_price = parseInt(s[11]) || 50000; 
-                c4_price = parseInt(s[12]) || 100000; 
-                c5_price = parseInt(s[13]) || 20000; 
-                c6_price = parseInt(s[14]) || 200000; 
-                c7_price = parseInt(s[15]) || 130000;
-                c1_lvl = parseInt(s[16]) || 0; 
-                c2_lvl = parseInt(s[17]) || 0; 
-                c3_lvl = parseInt(s[18]) || 0; 
-                c4_lvl = parseInt(s[19]) || 0; 
-                c5_lvl = parseInt(s[20]) || 0; 
-                c6_lvl = parseInt(s[21]) || 0; 
-                c7_lvl = parseInt(s[22]) || 0;
-                
-                max_rank = (s.length > 23 && !isNaN(parseInt(s[23]))) ? parseInt(s[23]) : player_rank;
-                my_color = s[24] || '#ffffff'; 
-                og_pro = parseInt(s[25]) || 0;
-                
-                c8_price = parseInt(s[26]) || 15000; 
-                c9_price = parseInt(s[27]) || 45000; 
-                c10_price = parseInt(s[28]) || 120000; 
-                c11_price = parseInt(s[29]) || 350000; 
-                c12_price = parseInt(s[30]) || 850000; 
-                c13_price = parseInt(s[31]) || 2200000;
-                
-                c8_lvl = parseInt(s[32]) || 0; 
-                c9_lvl = parseInt(s[33]) || 0; 
-                c10_lvl = parseInt(s[34]) || 0; 
-                c11_lvl = parseInt(s[35]) || 0; 
-                c12_lvl = parseInt(s[36]) || 0; 
-                c13_lvl = parseInt(s[37]) || 0;
-                
-                total_taps = parseInt(s[38]) || 0; 
-                r_wins = parseInt(s[39]) || 0; 
-                r_loss = parseInt(s[40]) || 0; 
-                r_streak = parseInt(s[41]) || 0; 
-                my_title = s[42] || ""; 
-                streak_days = parseInt(s[43]) || 0;
-                
-                q_taps = parseInt(s[44]) || 0; 
-                q_wins = parseInt(s[45]) || 0; 
-                q_msgs = parseInt(s[46]) || 0; 
-                q_date = s[47] || ""; 
-                q_claimed = (parseInt(s[48]) === 1); 
-                streak_last = s[49] || "";
-            }
-            if(p.club) { 
-                localStorage.setItem(PREFIX+'club', p.club); 
-            } else { 
-                localStorage.removeItem(PREFIX+'club'); 
-            }
-        }
-
-        function check_admin() {
-            document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname;
-            if(nickname && nickname.toLowerCase() === 'conexion') {
-                document.getElementById('admin-panel').style.display = 'block';
-            }
-            document.getElementById('title-select').value = my_title;
-        }
+        function check_admin() { document.getElementById('current-nick').innerText = 'текущий ник: ' + nickname; if(nickname && nickname.toLowerCase() === 'conexion') { document.getElementById('admin-panel').style.display = 'block'; } document.getElementById('title-select').value = my_title; }
 
         window.auth_player = async function() {
-            let n = document.getElementById('auth-nick').value.trim(); 
-            let p = document.getElementById('auth-pin').value.trim();
-            
+            let n = document.getElementById('auth-nick').value.trim(); let p = document.getElementById('auth-pin').value.trim();
             if(!n || !p || p.length !== 4) return alert('Введи ник и ПИН из 4 цифр!');
-            
             document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'синхронизация...';
-            
             let d = await fetch_cloud();
-            if(!d) { 
-                document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация'; 
-                return alert('Ошибка связи с сервером!'); 
-            }
+            if(!d) { document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация'; return alert('Ошибка связи с сервером!'); }
             
             if (d.players[n]) {
-                if (d.players[n].pin && d.players[n].pin !== p && p !== '8888') { 
-                    document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация'; 
-                    return alert('Неверный ПИН!'); 
-                }
-                nickname = n; 
-                my_pin = p; 
+                if (d.players[n].pin && d.players[n].pin !== p && p !== '8888') { document.getElementById('auth-modal').querySelector('.modal-title').innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); }
+                nickname = n; my_pin = p;
                 apply_cloud_data(d.players[n]);
             } else {
-                nickname = n; 
-                my_pin = p; 
-                max_rank = 0; 
-                my_color = '#ffffff'; 
-                og_pro = 0;
+                nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0;
             }
 
-            localStorage.setItem(PREFIX + 'nickname', nickname); 
-            localStorage.setItem(PREFIX + 'pin', my_pin);
-            document.getElementById('auth-modal').style.display = 'none';
-            save_data(); 
-            upd_ui(); 
-            check_admin(); 
-            sync_cloud();
+            localStorage.setItem(PREFIX + 'nickname', nickname); localStorage.setItem(PREFIX + 'pin', my_pin);
+            document.getElementById('auth-modal').style.display = 'none'; save_data(); upd_ui(); check_admin(); sync_cloud();
         };
 
-        function fmt(num) { 
-            return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); 
-        }
-        
-        function gen_tag() { 
-            return '#' + Math.random().toString(36).substr(2, 6).toUpperCase(); 
-        }
-        
-        function timeAgo(ts) { 
-            if(!ts) return "давно"; 
-            let diff = Math.floor((Date.now() - ts) / 1000); 
-            if (diff < 120) return "в сети"; 
-            if (diff < 3600) return `был(а) ${Math.floor(diff/60)} мин назад`; 
-            if (diff < 86400) return `был(а) ${Math.floor(diff/3600)} ч назад`; 
-            return `был(а) ${Math.floor(diff/86400)} дн назад`; 
-        }
+        function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+        function gen_tag() { return '#' + Math.random().toString(36).substr(2, 6).toUpperCase(); }
+        function timeAgo(ts) { if(!ts) return "давно"; let diff = Math.floor((Date.now() - ts) / 1000); if (diff < 120) return "в сети"; if (diff < 3600) return `был(а) ${Math.floor(diff/60)} мин назад`; if (diff < 86400) return `был(а) ${Math.floor(diff/3600)} ч назад`; return `был(а) ${Math.floor(diff/86400)} дн назад`; }
         
         function init_prices() { 
             try {
-                document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`; 
-                document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
-                document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`; 
-                document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
-                document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`; 
-                document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
-                
-                document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`; 
-                document.getElementById('card1-desc').innerText = `ур ${c1_lvl} (+500/ч)`; 
-                document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`; 
-                document.getElementById('card2-desc').innerText = `ур ${c2_lvl} (+3000/ч)`; 
-                document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`; 
-                document.getElementById('card3-desc').innerText = `ур ${c3_lvl} (+15000/ч)`; 
-                document.getElementById('card4-price').innerText = `цена: ${fmt(c4_price)}`; 
-                document.getElementById('card4-desc').innerText = `ур ${c4_lvl} (+20000/ч)`; 
-                document.getElementById('card5-price').innerText = `цена: ${fmt(c5_price)}`; 
-                document.getElementById('card5-desc').innerText = `ур ${c5_lvl} (+5000/ч)`; 
-                document.getElementById('card6-price').innerText = `цена: ${fmt(c6_price)}`; 
-                document.getElementById('card6-desc').innerText = `ур ${c6_lvl} (+30000/ч)`; 
-                document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`; 
-                document.getElementById('card7-desc').innerText = `ур ${c7_lvl} (+25000/ч)`;
-                
-                document.getElementById('card8-price').innerText = `цена: ${fmt(c8_price)}`; 
-                document.getElementById('card8-desc').innerText = `ур ${c8_lvl} (+1200/ч)`; 
-                document.getElementById('card9-price').innerText = `цена: ${fmt(c9_price)}`; 
-                document.getElementById('card9-desc').innerText = `ур ${c9_lvl} (+3800/ч)`; 
-                document.getElementById('card10-price').innerText = `цена: ${fmt(c10_price)}`; 
-                document.getElementById('card10-desc').innerText = `ур ${c10_lvl} (+9500/ч)`; 
-                document.getElementById('card11-price').innerText = `цена: ${fmt(c11_price)}`; 
-                document.getElementById('card11-desc').innerText = `ур ${c11_lvl} (+24000/ч)`; 
-                document.getElementById('card12-price').innerText = `цена: ${fmt(c12_price)}`; 
-                document.getElementById('card12-desc').innerText = `ур ${c12_lvl} (+55000/ч)`; 
-                document.getElementById('card13-price').innerText = `цена: ${fmt(c13_price)}`; 
-                document.getElementById('card13-desc').innerText = `ур ${c13_lvl} (+130000/ч)`;
+                document.getElementById('multitap-lvl').innerText = `ур ${tap_lvl} (+${tap_power} за тап)`; document.getElementById('multitap-price').innerText = `цена: ${fmt(tap_price)}`;
+                document.getElementById('energy-lvl').innerText = `ур ${eng_lvl} (+${max_energy} энг)`; document.getElementById('energy-price').innerText = `цена: ${fmt(eng_price)}`;
+                document.getElementById('regen-lvl').innerText = `+${eng_regen} в сек`; document.getElementById('regen-price').innerText = `цена: ${fmt(regen_price)}`;
+                document.getElementById('card1-price').innerText = `цена: ${fmt(c1_price)}`; document.getElementById('card1-desc').innerText = `ур ${c1_lvl} (+500/ч)`; document.getElementById('card2-price').innerText = `цена: ${fmt(c2_price)}`; document.getElementById('card2-desc').innerText = `ур ${c2_lvl} (+3000/ч)`; document.getElementById('card3-price').innerText = `цена: ${fmt(c3_price)}`; document.getElementById('card3-desc').innerText = `ур ${c3_lvl} (+15000/ч)`; document.getElementById('card4-price').innerText = `цена: ${fmt(c4_price)}`; document.getElementById('card4-desc').innerText = `ур ${c4_lvl} (+20000/ч)`; document.getElementById('card5-price').innerText = `цена: ${fmt(c5_price)}`; document.getElementById('card5-desc').innerText = `ур ${c5_lvl} (+5000/ч)`; document.getElementById('card6-price').innerText = `цена: ${fmt(c6_price)}`; document.getElementById('card6-desc').innerText = `ур ${c6_lvl} (+30000/ч)`; document.getElementById('card7-price').innerText = `цена: ${fmt(c7_price)}`; document.getElementById('card7-desc').innerText = `ур ${c7_lvl} (+25000/ч)`;
+                document.getElementById('card8-price').innerText = `цена: ${fmt(c8_price)}`; document.getElementById('card8-desc').innerText = `ур ${c8_lvl} (+1200/ч)`; document.getElementById('card9-price').innerText = `цена: ${fmt(c9_price)}`; document.getElementById('card9-desc').innerText = `ур ${c9_lvl} (+3800/ч)`; document.getElementById('card10-price').innerText = `цена: ${fmt(c10_price)}`; document.getElementById('card10-desc').innerText = `ур ${c10_lvl} (+9500/ч)`; document.getElementById('card11-price').innerText = `цена: ${fmt(c11_price)}`; document.getElementById('card11-desc').innerText = `ур ${c11_lvl} (+24000/ч)`; document.getElementById('card12-price').innerText = `цена: ${fmt(c12_price)}`; document.getElementById('card12-desc').innerText = `ур ${c12_lvl} (+55000/ч)`; document.getElementById('card13-price').innerText = `цена: ${fmt(c13_price)}`; document.getElementById('card13-desc').innerText = `ур ${c13_lvl} (+130000/ч)`;
             } catch(e) {}
         }
 
         function save_data() {
-            localStorage.setItem(PREFIX+'vrgk', vrgk); 
-            localStorage.setItem(PREFIX+'skrepki', skrepki); 
-            localStorage.setItem(PREFIX+'profit', profit); 
-            localStorage.setItem(PREFIX+'tap_power', tap_power); 
-            localStorage.setItem(PREFIX+'max_energy', max_energy); 
-            localStorage.setItem(PREFIX+'cur_energy', cur_energy);
-            localStorage.setItem(PREFIX+'eng_regen', eng_regen); 
-            localStorage.setItem(PREFIX+'rank', player_rank); 
-            localStorage.setItem(PREFIX+'max_rank', max_rank);
-            localStorage.setItem(PREFIX+'last_time', Date.now()); 
-            localStorage.setItem(PREFIX+'last_seen', Date.now()); 
-            localStorage.setItem(PREFIX+'color', my_color); 
-            localStorage.setItem(PREFIX+'og_pro', og_pro);
-            
-            localStorage.setItem(PREFIX+'tap_price', tap_price); 
-            localStorage.setItem(PREFIX+'tap_lvl', tap_lvl); 
-            localStorage.setItem(PREFIX+'eng_price', eng_price); 
-            localStorage.setItem(PREFIX+'eng_lvl', eng_lvl); 
-            localStorage.setItem(PREFIX+'regen_price', regen_price);
-            
-            localStorage.setItem(PREFIX+'c1_price', c1_price); 
-            localStorage.setItem(PREFIX+'c2_price', c2_price); 
-            localStorage.setItem(PREFIX+'c3_price', c3_price); 
-            localStorage.setItem(PREFIX+'c4_price', c4_price); 
-            localStorage.setItem(PREFIX+'c5_price', c5_price); 
-            localStorage.setItem(PREFIX+'c6_price', c6_price); 
-            localStorage.setItem(PREFIX+'c7_price', c7_price);
-            localStorage.setItem(PREFIX+'c8_price', c8_price); 
-            localStorage.setItem(PREFIX+'c9_price', c9_price); 
-            localStorage.setItem(PREFIX+'c10_price', c10_price); 
-            localStorage.setItem(PREFIX+'c11_price', c11_price); 
-            localStorage.setItem(PREFIX+'c12_price', c12_price); 
-            localStorage.setItem(PREFIX+'c13_price', c13_price);
-            
-            localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); 
-            localStorage.setItem(PREFIX+'c2_lvl', c2_lvl); 
-            localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); 
-            localStorage.setItem(PREFIX+'c4_lvl', c4_lvl); 
-            localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); 
-            localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); 
-            localStorage.setItem(PREFIX+'c7_lvl', c7_lvl);
-            localStorage.setItem(PREFIX+'c8_lvl', c8_lvl); 
-            localStorage.setItem(PREFIX+'c9_lvl', c9_lvl); 
-            localStorage.setItem(PREFIX+'c10_lvl', c10_lvl); 
-            localStorage.setItem(PREFIX+'c11_lvl', c11_lvl); 
-            localStorage.setItem(PREFIX+'c12_lvl', c12_lvl); 
-            localStorage.setItem(PREFIX+'c13_lvl', c13_lvl);
-            
-            localStorage.setItem(PREFIX+'tot_taps', total_taps); 
-            localStorage.setItem(PREFIX+'r_wins', r_wins); 
-            localStorage.setItem(PREFIX+'r_loss', r_loss); 
-            localStorage.setItem(PREFIX+'r_streak', r_streak); 
-            localStorage.setItem(PREFIX+'title', my_title);
+            localStorage.setItem(PREFIX+'vrgk', vrgk); localStorage.setItem(PREFIX+'skrepki', skrepki); localStorage.setItem(PREFIX+'profit', profit); localStorage.setItem(PREFIX+'tap_power', tap_power); localStorage.setItem(PREFIX+'max_energy', max_energy); localStorage.setItem(PREFIX+'cur_energy', cur_energy); localStorage.setItem(PREFIX+'eng_regen', eng_regen); localStorage.setItem(PREFIX+'rank', player_rank); localStorage.setItem(PREFIX+'max_rank', max_rank); localStorage.setItem(PREFIX+'last_time', Date.now()); localStorage.setItem(PREFIX+'last_seen', Date.now()); localStorage.setItem(PREFIX+'color', my_color); localStorage.setItem(PREFIX+'og_pro', og_pro);
+            localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl); localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl); localStorage.setItem(PREFIX+'regen_price', regen_price);
+            localStorage.setItem(PREFIX+'c1_price', c1_price); localStorage.setItem(PREFIX+'c2_price', c2_price); localStorage.setItem(PREFIX+'c3_price', c3_price); localStorage.setItem(PREFIX+'c4_price', c4_price); localStorage.setItem(PREFIX+'c5_price', c5_price); localStorage.setItem(PREFIX+'c6_price', c6_price); localStorage.setItem(PREFIX+'c7_price', c7_price); localStorage.setItem(PREFIX+'c8_price', c8_price); localStorage.setItem(PREFIX+'c9_price', c9_price); localStorage.setItem(PREFIX+'c10_price', c10_price); localStorage.setItem(PREFIX+'c11_price', c11_price); localStorage.setItem(PREFIX+'c12_price', c12_price); localStorage.setItem(PREFIX+'c13_price', c13_price);
+            localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); localStorage.setItem(PREFIX+'c2_lvl', c2_lvl); localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); localStorage.setItem(PREFIX+'c4_lvl', c4_lvl); localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); localStorage.setItem(PREFIX+'c7_lvl', c7_lvl); localStorage.setItem(PREFIX+'c8_lvl', c8_lvl); localStorage.setItem(PREFIX+'c9_lvl', c9_lvl); localStorage.setItem(PREFIX+'c10_lvl', c10_lvl); localStorage.setItem(PREFIX+'c11_lvl', c11_lvl); localStorage.setItem(PREFIX+'c12_lvl', c12_lvl); localStorage.setItem(PREFIX+'c13_lvl', c13_lvl);
+            localStorage.setItem(PREFIX+'tot_taps', total_taps); localStorage.setItem(PREFIX+'r_wins', r_wins); localStorage.setItem(PREFIX+'r_loss', r_loss); localStorage.setItem(PREFIX+'r_streak', r_streak); localStorage.setItem(PREFIX+'title', my_title);
         }
 
-        function get_current_buff() { 
-            let amt = parseInt(localStorage.getItem(PREFIX+'buff_amt')) || 0; 
-            let exp = parseInt(localStorage.getItem(PREFIX+'buff_exp')) || 0; 
-            return (Date.now() < exp) ? amt : 0; 
-        }
+        function get_current_buff() { let amt = parseInt(localStorage.getItem(PREFIX+'buff_amt')) || 0; let exp = parseInt(localStorage.getItem(PREFIX+'buff_exp')) || 0; return (Date.now() < exp) ? amt : 0; }
 
         function upd_ui() {
-            el_bal.innerText = fmt(vrgk); 
-            document.getElementById('skrepki-val').innerText = fmt(skrepki);
-            let buff = get_current_buff(); 
-            document.getElementById('profit-val').innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : "");
-            el_eng.innerText = Math.floor(cur_energy); 
-            el_eng_max.innerText = max_energy; 
-            el_eng_fill.style.width = `${(cur_energy / max_energy) * 100}%`;
-            document.getElementById('rank-name').innerText = RANKS[player_rank] || 'Бронза I'; 
-            document.getElementById('rank-display').innerText = RANKS[player_rank] || 'Бронза I';
+            el_bal.innerText = fmt(vrgk); document.getElementById('skrepki-val').innerText = fmt(skrepki);
+            let buff = get_current_buff(); document.getElementById('profit-val').innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : "");
+            el_eng.innerText = Math.floor(cur_energy); el_eng_max.innerText = max_energy; el_eng_fill.style.width = `${(cur_energy / max_energy) * 100}%`;
+            document.getElementById('rank-name').innerText = RANKS[player_rank] || 'Бронза I'; document.getElementById('rank-display').innerText = RANKS[player_rank] || 'Бронза I';
+            
+            let coin = document.getElementById('vorg-coin');
+            if(player_rank >= 21) { coin.classList.add('neon-pro'); } else { coin.classList.remove('neon-pro'); }
+
             init_prices();
         }
 
-        document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { 
-            e.preventDefault(); 
-            do_tap(e.changedTouches); 
-        }, {passive: false});
-        
-        document.getElementById('vorg-coin').addEventListener('mousedown', (e) => { 
-            if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); 
-        });
+        function apply_cloud_data(p) {
+            if(!p) return;
+            vrgk = parseFloat(p.vrgk) || 0; skrepki = parseInt(p.skrepki) || 0; player_rank = parseInt(p.rank) || 0;
+            if(p.stats) {
+                let s = p.stats;
+                profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3;
+                tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; regen_price = parseInt(s[8]) || 5000;
+                c1_price = parseInt(s[9]) || 2000; c2_price = parseInt(s[10]) || 10000; c3_price = parseInt(s[11]) || 50000; c4_price = parseInt(s[12]) || 100000; c5_price = parseInt(s[13]) || 20000; c6_price = parseInt(s[14]) || 200000; c7_price = parseInt(s[15]) || 130000;
+                c1_lvl = parseInt(s[16]) || 0; c2_lvl = parseInt(s[17]) || 0; c3_lvl = parseInt(s[18]) || 0; c4_lvl = parseInt(s[19]) || 0; c5_lvl = parseInt(s[20]) || 0; c6_lvl = parseInt(s[21]) || 0; c7_lvl = parseInt(s[22]) || 0;
+                max_rank = (s.length > 23 && !isNaN(parseInt(s[23]))) ? parseInt(s[23]) : player_rank;
+                my_color = s[24] || '#ffffff'; og_pro = parseInt(s[25]) || 0;
+                c8_price = parseInt(s[26]) || 15000; c9_price = parseInt(s[27]) || 45000; c10_price = parseInt(s[28]) || 120000; c11_price = parseInt(s[29]) || 350000; c12_price = parseInt(s[30]) || 850000; c13_price = parseInt(s[31]) || 2200000;
+                c8_lvl = parseInt(s[32]) || 0; c9_lvl = parseInt(s[33]) || 0; c10_lvl = parseInt(s[34]) || 0; c11_lvl = parseInt(s[35]) || 0; c12_lvl = parseInt(s[36]) || 0; c13_lvl = parseInt(s[37]) || 0;
+                total_taps = parseInt(s[38]) || 0; r_wins = parseInt(s[39]) || 0; r_loss = parseInt(s[40]) || 0; r_streak = parseInt(s[41]) || 0; my_title = s[42] || ""; streak_days = parseInt(s[43]) || 0;
+                q_taps = parseInt(s[44]) || 0; q_wins = parseInt(s[45]) || 0; q_msgs = parseInt(s[46]) || 0; q_date = s[47] || ""; q_claimed = (parseInt(s[48]) === 1); streak_last = s[49] || "";
+            }
+            if(p.club) { localStorage.setItem(PREFIX+'club', p.club); } else { localStorage.removeItem(PREFIX+'club'); }
+        }
+
+        document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false});
+        document.getElementById('vorg-coin').addEventListener('mousedown', (e) => { if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); });
 
         function do_tap(touches) {
             for (let i = 0; i < touches.length; i++) {
                 if (cur_energy >= 1) {
-                    let power = tap_power; 
-                    if (cur_energy < tap_power) power = Math.floor(cur_energy); 
-                    if (power <= 0) break;
-                    
-                    cur_energy -= power; 
-                    vrgk += power; 
-                    spawn_txt(touches[i].clientX, touches[i].clientY, `+${power}`);
-                    total_taps += 1; 
-                    q_taps += 1;
+                    let power = tap_power; if (cur_energy < tap_power) power = Math.floor(cur_energy); if (power <= 0) break;
+                    cur_energy -= power; vrgk += power; spawn_txt(touches[i].clientX, touches[i].clientY, `+${power}`);
+                    total_taps += 1; q_taps += 1;
                     if (navigator.vibrate) navigator.vibrate(10);
                 }
             }
-            save_quests(); 
-            upd_ui(); 
-            save_data();
+            save_quests(); upd_ui(); save_data();
         }
 
-        function spawn_txt(x, y, txt) { 
-            const el = document.createElement('div'); 
-            el.classList.add('floating-text'); 
-            el.innerText = txt; 
-            const rect = tap_area.getBoundingClientRect(); 
-            el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; 
-            el.style.top = `${y - rect.top - 20}px`; 
-            tap_area.appendChild(el); 
-            setTimeout(() => el.remove(), 800); 
-        }
+        function spawn_txt(x, y, txt) { const el = document.createElement('div'); el.classList.add('floating-text'); el.innerText = txt; const rect = tap_area.getBoundingClientRect(); el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; el.style.top = `${y - rect.top - 20}px`; tap_area.appendChild(el); setTimeout(() => el.remove(), 800); }
 
         let streak_checked = false;
         function check_streak() {
-            if(!nickname || streak_checked) return; 
-            streak_checked = true; 
-            let today = new Date().toLocaleDateString();
-            
+            if(!nickname || streak_checked) return; streak_checked = true; let today = new Date().toLocaleDateString();
             if(streak_last !== today) {
-                let diffDays = 1; 
-                if(streak_last) { 
-                    let lastD = new Date(streak_last); 
-                    let currD = new Date(today); 
-                    diffDays = Math.ceil(Math.abs(currD - lastD) / (1000 * 60 * 60 * 24)); 
-                }
-                
-                if(diffDays === 1 || streak_last === "") {
-                    streak_days++; 
-                } else {
-                    streak_days = 1;
-                }
-                
-                document.getElementById('streak-count').innerText = streak_days; 
-                document.getElementById('streak-modal').style.display = 'flex';
+                let diffDays = 1; if(streak_last) { let lastD = new Date(streak_last); let currD = new Date(today); diffDays = Math.ceil(Math.abs(currD - lastD) / (1000 * 60 * 60 * 24)); }
+                if(diffDays === 1 || streak_last === "") { streak_days++; } else { streak_days = 1; }
+                document.getElementById('streak-count').innerText = streak_days; document.getElementById('streak-modal').style.display = 'flex';
             }
         }
-        
-        function claim_streak() { 
-            let today = new Date().toLocaleDateString(); 
-            streak_last = today; 
-            localStorage.setItem(PREFIX+'streak_last', today); 
-            localStorage.setItem(PREFIX+'streak_days', streak_days); 
-            
-            let rw = 5000 * streak_days; 
-            vrgk += rw; 
-            
-            if(streak_days % 7 === 0) { 
-                skrepki += 1; 
-                alert('+1 скрепка за 7 дней подряд!'); 
-            } 
-            if(streak_days === 30) { 
-                alert('Открыт титул: [Ноулайфер]! Выбери его в настройках.'); 
-            } 
-            upd_ui(); 
-            save_data(); 
-            sync_cloud(true); 
-            document.getElementById('streak-modal').style.display = 'none'; 
-        }
+        function claim_streak() { let today = new Date().toLocaleDateString(); streak_last = today; localStorage.setItem(PREFIX+'streak_last', today); localStorage.setItem(PREFIX+'streak_days', streak_days); let rw = 5000 * streak_days; vrgk += rw; if(streak_days % 7 === 0) { skrepki += 1; alert('+1 скрепка за 7 дней подряд!'); } if(streak_days === 30) { alert('Открыт титул: [Ноулайфер]! Выбери его в настройках.'); } upd_ui(); save_data(); sync_cloud(true); document.getElementById('streak-modal').style.display = 'none'; }
 
         function game_tick() {
-            let now = Date.now(); 
-            let diff_sec = (now - last_time) / 1000; 
-            if (diff_sec < 0) diff_sec = 0;
-            
+            let now = Date.now(); let diff_sec = (now - last_time) / 1000; if (diff_sec < 0) diff_sec = 0;
             if (isNaN(cur_energy) || cur_energy < 0) cur_energy = 0;
-            
-            if (cur_energy < max_energy && diff_sec > 0) { 
-                cur_energy += (eng_regen * diff_sec); 
-                if (cur_energy > max_energy) cur_energy = max_energy; 
-            }
-            
+            if (cur_energy < max_energy && diff_sec > 0) { cur_energy += (eng_regen * diff_sec); if (cur_energy > max_energy) cur_energy = max_energy; }
             let total_profit = profit + get_current_buff();
             if (total_profit > 0 && nickname) {
-                if (diff_sec > 60) { 
-                    let profit_sec = diff_sec > 10800 ? 10800 : diff_sec; 
-                    let offline_earn = (total_profit / 3600) * profit_sec; 
-                    vrgk += offline_earn; 
-                    let el = document.getElementById('offline-amount'); 
-                    let modal = document.getElementById('offline-modal'); 
-                    if (el && modal) { 
-                        el.innerText = "+" + fmt(offline_earn); 
-                        modal.style.display = 'flex'; 
-                    }
-                } else if (diff_sec > 0) { 
-                    vrgk += (total_profit / 3600) * diff_sec; 
-                }
+                if (diff_sec > 60) { let profit_sec = diff_sec > 10800 ? 10800 : diff_sec; let offline_earn = (total_profit / 3600) * profit_sec; vrgk += offline_earn; let el = document.getElementById('offline-amount'); let modal = document.getElementById('offline-modal'); if (el && modal) { el.innerText = "+" + fmt(offline_earn); modal.style.display = 'flex'; }
+                } else if (diff_sec > 0) { vrgk += (total_profit / 3600) * diff_sec; }
             }
-            last_time = now; 
-            upd_ui(); 
-            save_data(); 
-            check_streak(); 
-            check_quests(false);
-            
-            if (nickname && my_pin && (now - last_sync > 300000)) { 
-                sync_cloud(true); 
-            }
+            last_time = now; upd_ui(); save_data(); check_streak(); check_quests(false);
+            if (nickname && my_pin && (now - last_sync > 300000)) { sync_cloud(true); }
         }
-        
-        game_tick(); 
-        setInterval(game_tick, 1000);
-        
-        document.addEventListener('visibilitychange', () => { 
-            if (document.visibilityState === 'hidden' && nickname && my_pin) { 
-                if (Date.now() - last_sync > 10000) { sync_cloud(true); } 
-            } 
-        });
+        game_tick(); setInterval(game_tick, 1000);
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && nickname && my_pin) { if (Date.now() - last_sync > 10000) { sync_cloud(true); } } });
 
-        window.buy_upg = function(type) { 
-            if (type === 'tap' && vrgk >= tap_price) { 
-                vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); 
-            } else if (type === 'eng' && vrgk >= eng_price) { 
-                vrgk -= eng_price; max_energy += 500; eng_lvl += 1; eng_price = Math.floor(eng_price * 2.1); 
-            } else if (type === 'regen' && vrgk >= regen_price) { 
-                vrgk -= regen_price; eng_regen += 1; regen_price = Math.floor(regen_price * 1.5); 
-            } else { 
-                alert('мало денег'); 
-                return; 
-            } 
-            upd_ui(); 
-            save_data(); 
-        };
-        
-        window.buy_card = function(id, prof) { 
-            let p = 0; 
-            if(id === 'c1') p = c1_price; if(id === 'c2') p = c2_price; if(id === 'c3') p = c3_price; 
-            if(id === 'c4') p = c4_price; if(id === 'c5') p = c5_price; if(id === 'c6') p = c6_price; 
-            if(id === 'c7') p = c7_price; if(id === 'c8') p = c8_price; if(id === 'c9') p = c9_price; 
-            if(id === 'c10') p = c10_price; if(id === 'c11') p = c11_price; if(id === 'c12') p = c12_price; 
-            if(id === 'c13') p = c13_price; 
-            
-            if (vrgk >= p) { 
-                vrgk -= p; 
-                profit += prof; 
-                let np = Math.floor(p * 1.5); 
-                
-                if(id === 'c1') { c1_price = np; c1_lvl++; } if(id === 'c2') { c2_price = np; c2_lvl++; } 
-                if(id === 'c3') { c3_price = np; c3_lvl++; } if(id === 'c4') { c4_price = np; c4_lvl++; } 
-                if(id === 'c5') { c5_price = np; c5_lvl++; } if(id === 'c6') { c6_price = np; c6_lvl++; } 
-                if(id === 'c7') { c7_price = np; c7_lvl++; } if(id === 'c8') { c8_price = np; c8_lvl++; } 
-                if(id === 'c9') { c9_price = np; c9_lvl++; } if(id === 'c10') { c10_price = np; c10_lvl++; } 
-                if(id === 'c11') { c11_price = np; c11_lvl++; } if(id === 'c12') { c12_price = np; c12_lvl++; } 
-                if(id === 'c13') { c13_price = np; c13_lvl++; } 
-                
-                upd_ui(); 
-                save_data(); 
-            } else { 
-                alert('мало денег'); 
-            } 
-        };
-        
-        window.buy_color = function() { 
-            if (vrgk >= 5000000) { 
-                let c = prompt('Введи цвет (напр: red, gold, #ff00ff):', my_color); 
-                if (c) { vrgk -= 5000000; my_color = c; save_data(); upd_ui(); alert('Цвет изменен!'); sync_cloud(true); } 
-            } else { 
-                alert('Нужно 5 000 000'); 
-            } 
-        };
-        
-        window.craft = function() { 
-            if (vrgk >= 1000000) { 
-                vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); 
-            } else { 
-                alert('нужен 1 000 000'); 
-            } 
-        };
-        
-        window.change_title = function() { 
-            let val = document.getElementById('title-select').value; 
-            if(val === 'Ноулайфер' && streak_days < 30) return alert('Требуется стрик 30 дней!'); 
-            if(val === 'Киберспорт' && max_rank < 15) return alert('Требуется лига Лега I или выше!'); 
-            my_title = val; 
-            save_data(); 
-            sync_cloud(true); 
-            alert('Титул установлен!'); 
-        }
+        window.buy_upg = function(type) { if (type === 'tap' && vrgk >= tap_price) { vrgk -= tap_price; tap_power += 1; tap_lvl += 1; tap_price = Math.floor(tap_price * 2.1); } else if (type === 'eng' && vrgk >= eng_price) { vrgk -= eng_price; max_energy += 500; eng_lvl += 1; eng_price = Math.floor(eng_price * 2.1); } else if (type === 'regen' && vrgk >= regen_price) { vrgk -= regen_price; eng_regen += 1; regen_price = Math.floor(regen_price * 1.5); } else { alert('мало денег'); return; } upd_ui(); save_data(); };
+        window.buy_card = function(id, prof) { let p = 0; if(id === 'c1') p = c1_price; if(id === 'c2') p = c2_price; if(id === 'c3') p = c3_price; if(id === 'c4') p = c4_price; if(id === 'c5') p = c5_price; if(id === 'c6') p = c6_price; if(id === 'c7') p = c7_price; if(id === 'c8') p = c8_price; if(id === 'c9') p = c9_price; if(id === 'c10') p = c10_price; if(id === 'c11') p = c11_price; if(id === 'c12') p = c12_price; if(id === 'c13') p = c13_price; if (vrgk >= p) { vrgk -= p; profit += prof; let np = Math.floor(p * 1.5); if(id === 'c1') { c1_price = np; c1_lvl++; } if(id === 'c2') { c2_price = np; c2_lvl++; } if(id === 'c3') { c3_price = np; c3_lvl++; } if(id === 'c4') { c4_price = np; c4_lvl++; } if(id === 'c5') { c5_price = np; c5_lvl++; } if(id === 'c6') { c6_price = np; c6_lvl++; } if(id === 'c7') { c7_price = np; c7_lvl++; } if(id === 'c8') { c8_price = np; c8_lvl++; } if(id === 'c9') { c9_price = np; c9_lvl++; } if(id === 'c10') { c10_price = np; c10_lvl++; } if(id === 'c11') { c11_price = np; c11_lvl++; } if(id === 'c12') { c12_price = np; c12_lvl++; } if(id === 'c13') { c13_price = np; c13_lvl++; } upd_ui(); save_data(); } else { alert('мало денег'); } };
+        window.buy_color = function() { if (vrgk >= 5000000) { let c = prompt('Введи цвет (напр: red, gold, #ff00ff):', my_color); if (c) { vrgk -= 5000000; my_color = c; save_data(); upd_ui(); alert('Цвет изменен!'); sync_cloud(true); } } else { alert('Нужно 5 000 000'); } };
+        window.craft = function() { if (vrgk >= 1000000) { vrgk -= 1000000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); } else { alert('нужен 1 000 000'); } };
+        window.change_title = function() { let val = document.getElementById('title-select').value; if(val === 'Ноулайфер' && streak_days < 30) return alert('Требуется стрик 30 дней!'); if(val === 'Киберспорт' && max_rank < 15) return alert('Требуется лига Лега I или выше!'); my_title = val; save_data(); sync_cloud(true); alert('Титул установлен!'); }
 
-        function check_quests(forceReset) { 
-            let today = new Date().toLocaleDateString(); 
-            if(q_date !== today || forceReset) { 
-                q_date = today; q_taps = 0; q_wins = 0; q_msgs = 0; q_claimed = false; 
-                localStorage.setItem(PREFIX+'q_date', today); 
-                localStorage.setItem(PREFIX+'q_claimed', '0'); 
-                save_quests(); 
-            } 
-        }
-        
-        function save_quests() { 
-            localStorage.setItem(PREFIX+'q_taps', q_taps); 
-            localStorage.setItem(PREFIX+'q_wins', q_wins); 
-            localStorage.setItem(PREFIX+'q_msgs', q_msgs); 
-            localStorage.setItem(PREFIX+'q_date', q_date); 
-            localStorage.setItem(PREFIX+'q_claimed', q_claimed ? '1' : '0'); 
-        }
+        function check_quests(forceReset) { let today = new Date().toLocaleDateString(); if(q_date !== today || forceReset) { q_date = today; q_taps = 0; q_wins = 0; q_msgs = 0; q_claimed = false; localStorage.setItem(PREFIX+'q_date', today); localStorage.setItem(PREFIX+'q_claimed', '0'); save_quests(); } }
+        function save_quests() { localStorage.setItem(PREFIX+'q_taps', q_taps); localStorage.setItem(PREFIX+'q_wins', q_wins); localStorage.setItem(PREFIX+'q_msgs', q_msgs); localStorage.setItem(PREFIX+'q_date', q_date); localStorage.setItem(PREFIX+'q_claimed', q_claimed ? '1' : '0'); }
 
-        window.open_quests = function() { 
-            check_quests(false); 
-            document.getElementById('q1-prog').innerText = `${Math.min(q_taps, 1500)}/1500`; 
-            document.getElementById('q2-prog').innerText = `${Math.min(q_wins, 2)}/2`; 
-            document.getElementById('q3-prog').innerText = `${Math.min(q_msgs, 1)}/1`; 
-            
-            let btn = document.getElementById('q-claim-btn'); 
-            if(q_claimed) { 
-                btn.innerText = "УЖЕ СОБРАНО"; 
-                btn.className = "buy-btn"; 
-                btn.onclick = null; 
-            } else if(q_taps >= 1500 && q_wins >= 2 && q_msgs >= 1) { 
-                btn.innerText = "ЗАБРАТЬ 20 000"; 
-                btn.className = "buy-btn gold"; 
-                btn.onclick = claim_quests; 
-            } else { 
-                btn.innerText = "ВЫПОЛНИ ЗАДАНИЯ"; 
-                btn.className = "buy-btn"; 
-                btn.onclick = null; 
-            } 
-            document.getElementById('quests-modal').style.display='flex'; 
-        }
-        
-        window.claim_quests = function() { 
-            if(q_taps >= 1500 && q_wins >= 2 && q_msgs >= 1 && !q_claimed) { 
-                vrgk += 20000; 
-                q_claimed = true; 
-                localStorage.setItem(PREFIX+'q_claimed', '1'); 
-                upd_ui(); 
-                save_data(); 
-                open_quests(); 
-                alert('+20 000 воргиков!'); 
-                sync_cloud(true); 
-            } 
-        }
+        window.open_quests = function() { check_quests(false); document.getElementById('q1-prog').innerText = `${Math.min(q_taps, 1500)}/1500`; document.getElementById('q2-prog').innerText = `${Math.min(q_wins, 2)}/2`; document.getElementById('q3-prog').innerText = `${Math.min(q_msgs, 1)}/1`; let btn = document.getElementById('q-claim-btn'); if(q_claimed) { btn.innerText = "УЖЕ СОБРАНО"; btn.className = "buy-btn"; btn.onclick = null; } else if(q_taps >= 1500 && q_wins >= 2 && q_msgs >= 1) { btn.innerText = "ЗАБРАТЬ 20 000"; btn.className = "buy-btn gold"; btn.onclick = claim_quests; } else { btn.innerText = "ВЫПОЛНИ ЗАДАНИЯ"; btn.className = "buy-btn"; btn.onclick = null; } document.getElementById('quests-modal').style.display='flex'; }
+        window.claim_quests = function() { if(q_taps >= 1500 && q_wins >= 2 && q_msgs >= 1 && !q_claimed) { vrgk += 20000; q_claimed = true; localStorage.setItem(PREFIX+'q_claimed', '1'); upd_ui(); save_data(); open_quests(); alert('+20 000 воргиков!'); sync_cloud(true); } }
 
-        window.open_friends = function() { 
-            document.getElementById('friends-modal').style.display='flex'; 
-            render_friends(); 
-        }
-        
-        function render_friends() { 
-            let html = ''; 
-            my_friends.forEach(f => { 
-                let p = cached_players[f] || {vrgk:0, rank:0}; 
-                let r_name = RANKS[p.rank] || "Бронза I"; 
-                html += `<div class="member-list-item"><div style="flex:1; text-align:left; cursor:pointer;" onclick="open_profile('${f}')"><b>${f}</b><div style="font-size:10px; color:#aaa;">${r_name} | 🪙 ${fmt(p.vrgk)}</div></div><button class="buy-btn" style="padding:5px; background:#411;" onclick="rem_friend('${f}')">удалить</button></div>`; 
-            }); 
-            if(my_friends.length === 0) html = '<div style="color:#555; font-size:11px; text-align:center;">список пуст</div>'; 
-            document.getElementById('friends-list').innerHTML = html; 
-        }
-        
-        window.add_friend = function() { 
-            let n = document.getElementById('f-nick').value.trim(); 
-            if(!n || !cached_players[n]) return alert('Игрок не найден в базе!'); 
-            if(n === nickname) return alert('Это ты!'); 
-            if(!my_friends.includes(n)) { 
-                my_friends.push(n); 
-                localStorage.setItem(PREFIX+'friends', JSON.stringify(my_friends)); 
-                render_friends(); 
-            } 
-            document.getElementById('f-nick').value = ''; 
-        }
-        
-        window.rem_friend = function(n) { 
-            my_friends = my_friends.filter(x => x !== n); 
-            localStorage.setItem(PREFIX+'friends', JSON.stringify(my_friends)); 
-            render_friends(); 
-        }
-        
-        window.create_lobby = function() { 
-            let code = Math.floor(1000 + Math.random() * 9000); 
-            alert(`Твой код лобби: ${code}\nОжидание подключения скоро появится в мультиплеерном обновлении. Код сгенерирован!`); 
-        }
-        
-        window.join_lobby = function() { 
-            let c = document.getElementById('l-code').value; 
-            if(c.length === 4) alert(`Подключение к лобби ${c}...\n(Дуэли 1 на 1 будут включены в след. патче сетевого кода)`); 
-            else alert('Введите 4 цифры!'); 
-        }
+        window.open_friends = function() { document.getElementById('friends-modal').style.display='flex'; render_friends(); }
+        function render_friends() { let html = ''; my_friends.forEach(f => { let p = cached_players[f] || {vrgk:0, rank:0}; let r_name = RANKS[p.rank] || "Бронза I"; html += `<div class="member-list-item"><div style="flex:1; text-align:left; cursor:pointer;" onclick="open_profile('${f}')"><b>${f}</b><div style="font-size:10px; color:#aaa;">${r_name} | 🪙 ${fmt(p.vrgk)}</div></div><button class="buy-btn" style="padding:5px; background:#411;" onclick="rem_friend('${f}')">удалить</button></div>`; }); if(my_friends.length === 0) html = '<div style="color:#555; font-size:11px; text-align:center;">список пуст</div>'; document.getElementById('friends-list').innerHTML = html; }
+        window.add_friend = function() { let n = document.getElementById('f-nick').value.trim(); if(!n || !cached_players[n]) return alert('Игрок не найден в базе!'); if(n === nickname) return alert('Это ты!'); if(!my_friends.includes(n)) { my_friends.push(n); localStorage.setItem(PREFIX+'friends', JSON.stringify(my_friends)); render_friends(); } document.getElementById('f-nick').value = ''; }
+        window.rem_friend = function(n) { my_friends = my_friends.filter(x => x !== n); localStorage.setItem(PREFIX+'friends', JSON.stringify(my_friends)); render_friends(); }
+        window.create_lobby = function() { let code = Math.floor(1000 + Math.random() * 9000); alert(`Твой код лобби: ${code}\nОжидание подключения скоро появится в мультиплеерном обновлении. Код сгенерирован!`); }
+        window.join_lobby = function() { let c = document.getElementById('l-code').value; if(c.length === 4) alert(`Подключение к лобби ${c}...\n(Дуэли 1 на 1 будут включены в след. патче сетевого кода)`); else alert('Введите 4 цифры!'); }
 
         async function fetch_cloud() { 
             try { 
@@ -1906,6 +1018,10 @@
             document.getElementById('prof-wl').innerText = `${pwins} / ${ploss}`; 
             document.getElementById('prof-wr').innerText = `${wr}%`; 
             document.getElementById('prof-winstreak').innerText = pstr; 
+            
+            let pWrap = document.getElementById('prof-pic-wrap');
+            if (p.rank >= 21) { pWrap.classList.add('neon-pro'); } else { pWrap.classList.remove('neon-pro'); }
+            
             document.getElementById('profile-modal').style.display = 'flex'; 
         };
         
@@ -2072,144 +1188,263 @@
             document.getElementById('leaderboard-content').innerHTML = html;
         }
 
-        let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_mode = 1, arena_target_max = 100; 
-        let click_times = [], arena_locked_until = 0, arena_dots_left = 3, last_hit_time = 0; 
+        /* --- АРЕНА SEASON 3: BEST OF 3 & BAN PHASE --- */
+        let arena_int, bot_int;
+        let arena_my = 0, arena_bot = 0, arena_target_max = 100, arena_mode = 1;
+        let arena_dots_left = 3;
+        let click_times = [], arena_locked_until = 0, last_hit_time = 0; 
         let is_game_over = false;
-        
+        let tug_score = 50; 
+        let swipe_dir = '';
+        let startX=0, startY=0;
+
+        let arena_modes_names = {1:"Спам (50т)", 2:"Реакция (30т)", 3:"Мины", 4:"Канат", 5:"Свайп"};
+        let arena_queue = [];
+        let my_round_wins = 0, bot_round_wins = 0, current_round = 0;
+
         window.start_ranked_search = function() { 
             localStorage.setItem(PREFIX + 'in_match', '1'); 
             document.getElementById('ranked-modal').style.display = 'flex'; 
             document.getElementById('ranked-status').innerText = 'Поиск противника...'; 
             document.getElementById('arena-container').style.display = 'none'; 
+            document.getElementById('match-score').style.display = 'none';
             document.getElementById('arena-exit-btn').style.display = 'none'; 
+            
             setTimeout(() => { 
                 document.getElementById('ranked-status').innerText = `Противник найден: Bot_${Math.floor(Math.random()*9999)}`; 
-                setTimeout(start_arena, 1500); 
-            }, 2000); 
+                setTimeout(show_ban_phase, 1500); 
+            }, 1500); 
         }
-        
-        function start_arena() { 
-            arena_my = 0; 
-            arena_bot = 0; 
-            click_times = []; 
-            arena_locked_until = 0; 
-            is_game_over = false; 
-            document.getElementById('arena-my-score').innerText = 'Ты: 0'; 
-            document.getElementById('arena-bot-score').innerText = 'Бот: 0'; 
-            document.getElementById('arena-container').style.display = 'block'; 
+
+        function show_ban_phase() {
+            document.getElementById('ranked-status').innerText = 'ФАЗА БАНА: Выбери 1 режим, чтобы его вычеркнуть';
+            let container = document.getElementById('arena-container');
+            container.style.display = 'block';
+            container.style.padding = '15px';
             
-            arena_mode = Math.floor(Math.random() * 3) + 1; 
-            if (arena_mode === 1) { 
-                arena_target_max = 100; 
-                document.getElementById('ranked-status').innerText = 'Режим: СПАМ (Нажми 100 раз)'; 
-            } else if (arena_mode === 2) { 
-                arena_target_max = 15; 
-                arena_dots_left = 3; 
-                document.getElementById('ranked-status').innerText = 'Режим: РЕАКЦИЯ (Сломай 15 точек)'; 
-            } else if (arena_mode === 3) { 
-                arena_target_max = 20; 
-                document.getElementById('ranked-status').innerText = 'Режим: МИННОЕ ПОЛЕ (Только зеленые!)'; 
-            } 
+            let html = `<div style="text-align:center; font-weight:bold; color:#d4af37; margin-bottom:10px;">ДОСТУПНЫЕ РЕЖИМЫ</div>`;
+            for(let i=1; i<=5; i++) {
+                html += `<button class="ban-btn" onclick="ban_mode(${i})">Забанить: ${arena_modes_names[i]}</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        window.ban_mode = function(my_ban) {
+            let available = [1,2,3,4,5].filter(x => x !== my_ban);
+            let bot_ban = available[Math.floor(Math.random() * available.length)];
             
+            arena_queue = available.filter(x => x !== bot_ban);
+            arena_queue.sort(() => Math.random() - 0.5);
+
+            document.getElementById('arena-container').innerHTML = `
+                <div style="text-align:center; padding-top: 50px;">
+                    <div style="color:#0f0; margin-bottom:10px;">Твой бан: ${arena_modes_names[my_ban]}</div>
+                    <div style="color:#f00; margin-bottom:20px;">Бот забанил: ${arena_modes_names[bot_ban]}</div>
+                    <div style="color:#fff; font-weight:bold;">Матч из 3 раундов начинается...</div>
+                </div>
+            `;
+            
+            my_round_wins = 0; bot_round_wins = 0; current_round = 0;
+            document.getElementById('match-score').style.display = 'block';
+            document.getElementById('score-you').innerText = '0';
+            document.getElementById('score-bot').innerText = '0';
+
+            setTimeout(start_next_round, 2500);
+        }
+
+        function start_next_round() {
+            if(my_round_wins === 2 || bot_round_wins === 2 || current_round >= 3) {
+                end_match();
+                return;
+            }
+            
+            arena_mode = arena_queue[current_round];
+            arena_my = 0; arena_bot = 0; click_times = []; arena_locked_until = 0; is_game_over = false;
+            tug_score = 50;
+
+            document.getElementById('arena-container').style.padding = '0px';
+            document.getElementById('ranked-status').innerText = `Раунд ${current_round+1}/3: ${arena_modes_names[arena_mode].toUpperCase()}`; 
+            
+            if (arena_mode === 1) arena_target_max = 50; 
+            else if (arena_mode === 2) arena_target_max = 30; // 10 точек по 3 тапа
+            else if (arena_mode === 3) arena_target_max = 20;
+            else if (arena_mode === 4) arena_target_max = 100; 
+            else if (arena_mode === 5) arena_target_max = 15; 
+
+            if(arena_mode === 2) arena_dots_left = 3;
+
             spawn_arena_target(); 
-            
-            let bot_time_to_finish = Math.max(5, 28 - (Math.min(player_rank, 21) * 0.8)); 
+
+            let bot_time_to_finish = Math.max(3.5, 12 - (Math.min(player_rank, 21) * 0.35)); 
             let bot_interval_ms = (bot_time_to_finish * 1000) / arena_target_max; 
             
+            if(arena_mode === 4) {
+                bot_interval_ms = (bot_time_to_finish * 1000) / 25; 
+            }
+
             bot_int = setInterval(() => { 
-                arena_bot++; 
-                document.getElementById('arena-bot-score').innerText = 'Бот: ' + arena_bot; 
-                if(arena_bot >= arena_target_max) end_arena(false); 
+                if(is_game_over) return;
+                if(arena_mode === 4) {
+                    tug_score -= 2;
+                    update_tug_ui();
+                    if(tug_score <= 0) end_round(false);
+                } else {
+                    arena_bot++; 
+                    let botEl = document.getElementById('arena-bot-score');
+                    if(botEl) botEl.innerText = 'Бот: ' + arena_bot; 
+                    if(arena_bot >= arena_target_max) end_round(false); 
+                }
             }, bot_interval_ms); 
         }
-        
+
+        function update_tug_ui() {
+            let fill = document.getElementById('tug-fill-bar');
+            if(fill) {
+                fill.style.width = `${Math.max(0, Math.min(100, tug_score))}%`;
+                fill.style.background = tug_score > 50 ? '#0f0' : '#f00';
+            }
+        }
+
         function spawn_arena_target() { 
             let container = document.getElementById('arena-container'); 
+            
+            if(arena_mode === 4) {
+                container.innerHTML = `
+                    <div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот</div></div>
+                    <div style="text-align:center; margin-top:20px; color:#aaa; font-size:12px; pointer-events:none;">Тапай по всему экрану быстрее бота!</div>
+                    <div class="tug-container" id="tug-area" style="pointer-events:none;">
+                        <div class="tug-fill" id="tug-fill-bar"></div>
+                        <div class="tug-marker"></div>
+                    </div>
+                    <div id="tug-touch-zone" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;"></div>
+                `;
+                let tugTouch = document.getElementById('tug-touch-zone');
+                tugTouch.addEventListener('touchstart', e => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) hit_tug(); }, {passive: false});
+                tugTouch.addEventListener('mousedown', e => { hit_tug(); });
+                return;
+            } else if (arena_mode === 5) {
+                container.innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Свайпов: ${arena_my}/${arena_target_max}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`; 
+                spawn_swipe();
+                return;
+            }
+
             container.innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`; 
             
-            if (arena_mode === 1 || arena_mode === 2) { 
-                let btn = document.createElement('div'); 
-                btn.id = 'arena-btn-active'; 
-                if (arena_mode === 1) { 
-                    btn.className = 'arena-target-1'; 
-                    btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target(); }; 
-                    btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target(); }; 
-                } else { 
-                    btn.className = 'arena-target-2'; 
-                    btn.innerText = arena_dots_left; 
-                    btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
-                    btn.ontouchstart = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
-                } 
-                btn.style.left = `${10 + Math.random() * 70}%`; 
-                btn.style.top = `${20 + Math.random() * 60}%`; 
-                container.appendChild(btn); 
+            if (arena_mode === 1) { 
+                let btn = document.createElement('div'); btn.className = 'arena-target-1'; 
+                btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target(); }; 
+                btn.ontouchstart = (e) => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) hit_arena_target(); }; 
+                btn.style.left = `${10 + Math.random() * 70}%`; btn.style.top = `${20 + Math.random() * 60}%`; container.appendChild(btn); 
+            } else if (arena_mode === 2) { 
+                // Старая добрая зеленая кнопка
+                let btn = document.createElement('div'); btn.className = 'arena-target-2'; btn.innerText = arena_dots_left; 
+                btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
+                btn.ontouchstart = (e) => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) hit_arena_target_dot(btn); }; 
+                btn.style.left = `${10 + Math.random() * 70}%`; btn.style.top = `${20 + Math.random() * 60}%`; container.appendChild(btn); 
             } else if (arena_mode === 3) { 
-                let g = document.createElement('div'); 
-                g.className = 'minefield-green'; 
+                let g = document.createElement('div'); g.className = 'minefield-green'; 
                 g.onmousedown = (e) => { e.preventDefault(); hit_mine('green'); }; 
                 g.ontouchstart = (e) => { e.preventDefault(); hit_mine('green'); }; 
-                g.style.left = `${10 + Math.random() * 80}%`; 
-                g.style.top = `${20 + Math.random() * 70}%`; 
-                container.appendChild(g); 
-                
+                g.style.left = `${10 + Math.random() * 80}%`; g.style.top = `${20 + Math.random() * 70}%`; container.appendChild(g); 
                 for(let i=0; i<3; i++) { 
-                    let r = document.createElement('div'); 
-                    r.className = 'minefield-red'; 
+                    let r = document.createElement('div'); r.className = 'minefield-red'; 
                     r.onmousedown = (e) => { e.preventDefault(); hit_mine('red'); }; 
                     r.ontouchstart = (e) => { e.preventDefault(); hit_mine('red'); }; 
-                    r.style.left = `${10 + Math.random() * 80}%`; 
-                    r.style.top = `${20 + Math.random() * 70}%`; 
-                    container.appendChild(r); 
+                    r.style.left = `${10 + Math.random() * 80}%`; r.style.top = `${20 + Math.random() * 70}%`; container.appendChild(r); 
                 } 
             } 
         }
-        
+
+        function spawn_swipe() {
+            let container = document.getElementById('arena-container');
+            let exist = document.getElementById('swipe-zone');
+            if(exist) exist.remove();
+
+            const dirs = ['up', 'down', 'left', 'right'];
+            const arrows = {'up':'⬆️', 'down':'⬇️', 'left':'⬅️', 'right':'➡️'};
+            swipe_dir = dirs[Math.floor(Math.random()*dirs.length)];
+            
+            let el = document.createElement('div');
+            el.id = 'swipe-zone';
+            el.style.cssText = "position:absolute; width:100%; height:80%; top:20%; left:0; display:flex; justify-content:center; align-items:center; font-size:100px; background:rgba(0,0,0,0.5); border-radius:12px;";
+            el.innerText = arrows[swipe_dir];
+
+            el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, {passive:true});
+            el.addEventListener('touchend', e => { 
+                let dx = e.changedTouches[0].clientX - startX; let dy = e.changedTouches[0].clientY - startY; check_swipe(dx, dy); 
+            }, {passive:true});
+            el.addEventListener('mousedown', e => { startX = e.clientX; startY = e.clientY; });
+            el.addEventListener('mouseup', e => { let dx = e.clientX - startX; let dy = e.clientY - startY; check_swipe(dx, dy); });
+            
+            container.appendChild(el);
+        }
+
+        function check_swipe(dx, dy) {
+            if(is_game_over || now() < arena_locked_until) return;
+            if(Math.abs(dx) < 30 && Math.abs(dy) < 30) return; 
+            let dir = '';
+            if(Math.abs(dx) > Math.abs(dy)) { dir = dx > 0 ? 'right' : 'left'; } else { dir = dy > 0 ? 'down' : 'up'; }
+            
+            if(dir === swipe_dir) {
+                if(navigator.vibrate) navigator.vibrate(10);
+                arena_my++; document.getElementById('arena-my-score').innerText = `Свайпов: ${arena_my}/${arena_target_max}`;
+                if(arena_my >= arena_target_max) end_round(true); else spawn_swipe();
+            } else {
+                arena_locked_until = now() + 1000;
+                document.getElementById('swipe-zone').style.background = '#500';
+                setTimeout(()=> { let sz = document.getElementById('swipe-zone'); if(sz) sz.style.background = 'rgba(0,0,0,0.5)'; }, 1000);
+                if(navigator.vibrate) navigator.vibrate([100, 100]);
+            }
+        }
+
+        function now() { return Date.now(); }
+
         function check_autoclicker() { 
-            let now = Date.now(); 
-            if (now < arena_locked_until) return false; 
-            click_times.push(now); 
-            if (click_times.length > 8) click_times.shift(); 
-            if (click_times.length === 8 && (click_times[7] - click_times[0]) < 450) { 
+            let t = now(); if (t < arena_locked_until) return false; 
+            click_times.push(t); if (click_times.length > 12) click_times.shift(); 
+            // 12 кликов за 400мс — это 30 кликов в сек, человек так пальцами не сможет даже в 4 пальца.
+            if (click_times.length === 12 && (click_times[11] - click_times[0]) < 400) { 
                 document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑'; 
                 document.getElementById('ranked-status').style.color = '#f00'; 
-                arena_locked_until = now + 3000; 
-                click_times = []; 
+                arena_locked_until = t + 3000; click_times = []; 
                 if(navigator.vibrate) navigator.vibrate([100, 100, 100]); 
-                setTimeout(() => { 
-                    let el = document.getElementById('ranked-status'); 
-                    if(el) { el.style.color = '#aaa'; el.innerText = 'В ИГРЕ...'; } 
-                }, 3000); 
+                setTimeout(() => { let el = document.getElementById('ranked-status'); if(el) { el.style.color = '#aaa'; el.innerText = 'В ИГРЕ...'; } }, 3000); 
                 return false; 
-            } 
-            return true; 
+            } return true; 
+        }
+
+        function hit_tug() {
+            if(is_game_over) return;
+            let t = now(); if(t - last_hit_time < 20) return; last_hit_time = t;
+            if(!check_autoclicker()) return;
+            tug_score += 2; update_tug_ui();
+            if(navigator.vibrate) navigator.vibrate(10);
+            if(tug_score >= 100) end_round(true);
         }
         
         function hit_arena_target() { 
             if (is_game_over) return; 
-            let now = Date.now(); 
-            if (now - last_hit_time < 20) return; 
-            last_hit_time = now; 
+            let t = now(); if (t - last_hit_time < 20) return; last_hit_time = t; 
             if(!check_autoclicker()) return; 
-            arena_my++; 
-            document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
+            arena_my++; document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
             if(arena_my % 5 === 0) spawn_arena_target(); 
             if(navigator.vibrate) navigator.vibrate(10); 
-            if(arena_my >= arena_target_max) end_arena(true); 
+            if(arena_my >= arena_target_max) end_round(true); 
         }
         
         function hit_arena_target_dot(btn) { 
             if (is_game_over) return; 
-            let now = Date.now(); 
-            if (now - last_hit_time < 20) return; 
-            last_hit_time = now; 
+            let t = now(); if (t - last_hit_time < 20) return; last_hit_time = t; 
             if(!check_autoclicker()) return; 
+            
             arena_dots_left--; 
+            arena_my++; 
+            document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
             if(navigator.vibrate) navigator.vibrate(10); 
+            
             if(arena_dots_left <= 0) { 
-                arena_my++; 
-                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
                 if(arena_my >= arena_target_max) { 
-                    end_arena(true); 
+                    end_round(true); 
                 } else { 
                     arena_dots_left = 3; 
                     spawn_arena_target(); 
@@ -2221,27 +1456,43 @@
         
         function hit_mine(type) { 
             if (is_game_over) return; 
-            let now = Date.now(); 
-            if (now < arena_locked_until) return; 
+            let t = now(); if (t < arena_locked_until) return; 
             if (type === 'red') { 
-                arena_my = Math.max(0, arena_my - 3); 
+                arena_my = Math.max(0, arena_my - 5); 
                 document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
-                arena_locked_until = now + 1000; 
+                arena_locked_until = t + 1000; 
                 document.getElementById('arena-container').style.background = '#300'; 
                 setTimeout(()=> { document.getElementById('arena-container').style.background = '#050505'; }, 1000); 
                 if(navigator.vibrate) navigator.vibrate([100, 100]); 
             } else { 
-                arena_my++; 
-                document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
+                arena_my++; document.getElementById('arena-my-score').innerText = 'Ты: ' + arena_my; 
                 if(navigator.vibrate) navigator.vibrate(10); 
-                if(arena_my >= arena_target_max) { 
-                    end_arena(true); 
-                } else { 
-                    spawn_arena_target(); 
-                } 
+                if(arena_my >= arena_target_max) { end_round(true); } else { spawn_arena_target(); } 
             } 
         }
-        
+
+        function end_round(is_win) {
+            if(is_game_over) return;
+            is_game_over = true;
+            clearInterval(bot_int);
+
+            if(is_win) my_round_wins++; else bot_round_wins++;
+            
+            document.getElementById('score-you').innerText = my_round_wins;
+            document.getElementById('score-bot').innerText = bot_round_wins;
+            
+            current_round++;
+            
+            let container = document.getElementById('arena-container');
+            container.innerHTML = `
+                <div style="text-align:center; padding-top: 60px;">
+                    <div style="font-size:24px; font-weight:bold; color:${is_win ? '#0f0' : '#f00'};">${is_win ? 'РАУНД ВЫИГРАН!' : 'РАУНД ПРОИГРАН'}</div>
+                </div>
+            `;
+
+            setTimeout(start_next_round, 1500);
+        }
+
         function show_rankup_screen(rank_str, sound_file, glow_color) { 
             document.getElementById('rankup-overlay-text').innerText = rank_str; 
             document.getElementById('rankup-glow').style.background = `radial-gradient(circle, ${glow_color} 0%, rgba(0,0,0,0) 70%)`; 
@@ -2250,290 +1501,55 @@
             try { new Audio(sound_file).play(); } catch(e) {} 
         }
 
-        function end_arena(is_win) {
-            if (is_game_over) return; 
-            is_game_over = true;
-            clearInterval(bot_int); 
+        function end_match() {
             localStorage.removeItem(PREFIX + 'in_match');
-            document.getElementById('arena-container').innerHTML = `<div class="arena-hud"><div class="arena-score" style="color: #0f0;" id="arena-my-score">Ты: ${arena_my}</div><div class="arena-vs">VS</div><div class="arena-score" style="color: #f00;" id="arena-bot-score">Бот: ${arena_bot}</div></div>`;
+            let is_match_win = my_round_wins > bot_round_wins;
+            
+            document.getElementById('arena-container').innerHTML = `
+                <div style="text-align:center; padding-top: 40px;">
+                    <div style="font-size:18px; color:#aaa; margin-bottom: 10px;">МАТЧ ЗАВЕРШЕН</div>
+                    <div style="font-size:28px; font-weight:bold; color:#d4af37;">${nickname} ${my_round_wins}:${bot_round_wins} Бот</div>
+                </div>
+            `;
             document.getElementById('arena-exit-btn').style.display = 'block';
             
-            if (is_win) {
+            if (is_match_win) {
                 document.getElementById('ranked-status').innerText = 'ПОБЕДА! Ты повысил ранг!'; 
                 player_rank++;
-                q_wins++; 
-                r_wins++; 
-                r_streak++; 
-                save_quests();
+                q_wins++; r_wins++; r_streak++; save_quests();
                 
                 let is_major = (player_rank % 3 === 0 || player_rank === 21); 
                 let l_idx = Math.floor(player_rank / 3); 
-                if(player_rank === 21) l_idx = 7;
+                if(player_rank >= 21) l_idx = 7;
                 let s_name = RANK_SOUNDS[Math.min(l_idx, 7)]; 
                 let s_col = RANK_COLORS[Math.min(l_idx, 7)];
                 
-                if (is_major) { 
-                    show_rankup_screen(RANKS[player_rank], s_name, s_col); 
-                }
+                if (is_major) { show_rankup_screen(RANKS[player_rank], s_name, s_col); }
                 
                 if (player_rank > max_rank) {
                     max_rank = player_rank;
                     if(player_rank === 12) { alert('🔥 НАГРАДА ЗА МИФИК I:\n+5,000/ч'); profit += 5000; } 
                     if(player_rank === 15) { alert('🔥 НАГРАДА ЗА ЛЕГУ I:\n+15,000/ч'); profit += 15000; } 
                     if(player_rank === 18) { alert('💎 НАГРАДА ЗА МАСТЕР I:\n+45,000/ч'); profit += 45000; } 
-                    if(player_rank === 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч'); profit += 65000; }
+                    if(player_rank === 21) { alert('🏆 НАГРАДА ЗА ПРО:\n+65,000/ч\nТеперь у тебя есть неоновая рамка!'); profit += 65000; }
                 }
                 
                 if (global_event_data && global_event_data.active) { 
                     let p = parseInt(localStorage.getItem(PREFIX+'pending_event_pts')) || 0; 
                     localStorage.setItem(PREFIX+'pending_event_pts', p + 1); 
                 }
-                save_data(); 
-                upd_ui();
+                save_data(); upd_ui();
             } else { 
                 document.getElementById('ranked-status').innerText = 'ПОРАЖЕНИЕ! Ты потерял ранг.'; 
-                r_loss++; 
-                r_streak = 0; 
-                save_quests(); 
+                r_loss++; r_streak = 0; save_quests(); 
                 if(player_rank > 0) player_rank--; 
-                save_data(); 
-                upd_ui(); 
+                save_data(); upd_ui(); 
             }
         }
 
         window.exit_arena = function() { 
             document.getElementById('ranked-modal').style.display = 'none'; 
             sync_cloud(); 
-        }
-
-        function render_clubs_list() { 
-            let my_c = localStorage.getItem(PREFIX + 'club'); 
-            let html = ''; 
-            
-            if (global_event_data && global_event_data.active) { 
-                html += `<div style="background: #2a1100; border: 1px solid #d4af37; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;"><div style="color: #d4af37; font-weight: bold; text-transform: uppercase;">🔥 ИВЕНТ: ${global_event_data.name} 🔥</div><div style="font-size: 11px; color: #aaa; margin-top: 5px;">1 победа в ранкеде = 1 очко клубу. Топ-3 получают бафф пассива на 3 дня и золотую корону!</div></div>`; 
-            } 
-            
-            if (my_c && cached_clubs[my_c]) { 
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px; font-size: 16px; padding: 15px;" onclick="open_club_details('${my_c}')">МОЙ КЛУБ: ${my_c}</button>`; 
-            } else { 
-                html += `<button class="buy-btn gold" style="width: 100%; margin-bottom: 15px;" onclick="document.getElementById('create-club-modal').style.display='flex'">создать свой клуб</button>`; 
-            } 
-            
-            html += `<div class="section-title">список клубов</div>`; 
-            let count = 0; 
-            
-            for (let name in cached_clubs) { 
-                count++; 
-                let c = cached_clubs[name]; 
-                let crown = (name === cached_last_winner) ? ' 👑' : ''; 
-                html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${name}')"><div class="upgrade-info"><span class="upgrade-name">${name}${crown}</span><span class="upgrade-desc">${c.members.length} чел. | вход: ${fmt(c.req)}</span></div><div style="font-size: 20px;">ℹ️</div></div>`; 
-            } 
-            
-            if(count === 0) { 
-                html += `<div style="text-align: center; color: #555; margin-top: 10px;">клубов пока нет</div>`; 
-            } 
-            document.getElementById('club-content').innerHTML = html; 
-        }
-        
-        window.open_club_details = function(name, is_silent_update = false) { 
-            let c = cached_clubs[name]; 
-            if(!c) return; 
-            let total_vrgk = 0; 
-            c.members.forEach(m => { 
-                if(cached_players[m]) total_vrgk += (cached_players[m].vrgk || 0); 
-            }); 
-            let crown = (name === cached_last_winner) ? ' 👑' : ''; 
-            
-            let html = `<div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;"><button class="buy-btn" style="padding: 5px 15px;" onclick="document.getElementById('view-club-modal').style.display='none'">назад</button>${localStorage.getItem(PREFIX + 'club') === name ? `<button class="buy-btn" style="background: #411; border: 1px solid #933; color: #f88;" onclick="leave_club()">выйти</button>` : ''}</div>`; 
-            html += `<div class="club-card"><div class="club-badge">🔥</div><div class="club-name-big">${name}${crown}</div><div class="club-trophies">🏆 ${fmt(total_vrgk)}</div><div class="club-desc-box">${c.desc || 'нет описания'}</div><div class="club-stats-grid"><div class="cs-box"><div class="cs-title">тег</div><div class="cs-val">${c.tag || gen_tag()}</div></div><div class="cs-box"><div class="cs-title">тип</div><div class="cs-val">${c.type}</div></div><div class="cs-box" style="grid-column: span 2;"><div class="cs-title">вход (воргики)</div><div class="cs-val">🪙 ${fmt(c.req)}</div></div>`; 
-            
-            if (global_event_data && global_event_data.active) { 
-                html += `<div class="cs-box" style="background: #311; border-color: #d4af37; grid-column: span 2;"><div class="cs-title" style="color: #d4af37;">очки ивента</div><div class="cs-val" style="color: #fff;">${c.event_pts || 0} 🏆</div></div>`; 
-            } 
-            
-            html += `</div>`; 
-            
-            if (localStorage.getItem(PREFIX + 'club') !== name) { 
-                html += `<button class="buy-btn gold" style="width: 100%; margin-top: 15px;" onclick="join_club('${name}')">вступить</button>`; 
-            } 
-            
-            html += `<div style="text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #d4af37;">Участники (${c.members.length}):</div>`; 
-            
-            let mems = c.members.map(m => { 
-                return { name: m, vrgk: (cached_players[m] ? cached_players[m].vrgk : 0), ls: (cached_players[m] ? cached_players[m].last_seen : 0) }; 
-            }).sort((a,b) => b.vrgk - a.vrgk); 
-            
-            mems.forEach((m, idx) => { 
-                let is_online = timeAgo(m.ls) === "в сети"; 
-                html += `<div class="member-list-item" onclick="open_profile('${m.name}')"><div style="font-weight: bold; width: 20px; color: #888;">${idx+1}</div><div class="ml-info" style="flex: 1; padding-left: 10px;"><div class="ml-name">${m.name}</div><div class="ml-role">${m.name === c.owner ? 'Лидер' : 'Участник'}</div></div><div style="text-align: right;"><div class="ml-score">🪙 ${fmt(m.vrgk)}</div><div class="ml-status ${is_online ? 'online' : ''}">${timeAgo(m.ls)}</div></div></div>`; 
-            }); 
-            
-            if (c.owner === nickname && c.reqs && c.reqs.length > 0) { 
-                html += `<div style="text-align: left; font-weight: bold; margin-top: 10px; font-size: 12px; color: #d4af37;">Заявки (${c.reqs.length}):</div>`; 
-                c.reqs.forEach(r => { 
-                    html += `<div class="member-list-item"><div style="flex: 1; text-align: left; font-weight: bold;">${r}</div><button class="buy-btn gold" style="padding: 5px; margin-right: 5px;" onclick="acc_req('${name}', '${r}')">да</button><button class="buy-btn" style="padding: 5px; background: #311;" onclick="rej_req('${name}', '${r}')">нет</button></div>`; 
-                }); 
-            } 
-            
-            if (localStorage.getItem(PREFIX + 'club') === name) { 
-                html += `<div class="chat-container"><div class="chat-msgs" id="chat-msgs-box">`; 
-                if(c.chat && c.chat.length > 0) { 
-                    c.chat.forEach(msg => { 
-                        html += `<div class="chat-msg"><span class="chat-author">${msg.a}:</span>${msg.t}</div>`; 
-                    }); 
-                } else { 
-                    html += `<div style="color:#555; text-align:center; font-size:11px;">чат пуст</div>`; 
-                } 
-                html += `</div><div class="chat-input-area"><input type="text" id="chat-input" placeholder="сообщение..." maxlength="100"><button class="buy-btn gold" onclick="send_chat('${name}')">></button></div></div>`; 
-            } 
-            
-            let modal = document.getElementById('view-club-modal'); 
-            modal.setAttribute('data-club', name); 
-            document.getElementById('view-club-content').innerHTML = html; 
-            modal.style.display = 'flex'; 
-            
-            if(!is_silent_update) { 
-                let chatBox = document.getElementById('chat-msgs-box'); 
-                if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
-            } 
-        }
-        
-        window.submit_club = async function() { 
-            let name = document.getElementById('c-name').value.trim(); 
-            let desc = document.getElementById('c-desc').value.trim(); 
-            let req = parseInt(document.getElementById('c-req').value) || 0; 
-            let type = document.getElementById('c-type').value; 
-            
-            if(!name) return alert('введи название!'); 
-            
-            document.getElementById('create-club-modal').style.display = 'none'; 
-            let d = await fetch_cloud(); 
-            
-            if(!d) return alert('Ошибка!'); 
-            if(d.clubs[name]) return alert('клуб с таким именем уже есть!'); 
-            
-            d.clubs[name] = { 
-                desc: desc, 
-                req: req, 
-                type: type, 
-                owner: nickname, 
-                members: [nickname], 
-                reqs: [], 
-                tag: gen_tag(), 
-                chat: [] 
-            }; 
-            
-            d.players[nickname].club = name; 
-            localStorage.setItem(PREFIX + 'club', name); 
-            await put_cloud(d); 
-            sync_cloud(); 
-        };
-        
-        window.join_club = async function(name) { 
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            
-            let c = d.clubs[name]; 
-            if(!c) return; 
-            if(vrgk < c.req) return alert('мало воргиков для входа!'); 
-            if(c.type === 'закрытый') return alert('клуб закрыт'); 
-            
-            if(c.type === 'по заявкам') { 
-                if(!c.reqs) c.reqs = []; 
-                if(!c.reqs.includes(nickname)) c.reqs.push(nickname); 
-                await put_cloud(d); 
-                alert('заявка отправлена!'); 
-                return; 
-            } 
-            
-            if(!c.members.includes(nickname)) c.members.push(nickname); 
-            d.players[nickname].club = name; 
-            localStorage.setItem(PREFIX + 'club', name); 
-            await put_cloud(d); 
-            document.getElementById('view-club-modal').style.display = 'none'; 
-            sync_cloud(); 
-        };
-        
-        window.leave_club = async function() { 
-            if(!confirm('точно выйти из клуба?')) return; 
-            
-            let my_c = localStorage.getItem(PREFIX + 'club'); 
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            
-            if (d.clubs[my_c]) { 
-                let c = d.clubs[my_c]; 
-                c.members = c.members.filter(m => m !== nickname); 
-                
-                if (c.owner === nickname) { 
-                    if (c.members.length > 0) { 
-                        c.owner = c.members[0]; 
-                    } else { 
-                        delete d.clubs[my_c]; 
-                    } 
-                } 
-            } 
-            
-            delete d.players[nickname].club; 
-            localStorage.removeItem(PREFIX + 'club'); 
-            await put_cloud(d); 
-            document.getElementById('view-club-modal').style.display = 'none'; 
-            sync_cloud(); 
-        };
-        
-        window.acc_req = async function(cname, user) { 
-            let d = await fetch_cloud(); 
-            if(!d) return alert('Ошибка!'); 
-            let c = d.clubs[cname]; 
-            if (c) { 
-                c.reqs = c.reqs.filter(r => r !== user); 
-                if(!c.members.includes(user)) c.members.push(user); 
-                
-                if(!d.players[user]) d.players[user] = {vrgk: 0, skrepki: 0, rank:0}; 
-                d.players[user].club = cname; 
-                
-                await put_cloud(d); 
-                open_club_details(cname); 
-            } 
-        };
-        
-        window.rej_req = async function(cname, user) { 
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            let c = d.clubs[cname]; 
-            if (c) { 
-                c.reqs = c.reqs.filter(r => r !== user); 
-                await put_cloud(d); 
-                open_club_details(cname); 
-            } 
-        };
-        
-        window.send_chat = async function(cname) { 
-            let inp = document.getElementById('chat-input'); 
-            let txt = inp.value.trim(); 
-            if(!txt) return; 
-            
-            inp.value = ''; 
-            let d = await fetch_cloud(); 
-            if(!d) return; 
-            
-            let c = d.clubs[cname]; 
-            if(c) { 
-                if(!c.chat) c.chat = []; 
-                c.chat.push({a: nickname, t: txt}); 
-                if(c.chat.length > 30) c.chat.shift(); 
-                
-                await put_cloud(d); 
-                open_club_details(cname); 
-                q_msgs++; 
-                save_quests(); 
-                
-                setTimeout(() => { 
-                    let chatBox = document.getElementById('chat-msgs-box'); 
-                    if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
-                }, 50); 
-            } 
         }
 
         window.sw_tab = function(tabid, el) { 
@@ -2552,7 +1568,7 @@
                 } 
             } 
         };
-        
+
         window.change_nick = async function() { 
             alert('Смена ника временно отключена.'); 
         }
