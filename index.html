@@ -702,7 +702,6 @@
         let global_event_data = null; let cached_last_winner = ""; let cached_players = {}; let cached_clubs = {};
         window.current_top_tab = 'players';
 
-        // ВОЗВРАЩЕНО РЕАЛЬНОЕ ОБЛАКО ДЛЯ РЕЛИЗА ИГРОКАМ
         const BIN_ID = '6a8f2d5cf5f4af5e2945ec3f'; 
         const API_KEY = '$2a$10$aaQQW4GHe/epejM6DjxqmubroFphtxyH7bfo30HN2R8zxaklID9fO';
         
@@ -1266,7 +1265,7 @@
             document.getElementById('ranked-status').innerText = `Раунд ${current_round+1}/3: ${arena_modes_names[arena_mode].toUpperCase()}`; 
             
             if (arena_mode === 1) arena_target_max = 50; 
-            else if (arena_mode === 2) arena_target_max = 30; // 10 точек по 3 тапа
+            else if (arena_mode === 2) arena_target_max = 30; 
             else if (arena_mode === 3) arena_target_max = 20;
             else if (arena_mode === 4) arena_target_max = 100; 
             else if (arena_mode === 5) arena_target_max = 15; 
@@ -1336,7 +1335,6 @@
                 btn.ontouchstart = (e) => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) hit_arena_target(); }; 
                 btn.style.left = `${10 + Math.random() * 70}%`; btn.style.top = `${20 + Math.random() * 60}%`; container.appendChild(btn); 
             } else if (arena_mode === 2) { 
-                // Старая добрая зеленая кнопка
                 let btn = document.createElement('div'); btn.className = 'arena-target-2'; btn.innerText = arena_dots_left; 
                 btn.onmousedown = (e) => { e.preventDefault(); hit_arena_target_dot(btn); }; 
                 btn.ontouchstart = (e) => { e.preventDefault(); for(let i=0; i<e.changedTouches.length; i++) hit_arena_target_dot(btn); }; 
@@ -1366,13 +1364,28 @@
             
             let el = document.createElement('div');
             el.id = 'swipe-zone';
-            el.style.cssText = "position:absolute; width:100%; height:80%; top:20%; left:0; display:flex; justify-content:center; align-items:center; font-size:100px; background:rgba(0,0,0,0.5); border-radius:12px;";
+            // ЖЕСТКАЯ БЛОКИРОВКА СИСТЕМНЫХ ЖЕСТОВ ДЛЯ TELEGRAM И CHROME
+            el.style.cssText = "position:absolute; width:100%; height:80%; top:20%; left:0; display:flex; justify-content:center; align-items:center; font-size:100px; background:rgba(0,0,0,0.5); border-radius:12px; touch-action:none;";
             el.innerText = arrows[swipe_dir];
 
-            el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, {passive:true});
+            // passive:false + e.preventDefault() спасает от закрытия приложения при свайпе
+            el.addEventListener('touchstart', e => { 
+                e.preventDefault(); 
+                startX = e.touches[0].clientX; 
+                startY = e.touches[0].clientY; 
+            }, {passive:false});
+            
+            el.addEventListener('touchmove', e => { 
+                e.preventDefault(); 
+            }, {passive:false});
+            
             el.addEventListener('touchend', e => { 
-                let dx = e.changedTouches[0].clientX - startX; let dy = e.changedTouches[0].clientY - startY; check_swipe(dx, dy); 
-            }, {passive:true});
+                e.preventDefault(); 
+                let dx = e.changedTouches[0].clientX - startX; 
+                let dy = e.changedTouches[0].clientY - startY; 
+                check_swipe(dx, dy); 
+            }, {passive:false});
+            
             el.addEventListener('mousedown', e => { startX = e.clientX; startY = e.clientY; });
             el.addEventListener('mouseup', e => { let dx = e.clientX - startX; let dy = e.clientY - startY; check_swipe(dx, dy); });
             
@@ -1402,7 +1415,6 @@
         function check_autoclicker() { 
             let t = now(); if (t < arena_locked_until) return false; 
             click_times.push(t); if (click_times.length > 12) click_times.shift(); 
-            // 12 кликов за 400мс — это 30 кликов в сек, человек так пальцами не сможет даже в 4 пальца.
             if (click_times.length === 12 && (click_times[11] - click_times[0]) < 400) { 
                 document.getElementById('ranked-status').innerText = '🛑 АВТОКЛИКЕР! ШТРАФ 3 СЕК 🛑'; 
                 document.getElementById('ranked-status').style.color = '#f00'; 
