@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Vorgster Kombat - Anarchy Update</title>
+    <title>Vorgster Kombat</title>
     
     <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -847,7 +847,7 @@
         let eng_lvl = parseInt(localStorage.getItem(PREFIX+'eng_lvl'))||1; 
         let regen_price = parseInt(localStorage.getItem(PREFIX+'regen_price'))||5000;
         
-        // Переменные всех 13 карточек
+        // Карточки
         let c1_price = parseInt(localStorage.getItem(PREFIX+'c1_price'))||2000; let c1_lvl = parseInt(localStorage.getItem(PREFIX+'c1_lvl'))||0;
         let c2_price = parseInt(localStorage.getItem(PREFIX+'c2_price'))||10000; let c2_lvl = parseInt(localStorage.getItem(PREFIX+'c2_lvl'))||0;
         let c3_price = parseInt(localStorage.getItem(PREFIX+'c3_price'))||50000; let c3_lvl = parseInt(localStorage.getItem(PREFIX+'c3_lvl'))||0;
@@ -1074,7 +1074,6 @@
             localStorage.setItem(PREFIX+'loc_x', loc_x); 
             localStorage.setItem(PREFIX+'loc_z', loc_z); 
             
-            // Цены карточек
             localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl); 
             localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl); 
             localStorage.setItem(PREFIX+'regen_price', regen_price); 
@@ -1779,6 +1778,7 @@
         }
 
         window.open_friends = function() { document.getElementById('friends-modal').style.display='flex'; render_friends(); }
+        
         function render_friends() { 
             let html = ''; 
             my_friends.forEach(f => { 
