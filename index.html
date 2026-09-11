@@ -31,12 +31,10 @@
       <div class="league-info" id="rank-name">БРОНЗА I</div>
       <div class="main-balance" id="vrgk-balance">0</div>
     </div>
-
     <div id="tab-mine" class="tab-content active">
       <div class="tap-area" id="tap-area"><div class="vorg-coin" id="vorg-coin"></div></div>
       <div class="energy-container"><div class="energy-text"><span id="energy-current">1000</span> / <span id="energy-max">1000</span> энг</div><div class="energy-bar-bg"><div class="energy-bar-fill" id="energy-fill"></div></div></div>
     </div>
-
     <div id="tab-upgrades" class="tab-content">
       <div class="upgrade-list">
         <div class="section-title">особое</div>
@@ -63,7 +61,6 @@
         <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">коллаб со звездой</span><span class="upgrade-desc" id="card13-desc">ур 0</span><span class="upgrade-price" id="card13-price">цена: 2 200 000</span></div><button class="buy-btn" onclick="buy_card(13, 130000)">купить</button></div>
       </div>
     </div>
-
     <div id="tab-donate" class="tab-content">
       <div class="upgrade-list">
         <div class="club-card" style="border-color:#a0f; background:#1a0a2a;">
@@ -88,7 +85,6 @@
         </div>
       </div>
     </div>
-
     <div id="tab-inventory" class="tab-content">
       <div class="upgrade-list">
         <div class="section-title">МОИ ВЕЩИ И РЕСУРСЫ</div>
@@ -105,24 +101,23 @@
           <button class="buy-btn gold" id="btn-get-kit" style="width:100%; margin-top:10px;" onclick="claim_kit()">ПОЛУЧИТЬ КИТ</button>
         </div>
         <div class="section-title" style="margin-top:20px; color:#f0f;">ШОП АРТЕФАКТОВ</div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#0ff;">Сфера Титана</span><span class="upgrade-price">20 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_titan', 20000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f0f;">Сфера Хаоса</span><span class="upgrade-price">18 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_chaos', 18000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f00;">Сфера Ареса</span><span class="upgrade-price">25 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_ares', 25000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#0f0;">Сфера Бестии</span><span class="upgrade-price">22 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_bestia', 22000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#00f;">Сфера Гидры</span><span class="upgrade-price">16 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_hydra', 16000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f0a;">Сфера Икара</span><span class="upgrade-price">8 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_icarus', 8000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#fd0;">Сфера Эриды</span><span class="upgrade-price">6 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_erida', 6000000)">купить</button></div>
-        <div class="upgrade-item" style="margin-top:10px;"><div class="upgrade-info"><span class="upgrade-name" style="color:#f55;">Талисман Крушителя</span><span class="upgrade-price">25 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_crusher', 25000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#a5f;">Талисман Карателя</span><span class="upgrade-price">21 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_punisher', 21000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#ff0;">Талисман Раздора</span><span class="upgrade-price">17 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_discord', 17000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#aaa;">Талисман Тирана</span><span class="upgrade-price">11 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_tyrant', 11000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f22;">Талисман Ярости</span><span class="upgrade-price">14 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_rage', 14000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#fff;">Талисман Вихря</span><span class="upgrade-price">15 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_vortex', 15000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#888;">Талисман Мрака</span><span class="upgrade-price">5 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_darkness', 5000000)">купить</button></div>
-        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#c00;">Талисман Демона</span><span class="upgrade-price">7 500 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_demon', 7500000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#0ff;">Сфера Титана</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Броня +15%</span><span class="upgrade-price">20 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_titan', 20000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f0f;">Сфера Хаоса</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">-4 ХП, Броня +10%, Урон +2.5</span><span class="upgrade-price">18 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_chaos', 18000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f00;">Сфера Ареса</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +6, Броня -15%, -2 ХП</span><span class="upgrade-price">25 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_ares', 25000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#0f0;">Сфера Бестии</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Броня +5%, +4 ХП</span><span class="upgrade-price">22 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_bestia', 22000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#00f;">Сфера Гидры</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">+4 ХП, Броня +10%</span><span class="upgrade-price">16 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_hydra', 16000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f0a;">Сфера Икара</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +2, +2 ХП</span><span class="upgrade-price">8 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_icarus', 8000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#fd0;">Сфера Эриды</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">+2 ХП</span><span class="upgrade-price">6 000 000 🪙</span></div><button class="buy-btn purple" onclick="buy_artifact('sphere_erida', 6000000)">купить</button></div>
+        <div class="upgrade-item" style="margin-top:10px;"><div class="upgrade-info"><span class="upgrade-name" style="color:#f55;">Талисман Крушителя</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">+4 ХП, Урон +3, Броня +10%</span><span class="upgrade-price">25 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_crusher', 25000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#a5f;">Талисман Карателя</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +7, -4 ХП</span><span class="upgrade-price">21 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_punisher', 21000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#ff0;">Талисман Раздора</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +4, +2 ХП, Броня -15%</span><span class="upgrade-price">17 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_discord', 17000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#aaa;">Талисман Тирана</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +2, Броня +10%, -4 ХП</span><span class="upgrade-price">11 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_tyrant', 11000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#f22;">Талисман Ярости</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +5, -4 ХП</span><span class="upgrade-price">14 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_rage', 14000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#fff;">Талисман Вихря</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">+2 ХП</span><span class="upgrade-price">15 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_vortex', 15000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#888;">Талисман Мрака</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Броня +5%, +1 ХП</span><span class="upgrade-price">5 000 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_darkness', 5000000)">купить</button></div>
+        <div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name" style="color:#c00;">Талисман Демона</span><span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +2</span><span class="upgrade-price">7 500 000 🪙</span></div><button class="buy-btn gold" onclick="buy_artifact('talisman_demon', 7500000)">купить</button></div>
       </div>
     </div>
-    
     <div id="tab-anarchy" class="tab-content">
       <div class="upgrade-list" style="padding-top:5px;">
         <div class="section-title">МИР АНАРХИИ</div>
@@ -142,14 +137,12 @@
         </div>
       </div>
     </div>
-
     <div id="tab-auction" class="tab-content">
       <div class="upgrade-list">
         <div class="section-title">АУКЦИОН (/AH)</div>
         <div style="text-align:center; padding: 40px 10px; color:#888;">Скоро появится рынок...</div>
       </div>
     </div>
-
     <div id="tab-ranked" class="tab-content">
       <div class="upgrade-list">
         <div class="club-card" style="margin-top:10px;">
@@ -169,11 +162,9 @@
         </div>
       </div>
     </div>
-
     <div id="tab-clubs" class="tab-content">
       <div class="upgrade-list" id="club-content"><div style="text-align:center; color:#888; margin-top:20px;">загрузка...</div></div>
     </div>
-    
     <div id="tab-rating" class="tab-content">
       <div class="upgrade-list">
         <div class="section-title">рейтинг лучших</div>
@@ -186,7 +177,6 @@
         <div id="leaderboard-content" style="text-align:center; color:#888;">загрузка...</div>
       </div>
     </div>
-
     <div class="bottom-nav">
       <div class="nav-item active" onclick="sw_tab('mine', this)">Тапать</div>
       <div class="nav-item" onclick="sw_tab('upgrades', this)">Бусты</div>
@@ -198,7 +188,6 @@
       <div class="nav-item" onclick="sw_tab('clubs', this)">Клубы</div>
       <div class="nav-item" onclick="sw_tab('rating', this)">Топ</div>
     </div>
-
     <div id="auth-modal" class="modal-overlay" style="z-index:9999; background:#000;">
       <div class="modal-content" style="background:#111; border:1px solid #d4af37;">
         <div class="modal-title">вход / регистрация</div>
@@ -207,16 +196,11 @@
         <button class="buy-btn gold" style="margin-top:10px; padding:12px;" onclick="auth_player()">войти</button>
       </div>
     </div>
-
     <div id="settings-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">настройки</div>
         <div style="font-size:12px; color:#888; margin-bottom:10px;" id="current-nick"></div>
-        <select id="title-select" onchange="change_title()" style="margin-bottom:15px;">
-          <option value="">Без титула</option>
-          <option value="Ноулайфер">Ноулайфер</option>
-          <option value="Киберспорт">Киберспорт</option>
-        </select>
+        <select id="title-select" onchange="change_title()" style="margin-bottom:15px;"><option value="">Без титула</option><option value="Ноулайфер">Ноулайфер</option><option value="Киберспорт">Киберспорт</option></select>
         <input type="text" id="promo-input" placeholder="промокод">
         <button class="buy-btn blue" style="width:100%; margin-bottom:15px;" onclick="use_promo()">активировать</button>
         <div id="admin-panel" style="display:none; background:#220; padding:10px; border-radius:8px; border:1px solid #d4af37; margin-bottom:15px;">
@@ -230,15 +214,10 @@
         <button class="buy-btn" style="margin-top:10px;" onclick="document.getElementById('settings-modal').style.display='none'">закрыть</button>
       </div>
     </div>
-
     <div id="craft-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">ПЕЧЬ И ВЕРСТАК ⚒️</div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:12px; background:#000; padding:10px; border-radius:8px;">
-          <div>Руда: <b id="ui-ore-iron">0</b></div>
-          <div>Слитки: <b id="ui-ingot-iron" style="color:#aaa;">0</b></div>
-          <div>Алмазы: <b id="ui-gem-diamond" style="color:#0ff;">0</b></div>
-        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:12px; background:#000; padding:10px; border-radius:8px;"><div>Руда: <b id="ui-ore-iron">0</b></div><div>Слитки: <b id="ui-ingot-iron" style="color:#aaa;">0</b></div><div>Алмазы: <b id="ui-gem-diamond" style="color:#0ff;">0</b></div></div>
         <button class="buy-btn blue" style="margin-bottom:5px;" onclick="smelt('iron')">Переплавить (1 к 1)</button>
         <button class="buy-btn" style="margin-bottom:5px;" onclick="craft_item('sword_iron', 2)">Жел. меч (2)</button>
         <button class="buy-btn" style="margin-bottom:5px;" onclick="craft_item('armor_iron', 24)">Жел. сет (24)</button>
@@ -247,67 +226,37 @@
         <button class="buy-btn red" style="margin-top:15px;" onclick="document.getElementById('craft-modal').style.display='none'; render_inventory();">Закрыть</button>
       </div>
     </div>
-
     <div id="anarchy-pvp-modal" class="modal-overlay" style="background:#000; z-index:10000;">
       <div class="modal-content" style="width:100%; height:100%; max-width:100%; border-radius:0; justify-content:flex-start; padding:15px; background:radial-gradient(circle at center, #311 0%, #000 80%);">
         <div class="modal-title" style="color:#f00; font-size:24px;">PVP ДУЭЛЬ (FULL DROP)</div>
         <div id="pvp-status-text" style="color:#aaa; margin-bottom:20px;">ОЖИДАНИЕ...</div>
         <div id="pvp-battle-ui" style="display:none; flex-direction:column; gap:15px; width:100%;">
-          <div style="background:#111; border:1px solid #500; border-radius:8px; padding:10px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#f00; font-weight:bold;"><span id="pvp-enemy-name">Enemy</span><span id="pvp-enemy-hp-text">20</span></div>
-            <div class="pvp-hp-bar"><div class="pvp-hp-fill" id="pvp-enemy-hp-fill" style="background:#f00;"></div></div>
-          </div>
+          <div style="background:#111; border:1px solid #500; border-radius:8px; padding:10px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#f00; font-weight:bold;"><span id="pvp-enemy-name">Enemy</span><span id="pvp-enemy-hp-text">20</span></div><div class="pvp-hp-bar"><div class="pvp-hp-fill" id="pvp-enemy-hp-fill" style="background:#f00;"></div></div></div>
           <div class="log-box" id="pvp-log"></div>
-          <div style="background:#111; border:1px solid #050; border-radius:8px; padding:10px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#0f0; font-weight:bold;"><span id="pvp-my-name">Me</span><span id="pvp-my-hp-text">20</span></div>
-            <div class="pvp-hp-bar"><div class="pvp-hp-fill" id="pvp-my-hp-fill"></div></div>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
-            <button class="buy-btn red" style="padding:15px; font-size:16px;" onclick="pvp_attack()" id="pvp-btn-attack">УДАРИТЬ ⚔️</button>
-            <button class="buy-btn gold" style="padding:15px; font-size:16px;" onclick="pvp_heal()" id="pvp-btn-heal">ГЭПЛ 🍎 (<span id="pvp-gapple-count">0</span>)</button>
-            <button class="buy-btn purple" style="grid-column:span 2; padding:15px; font-size:16px;" onclick="pvp_swap_offhand()">СВАП АРТЕФАКТА (F)</button>
-          </div>
+          <div style="background:#111; border:1px solid #050; border-radius:8px; padding:10px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#0f0; font-weight:bold;"><span id="pvp-my-name">Me</span><span id="pvp-my-hp-text">20</span></div><div class="pvp-hp-bar"><div class="pvp-hp-fill" id="pvp-my-hp-fill"></div></div></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;"><button class="buy-btn red" style="padding:15px; font-size:16px;" onclick="pvp_attack()" id="pvp-btn-attack">УДАРИТЬ ⚔️</button><button class="buy-btn gold" style="padding:15px; font-size:16px;" onclick="pvp_heal()" id="pvp-btn-heal">ГЭПЛ 🍎 (<span id="pvp-gapple-count">0</span>)</button><button class="buy-btn purple" style="grid-column:span 2; padding:15px; font-size:16px;" onclick="pvp_swap_offhand()">СВАП АРТЕФАКТА (F)</button></div>
         </div>
         <button class="buy-btn" id="pvp-exit-btn" style="margin-top:auto; display:none;" onclick="document.getElementById('anarchy-pvp-modal').style.display='none'">ЗАКРЫТЬ И ЗАБРАТЬ ЛУТ</button>
       </div>
     </div>
-
     <div id="stash-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">ТВОЙ СТЭШ</div>
-        <div style="display:flex; gap:10px; flex-direction:column; margin-top:10px;">
-          <button class="buy-btn blue" onclick="move_to_stash('skrepki')">Положить 1 скрепку</button>
-          <button class="buy-btn gold" onclick="move_from_stash('skrepki')">Забрать 1 скрепку</button>
-          <button class="buy-btn red" onclick="hide_all_armor()">Спрятать броню и артефакты</button>
-          <button class="buy-btn green" onclick="take_all_armor()">Забрать всё</button>
-        </div>
+        <div style="display:flex; gap:10px; flex-direction:column; margin-top:10px;"><button class="buy-btn blue" onclick="move_to_stash('skrepki')">Положить 1 скрепку</button><button class="buy-btn gold" onclick="move_from_stash('skrepki')">Забрать 1 скрепку</button><button class="buy-btn red" onclick="hide_all_armor()">Спрятать броню и артефакты</button><button class="buy-btn green" onclick="take_all_armor()">Забрать всё</button></div>
         <div style="margin-top:10px; color:#aaa; font-size:11px; text-align:left;" id="stash-info">В стэше: ...</div>
         <button class="buy-btn" style="margin-top:15px;" onclick="document.getElementById('stash-modal').style.display='none'; render_inventory();">Закрыть</button>
       </div>
     </div>
-    
     <div id="profile-modal" class="modal-overlay">
       <div class="modal-content" style="padding:25px;">
         <div id="prof-pic-wrap" style="width:100px; height:100px; margin:0 auto 15px auto; border-radius:50%; background:url('vorg.jpg') center/cover; border:3px solid #d4af37;"></div>
         <div id="prof-name" style="font-size:28px; font-weight:900;">Name</div>
         <div id="prof-title" style="color:#aaa; font-size:12px; margin-top:5px; font-weight:bold;"></div>
         <div id="prof-og" style="color:gold; font-size:12px; margin-top:5px; font-weight:bold; display:none;">🌟 ВЕТЕРАН 🌟</div>
-        <div style="margin-top:20px; font-size:14px; text-align:left; color:#ccc;">
-          <div>Ранг: <span id="prof-rank" style="color:#d4af37; font-weight:bold;">-</span></div>
-          <div>Донат: <span id="prof-donate" style="color:#fff; font-weight:bold;">Нет</span></div>
-          <div>Клуб: <span id="prof-club" style="color:#fff; font-weight:bold;">-</span></div>
-          <div>Воргиков: <span id="prof-vrgk" style="color:#fff; font-weight:bold;">0</span></div>
-          <div>Скрепок: <span id="prof-skr" style="color:#fff; font-weight:bold;">0</span></div>
-          <div style="border-top:1px solid #333; margin:10px 0;"></div>
-          <div>Тапов: <span id="prof-taps" style="color:#fff;">0</span></div>
-          <div>Ранкед В/П: <span id="prof-wl" style="color:#fff;">0 / 0</span></div>
-          <div>Винрейт: <span id="prof-wr" style="color:#fff;">0%</span></div>
-          <div>Стрик: <span id="prof-winstreak" style="color:#fff;">0</span></div>
-        </div>
+        <div style="margin-top:20px; font-size:14px; text-align:left; color:#ccc;"><div>Ранг: <span id="prof-rank" style="color:#d4af37; font-weight:bold;">-</span></div><div>Донат: <span id="prof-donate" style="color:#fff; font-weight:bold;">Нет</span></div><div>Клуб: <span id="prof-club" style="color:#fff; font-weight:bold;">-</span></div><div>Воргиков: <span id="prof-vrgk" style="color:#fff; font-weight:bold;">0</span></div><div>Скрепок: <span id="prof-skr" style="color:#fff; font-weight:bold;">0</span></div><div style="border-top:1px solid #333; margin:10px 0;"></div><div>Тапов: <span id="prof-taps" style="color:#fff;">0</span></div><div>Ранкед В/П: <span id="prof-wl" style="color:#fff;">0 / 0</span></div><div>Винрейт: <span id="prof-wr" style="color:#fff;">0%</span></div><div>Стрик: <span id="prof-winstreak" style="color:#fff;">0</span></div></div>
         <button class="buy-btn" style="margin-top:15px;" onclick="document.getElementById('profile-modal').style.display='none'">закрыть</button>
       </div>
     </div>
-
     <div id="create-club-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">создать клуб</div>
@@ -319,11 +268,9 @@
         <button class="buy-btn" onclick="document.getElementById('create-club-modal').style.display='none'">отмена</button>
       </div>
     </div>
-
     <div id="view-club-modal" class="modal-overlay">
       <div class="modal-content" id="view-club-content"></div>
     </div>
-
     <div id="streak-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">СТРИК</div>
@@ -331,7 +278,6 @@
         <button class="buy-btn gold" style="margin-top:15px;" onclick="claim_streak()">ЗАБРАТЬ БОНУС</button>
       </div>
     </div>
-
     <div id="quests-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">КВЕСТЫ</div>
@@ -342,20 +288,15 @@
         <button class="buy-btn" style="margin-top:5px;" onclick="document.getElementById('quests-modal').style.display='none'">закрыть</button>
       </div>
     </div>
-
     <div id="friends-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">друзья</div>
         <div style="display:flex; gap:5px;"><input type="text" id="f-nick" placeholder="ник"><button class="buy-btn gold" onclick="add_friend()">добавить</button></div>
         <div id="friends-list" style="margin-top:10px; border-top:1px solid #333; padding-top:10px; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:5px;"></div>
-        <div style="margin-top:15px; border-top:1px solid #333; padding-top:15px;">
-          <button class="buy-btn" style="width:100%; margin-bottom:5px;" onclick="create_lobby()">создать лобби</button>
-          <div style="display:flex; gap:5px;"><input type="text" id="l-code" placeholder="код"><button class="buy-btn blue" onclick="join_lobby()">войти</button></div>
-        </div>
+        <div style="margin-top:15px; border-top:1px solid #333; padding-top:15px;"><button class="buy-btn" style="width:100%; margin-bottom:5px;" onclick="create_lobby()">создать лобби</button><div style="display:flex; gap:5px;"><input type="text" id="l-code" placeholder="код"><button class="buy-btn blue" onclick="join_lobby()">войти</button></div></div>
         <button class="buy-btn" style="margin-top:15px;" onclick="document.getElementById('friends-modal').style.display='none'">закрыть</button>
       </div>
     </div>
-
     <div id="offline-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">офлайн прибыль</div>
