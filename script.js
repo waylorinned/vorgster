@@ -236,12 +236,13 @@ function init_map() {
 function get_best_armor() { if(inv['armor_netherite'] > 0) return 'netherite'; if(inv['armor_diamond'] > 0) return 'diamond'; if(inv['armor_iron'] > 0) return 'iron'; if(inv['armor_leather'] > 0) return 'leather'; return 'none'; }
 function get_armor_color(type) { if(type === 'netherite') return '#303'; if(type === 'diamond') return '#0ff'; if(type === 'iron') return '#aaa'; if(type === 'leather') return '#8B4513'; return '#fff'; }
 function get_ore_at(x, z) { let gridX = Math.floor(x/100); let gridZ = Math.floor(z/100); if(mined_ores[gridX + '_' + gridZ]) return null; let noise = Math.sin(gridX * 12.9898 + gridZ * 78.233) * 43758.5453; noise = noise - Math.floor(noise); if(noise > 0.95) return 'diamond'; if(noise > 0.80) return 'iron'; return null; }
+function sync_my_pos() { if(!nickname) return; database.ref('world_players/' + nickname).set({x: loc_x, z: loc_z, armor: get_best_armor(), last: Date.now()}); }
 function draw_map() {
     if(current_tab !== 'anarchy') return requestAnimationFrame(draw_map);
     let wrap = document.getElementById('map-wrapper'); if(wrap && (canvas.width !== wrap.clientWidth || canvas.height !== wrap.clientHeight)) { canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight; }
     if(isJoyActive) { 
         loc_x += joyX * 4; loc_z += joyY * 4; upd_ui(); 
-        if(Date.now() - last_stash_check > 1000) { check_local_stashes(); last_stash_check = Date.now(); }
+        if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); }
     }
     ctx.fillStyle = '#1e331e'; ctx.fillRect(0,0, canvas.width, canvas.height); 
     let cx = canvas.width/2; let cy = canvas.height/2; is_on_ore = null;
@@ -252,28 +253,27 @@ function draw_map() {
     ctx.fillStyle = get_armor_color(get_best_armor()); ctx.fillRect(cx - 10, cy - 10, 20, 20); ctx.strokeStyle = '#fff'; ctx.strokeRect(cx - 10, cy - 10, 20, 20);
     requestAnimationFrame(draw_map);
 }
-function sync_my_pos() { if(current_tab === 'anarchy') database.ref('world_players/' + nickname).set({x: loc_x, z: loc_z, armor: get_best_armor(), last: Date.now()}); }
 database.ref('world_players').on('value', snap => { online_players = snap.val() || {}; });
 function get_pvp_stats() { 
     let max_hp = 20; let dmg = 1; let armor_reduct = 0; 
     if(inv['armor_netherite'] > 0) armor_reduct = 0.70; else if(inv['armor_diamond'] > 0) armor_reduct = 0.50; else if(inv['armor_iron'] > 0) armor_reduct = 0.30; else if(inv['armor_leather'] > 0) armor_reduct = 0.10; 
     if(inv['mace'] > 0) dmg = 12; else if(inv['sword_netherite'] > 0) dmg = 8; else if(inv['sword_diamond'] > 0) dmg = 7; else if(inv['sword_iron'] > 0) dmg = 6; 
     let offhand = inv['active_offhand'];
-    if(offhand === 'sphere_titan') { armor_reduct += 0.20; } 
-    else if(offhand === 'sphere_chaos') { max_hp -= 4; armor_reduct += 0.06; dmg += 2.5; } 
+    if(offhand === 'sphere_titan') { armor_reduct += 0.15; } 
+    else if(offhand === 'sphere_chaos') { max_hp -= 4; armor_reduct += 0.10; dmg += 2.5; } 
     else if(offhand === 'sphere_satyr') { dmg += 2; } 
-    else if(offhand === 'sphere_bestia') { max_hp += 4; armor_reduct += 0.04; } 
-    else if(offhand === 'sphere_ares') { max_hp -= 2; dmg += 6; armor_reduct -= 0.08; } 
-    else if(offhand === 'sphere_hydra') { max_hp += 4; armor_reduct += 0.08; } 
+    else if(offhand === 'sphere_bestia') { max_hp += 4; armor_reduct += 0.05; } 
+    else if(offhand === 'sphere_ares') { max_hp -= 2; dmg += 6; armor_reduct -= 0.15; } 
+    else if(offhand === 'sphere_hydra') { max_hp += 4; armor_reduct += 0.10; } 
     else if(offhand === 'sphere_icarus') { max_hp += 2; dmg += 2; } 
     else if(offhand === 'sphere_erida') { max_hp += 2; } 
-    else if(offhand === 'talisman_crusher') { max_hp += 4; dmg += 3; armor_reduct += 0.16; } 
+    else if(offhand === 'talisman_crusher') { max_hp += 4; dmg += 3; armor_reduct += 0.10; } 
     else if(offhand === 'talisman_punisher') { max_hp -= 4; dmg += 7; } 
-    else if(offhand === 'talisman_discord') { max_hp += 2; dmg += 4; armor_reduct -= 0.12; } 
-    else if(offhand === 'talisman_tyrant') { max_hp -= 4; dmg += 2; armor_reduct += 0.08; } 
+    else if(offhand === 'talisman_discord') { max_hp += 2; dmg += 4; armor_reduct -= 0.15; } 
+    else if(offhand === 'talisman_tyrant') { max_hp -= 4; dmg += 2; armor_reduct += 0.10; } 
     else if(offhand === 'talisman_rage') { max_hp -= 4; dmg += 5; } 
     else if(offhand === 'talisman_vortex') { max_hp += 2; } 
-    else if(offhand === 'talisman_darkness') { max_hp += 1; armor_reduct += 0.04; } 
+    else if(offhand === 'talisman_darkness') { max_hp += 1; armor_reduct += 0.05; } 
     else if(offhand === 'talisman_demon') { dmg += 2; }
     return { hp: max_hp, max_hp: max_hp, dmg: dmg, armor: armor_reduct }; 
 }
