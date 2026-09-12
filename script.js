@@ -40,23 +40,24 @@ let streak_days = parseInt(localStorage.getItem(PREFIX+'streak_days')) || 0, str
 let q_taps = parseInt(localStorage.getItem(PREFIX+'q_taps')) || 0, q_wins = parseInt(localStorage.getItem(PREFIX+'q_wins')) || 0, q_msgs = parseInt(localStorage.getItem(PREFIX+'q_msgs')) || 0, q_date = localStorage.getItem(PREFIX+'q_date') || ""; let q_claimed = localStorage.getItem(PREFIX+'q_claimed') === '1';
 let my_friends = JSON.parse(localStorage.getItem(PREFIX+'friends') || "[]");
 let donate_rank = parseInt(localStorage.getItem(PREFIX + 'donate_rank')) || 0, donate_until = parseInt(localStorage.getItem(PREFIX + 'donate_until')) || 0;
-let inv = JSON.parse(localStorage.getItem(PREFIX + 'inv') || "{}");
-let last_kit_time = parseInt(localStorage.getItem(PREFIX + 'last_kit_v2')) || 0; // СБРОС КД: новый ключ last_kit_v2
+
+// БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ ИНВЕНТАРЯ И ЧАР
+let inv = {}; try { inv = JSON.parse(localStorage.getItem(PREFIX + 'inv') || "{}"); } catch(e) { inv = {}; }
+let last_kit_time = parseInt(localStorage.getItem(PREFIX + 'last_kit_v2')) || 0;
+let enchants = {}; try { enchants = JSON.parse(localStorage.getItem(PREFIX + 'enchants') || "{}"); } catch(e) { enchants = {}; }
+
+let weapon_dur = parseInt(localStorage.getItem(PREFIX + 'w_dur')); if (isNaN(weapon_dur)) weapon_dur = 1000;
+let armor_dur = parseInt(localStorage.getItem(PREFIX + 'a_dur')); if (isNaN(armor_dur)) armor_dur = 1000;
+
+const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, density:5, breach:4, protection:4, thorns:3, fire_protection:4, unbreaking:3, mending:1 };
+const ENCHANT_NAMES = { sharpness:'Острота (Урон)', fire_aspect:'Заговор Огня', looting:'Добыча (Скрепки)', knockback:'Отдача (Стан)', density:'Плотность (Булава)', breach:'Пробитие (Булава)', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность (Не ломается)', mending:'Починка (от Скрепок)' };
+for(let k in ENCHANT_LIMITS) { if(enchants[k] === undefined) enchants[k] = 0; }
+
 let loc_x = parseInt(localStorage.getItem(PREFIX + 'loc_x')) || 0, loc_z = parseInt(localStorage.getItem(PREFIX + 'loc_z')) || 0;
-let mined_ores = JSON.parse(localStorage.getItem(PREFIX + 'mined_ores') || "{}");
+let mined_ores = {}; try { mined_ores = JSON.parse(localStorage.getItem(PREFIX + 'mined_ores') || "{}"); } catch(e) { mined_ores = {}; }
 let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now(), last_sync = 0, last_stash_check = 0;
 let global_event_data = null, cached_last_winner = "", cached_players = {}, cached_clubs = {};
 window.current_top_tab = 'players'; window.current_tab = 'mine';
-
-// === СИСТЕМА ЗАЧАРОВАНИЙ ===
-let enchants = JSON.parse(localStorage.getItem(PREFIX + 'enchants') || "{}");
-let weapon_dur = parseInt(localStorage.getItem(PREFIX + 'w_dur')) || 1000;
-let armor_dur = parseInt(localStorage.getItem(PREFIX + 'a_dur')) || 1000;
-
-// Инит пустых чар
-const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, density:5, breach:4, protection:4, thorns:3, fire_protection:4, unbreaking:3, mending:1 };
-const ENCHANT_NAMES = { sharpness:'Острота (Урон)', fire_aspect:'Заговор Огня', looting:'Добыча (Скрепки)', knockback:'Отдача (Стан)', density:'Плотность (Булава)', breach:'Пробитие (Булава)', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность (Не ломается)', mending:'Починка (от Скрепок)' };
-for(let k in ENCHANT_LIMITS) if(enchants[k] === undefined) enchants[k] = 0;
 
 // === КОНСТАНТЫ ===
 const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
@@ -65,24 +66,14 @@ const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'myt
 const RANKS_INFO = [{name: "Нет", color: "#fff"}, {name: "Барон", color: "#aaa"}, {name: "Страж", color: "#aaddaa"}, {name: "Герой", color: "#55ccff"}, {name: "Аспид", color: "#00ff00"}, {name: "Сквид", color: "#00ffff"}, {name: "Глава", color: "#ffa500"}, {name: "Элита", color: "#a020f0"}, {name: "Титан", color: "#ff4500"}, {name: "Принц", color: "#ffd700"}, {name: "Князь", color: "#ff00ff"}, {name: "ГЕРЦОГ", color: "#fff"} ];
 const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_diamond": "Алмаз 💎", "ingot_iron": "Слиток железа 🪙", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈" };
 
-// === CANVAS И КАРТА ПЕРЕМЕННЫЕ ===
+// === ПЕРЕМЕННЫЕ КАРТЫ И БОЁВКИ ===
 let canvas = document.getElementById('rtp-canvas');
 let ctx = canvas ? canvas.getContext('2d') : null;
 let online_players = {}, joyX = 0, joyY = 0, isJoyActive = false;
-let is_on_ore = null, current_stash_id = null;
-let world_drops = {};
-
-// === ПЕРЕМЕННЫЕ НОВОЙ БОЁВКИ ===
-let my_cur_hp = 20;
-let in_combat = false;
-let combat_timer = 0;
-let combat_interval = null;
-let combo_count = 0;
-let last_combat_hit_time = 0;
-let sword_hits = 0;
-let is_stunned = false;
-let current_target = null;
-let last_heal_time = 0;
+let is_on_ore = null, current_stash_id = null, world_drops = {};
+let my_cur_hp = 20, in_combat = false, combat_timer = 0, combat_interval = null;
+let combo_count = 0, last_combat_hit_time = 0, sword_hits = 0;
+let is_stunned = false, current_target = null, last_heal_time = 0;
 
 // === РАНКЕД ПЕРЕМЕННЫЕ ===
 let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_target_max = 100, arena_mode = 1; 
@@ -97,7 +88,7 @@ if (!nickname || !my_pin) {
     document.getElementById('auth-modal').style.display = 'flex'; 
 } else { 
     check_admin(); sync_cloud(); render_inventory(); update_rtp_ui(); init_map(); 
-    my_cur_hp = get_pvp_stats().max_hp;
+    my_cur_hp = get_pvp_stats().max_hp; // Теперь безопасно!
     setup_dmg_listener();
 }
 
@@ -176,8 +167,12 @@ function apply_cloud_data(p) {
     if(!p) return; 
     vrgk = parseFloat(p.vrgk) || 0; skrepki = parseInt(p.skrepki) || 0; player_rank = parseInt(p.rank) || 0; 
     donate_rank = parseInt(p.donate_rank) || 0; donate_until = parseInt(p.donate_until) || 0; 
-    if(p.inventory) inv = JSON.parse(p.inventory); last_kit_time = parseInt(p.last_kit_v2) || 0; 
-    if(p.enchants) { enchants = JSON.parse(p.enchants); for(let k in ENCHANT_LIMITS) if(enchants[k]===undefined) enchants[k]=0; }
+    if(p.inventory) { try { inv = JSON.parse(p.inventory); } catch(e) { inv = {}; } }
+    last_kit_time = parseInt(p.last_kit_v2) || 0; 
+    if(p.enchants) { 
+        try { enchants = JSON.parse(p.enchants); } catch(e) { enchants = {}; }
+        for(let k in ENCHANT_LIMITS) if(enchants[k]===undefined) enchants[k]=0; 
+    }
     if(p.stats) { 
         let s = p.stats; profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3; 
         tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; regen_price = parseInt(s[8]) || 5000; 
@@ -279,7 +274,7 @@ window.claim_kit = function() {
     else if (donate_rank === 11) { 
         add_item('armor_netherite',1); add_item('mace',1); add_item('gapple',64); add_item('pearl',16); add_item('egapple',6); add_item('totem',3); 
         let spheres = ['sphere_titan','sphere_chaos','sphere_bestia','talisman_crusher','talisman_punisher'];
-        add_item(spheres[Math.floor(Math.random()*spheres.length)], 1); // Рандомная сфера для Герцога
+        add_item(spheres[Math.floor(Math.random()*spheres.length)], 1);
     } 
     save_data(); sync_cloud(); render_inventory(); alert("Кит успешно получен! Вещи добавлены в инвентарь."); 
 }
@@ -317,7 +312,7 @@ window.open_enchant_modal = function() {
         let curlvl = enchants[key];
         let maxlvl = ENCHANT_LIMITS[key];
         let cost = curlvl === 0 ? 1 : curlvl === 1 ? 3 : curlvl === 2 ? 5 : curlvl === 3 ? 10 : 15;
-        if(key === 'mending') cost = 20; // Починка дорогая
+        if(key === 'mending') cost = 20; 
         
         let btn_html = curlvl >= maxlvl 
             ? `<button class="buy-btn" disabled style="background:#222; color:#555;">МАКС.</button>`
@@ -340,7 +335,6 @@ window.upgrade_enchant = function(key, cost) {
     alert(`Чары ${ENCHANT_NAMES[key]} успешно улучшены!`);
 }
 
-// Добавляем кнопку Чар на карту Анархии динамически, если ее нет
 function inject_enchant_button() {
     let wrap = document.getElementById('map-wrapper');
     if(wrap && !document.getElementById('enchant-btn')) {
@@ -381,7 +375,7 @@ window.use_locator = async function() { if(vrgk < 50000) return alert("Лока�
 
 // === CANVAS И КАРТА ЛОГИКА ===
 function init_map() {
-    inject_enchant_button(); // Появление кнопки чар
+    inject_enchant_button();
     let wrap = document.getElementById('map-wrapper'); if(!wrap) return;
     canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight;
     let joyZone = document.getElementById('joystick-zone'); let joyKnob = document.getElementById('joystick-knob'); let jRect = null;
@@ -390,11 +384,9 @@ function init_map() {
     joyZone.addEventListener('touchend', e => { e.preventDefault(); isJoyActive = false; joyX = 0; joyY = 0; joyKnob.style.transform = `translate(0px, 0px)`; }, {passive:false});
     function handleJoy(t) { let dx = t.clientX - (jRect.left + 50); let dy = t.clientY - (jRect.top + 50); let dist = Math.sqrt(dx*dx + dy*dy); let maxD = 35; if(dist > maxD) { dx = (dx/dist)*maxD; dy = (dy/dist)*maxD; } joyKnob.style.transform = `translate(${dx}px, ${dy}px)`; joyX = dx / maxD; joyY = dy / maxD; }
     
-    // Клик по карте для таргета
     canvas.addEventListener('touchstart', e => {
         e.preventDefault(); let rect = canvas.getBoundingClientRect(); let tx = e.touches[0].clientX - rect.left; let ty = e.touches[0].clientY - rect.top;
         let clicked_nick = null; let cx = canvas.width/2; let cy = canvas.height/2;
-        
         for(let p in online_players) { 
             if(p === nickname || Date.now() - online_players[p].last > 15000) continue; 
             let pdx = online_players[p].x - loc_x; let pdz = online_players[p].z - loc_z; 
@@ -440,7 +432,6 @@ function draw_map() {
     for(let i = -3; i <= 3; i++) { for(let j = -3; j <= 3; j++) { let gx = myGridX + i; let gz = myGridZ + j; let ore = get_ore_at(gx*100, gz*100); if(ore) { let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); ctx.fillStyle = ore === 'diamond' ? '#0ff' : '#ccc'; ctx.beginPath(); ctx.arc(screenX, screenY, 8, 0, Math.PI*2); ctx.fill(); if(i === 0 && j === 0) is_on_ore = ore; } } }
     let btn = document.getElementById('mine-btn'); if(is_on_ore) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; }
     
-    // Отрисовка лута
     for(let d_id in world_drops) {
         let drop = world_drops[d_id];
         let dx = drop.x - loc_x, dz = drop.z - loc_z;
@@ -467,17 +458,14 @@ function draw_map() {
     
     ctx.fillStyle = get_armor_color(get_best_armor()); ctx.fillRect(cx - 10, cy - 10, 20, 20); ctx.strokeStyle = '#fff'; ctx.strokeRect(cx - 10, cy - 10, 20, 20);
     
-    // Полоски прочности под персонажем
     ctx.fillStyle = '#000'; ctx.fillRect(cx - 10, cy + 12, 20, 2);
-    ctx.fillStyle = '#0ff'; ctx.fillRect(cx - 10, cy + 12, 20 * (weapon_dur/1000), 2); // Оружие
+    ctx.fillStyle = '#0ff'; ctx.fillRect(cx - 10, cy + 12, 20 * (weapon_dur/1000), 2); 
     ctx.fillStyle = '#000'; ctx.fillRect(cx - 10, cy + 15, 20, 2);
-    ctx.fillStyle = '#aaa'; ctx.fillRect(cx - 10, cy + 15, 20 * (armor_dur/1000), 2); // Броня
+    ctx.fillStyle = '#aaa'; ctx.fillRect(cx - 10, cy + 15, 20 * (armor_dur/1000), 2); 
 
     update_target_hud();
     requestAnimationFrame(draw_map);
 }
-
-database.ref('world_players').on('value', snap => { online_players = snap.val() || {}; });
 
 function get_pvp_stats() { 
     let max_hp = 20; let dmg = 1; let armor_reduct = 0; 
@@ -486,11 +474,10 @@ function get_pvp_stats() {
     if(ar === 'netherite') armor_reduct = 0.70; else if(ar === 'diamond') armor_reduct = 0.50; else if(ar === 'iron') armor_reduct = 0.30; else if(ar === 'leather') armor_reduct = 0.10; 
     if(wp === 'mace') dmg = 12; else if(wp === 'sword_netherite') dmg = 8; else if(wp === 'sword_diamond') dmg = 7; else if(wp === 'sword_iron') dmg = 6; 
     
-    // Чары на урон и защиту
     if(wp.includes('sword')) dmg += enchants.sharpness * 0.5;
     if(wp === 'mace') dmg += enchants.density * 1.0;
     armor_reduct += enchants.protection * 0.04;
-    if(armor_reduct > 0.90) armor_reduct = 0.90; // кап брони 90%
+    if(armor_reduct > 0.90) armor_reduct = 0.90;
 
     let offhand = inv['active_offhand'];
     if(offhand === 'sphere_titan') { armor_reduct += 0.15; } 
@@ -548,9 +535,8 @@ function trigger_attack_logic() {
     if (now - last_combat_hit_time <= 1200) combo_count++; else combo_count = 1;
 
     let stats = get_pvp_stats();
-    if (stats.wp === 'none') return; // Голыми руками бить нельзя
+    if (stats.wp === 'none') return; 
 
-    // Потеря прочности оружия (Учитывается ПРОЧНОСТЬ)
     if(Math.random() >= (enchants.unbreaking * 0.25)) {
         weapon_dur -= 15;
         if(weapon_dur <= 0) {
@@ -588,7 +574,6 @@ function process_incoming_damage(data) {
     let armor = stats.armor;
     let atk_ench = data.ench || {};
     
-    // Потеря прочности брони (Учитывается ПРОЧНОСТЬ)
     if(stats.ar !== 'none' && Math.random() >= (enchants.unbreaking * 0.25)) {
         armor_dur -= 20;
         if(armor_dur <= 0) {
@@ -599,11 +584,10 @@ function process_incoming_damage(data) {
     }
 
     if (data.is_sweeping) armor = Math.max(0, armor - 0.20);
-    if (data.wp === 'mace') armor = Math.max(0, armor - ((atk_ench.breach||0) * 0.15)); // Пробитие булавой
+    if (data.wp === 'mace') armor = Math.max(0, armor - ((atk_ench.breach||0) * 0.15)); 
     
     let actual_dmg = data.dmg * (1 - armor);
     
-    // Заговор Огня (Чистый урон, снижаемый Огнеупорностью)
     if (atk_ench.fire_aspect > 0) {
         let fire_dmg = (atk_ench.fire_aspect * 1.5) * (1 - (enchants.fire_protection * 0.20));
         actual_dmg += Math.max(0, fire_dmg);
@@ -612,11 +596,9 @@ function process_incoming_damage(data) {
     if (actual_dmg < 0.5) actual_dmg = 0.5;
     my_cur_hp -= actual_dmg;
     
-    // Отдача (удлиняет стан)
     let stun_time = 350 + ((atk_ench.knockback||0) * 150);
     is_stunned = true; setTimeout(() => { is_stunned = false; }, stun_time);
 
-    // Шипы (Возврат урона с шансом 30%)
     if (enchants.thorns > 0 && Math.random() < 0.3 && !data.is_thorns) {
         database.ref('world_players/' + data.attacker + '/dmg_queue').push({ dmg: enchants.thorns * 1, attacker: nickname, is_thorns: true });
     }
@@ -645,7 +627,6 @@ function handle_death(killer) {
     alert(`☠️ ТЕБЯ УБИЛ ИГРОК ${killer}!\nВесь лут выпал на карту.`);
     
     let drop_id = "drop_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-    // Добавляем инфу об убитом, чтобы рассчитать Добычу для киллера
     database.ref('world_drops/' + drop_id).set({ x: loc_x, z: loc_z, inv: JSON.stringify(inv), skrepki: skrepki, from: nickname });
     
     my_cur_hp = get_pvp_stats().max_hp;
@@ -720,13 +701,11 @@ function pickup_drop(id) {
             let d = snap.val();
             if(d) {
                 database.ref('world_drops/'+id).remove();
-                // Чары "Починка": ремонт снаряжения за подбор лута
                 if(enchants.mending > 0) {
                     weapon_dur = Math.min(1000, weapon_dur + 150);
                     armor_dur = Math.min(1000, armor_dur + 150);
                 }
                 
-                // Чары "Добыча": шанс приумножить скрепки (если это с убитого врага)
                 let drop_skr = d.skrepki || 0;
                 if(enchants.looting > 0 && d.from && Math.random() < (enchants.looting * 0.15)) {
                     drop_skr = Math.floor(drop_skr * 1.5);
@@ -743,7 +722,7 @@ function pickup_drop(id) {
     }
 }
 
-// === УПРАВЛЕНИЕ ВКЛАДКАМИ (С БЛОКИРОВКОЙ В БОЮ) ===
+// === УПРАВЛЕНИЕ ВКЛАДКАМИ ===
 window.sw_tab = function(tabid, el) { 
     if (in_combat && tabid !== 'anarchy') return alert("Внимание! Ты в бою! Нельзя переключать вкладки!");
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
@@ -751,7 +730,6 @@ window.sw_tab = function(tabid, el) {
     current_tab = tabid; if (tabid === 'rating' || tabid === 'clubs') { if (Date.now() - last_sync > 60000) { sync_cloud(); } else { if (tabid === 'rating') render_leaderboard(); if (tabid === 'clubs') render_clubs_list(); } } 
 };
 
-// === ВСЕ ОСТАЛЬНЫЕ ФУНКЦИИ РАНКЕДА И ТОПА (Без изменений) ===
 window.switch_top = function(tab) { current_top_tab = tab; document.getElementById('btn-top-players').className = 'buy-btn'; document.getElementById('btn-top-clubs').className = 'buy-btn'; document.getElementById('btn-top-ranked').className = 'buy-btn'; document.getElementById('btn-top-hof').className = 'buy-btn'; document.getElementById('btn-top-' + tab).className = 'buy-btn gold'; render_leaderboard(); }
 function render_leaderboard() { 
     if (Object.keys(cached_players).length === 0 && current_top_tab !== 'clubs') { document.getElementById('leaderboard-content').innerHTML = '<div style="text-align:center; color:#555;">загрузка...</div>'; return; } 
