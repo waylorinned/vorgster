@@ -4,6 +4,15 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const PREFIX = 'v4_';
 
+// === БЕЗОПАСНОЕ ЧТЕНИЕ ДАННЫХ (Защита от крашей "undefined") ===
+function safeParse(key, def) {
+    try {
+        let val = localStorage.getItem(PREFIX + key);
+        if (!val || val === 'undefined' || val === 'null') return def;
+        return JSON.parse(val);
+    } catch(e) { return def; }
+}
+
 // === БАЗОВЫЕ ПЕРЕМЕННЫЕ ИГРОКА ===
 let nickname = localStorage.getItem(PREFIX + 'nickname');
 let my_pin = localStorage.getItem(PREFIX + 'pin');
@@ -38,26 +47,26 @@ let r_loss = parseInt(localStorage.getItem(PREFIX+'r_loss')) || 0, r_streak = pa
 let my_title = localStorage.getItem(PREFIX+'title') || "";
 let streak_days = parseInt(localStorage.getItem(PREFIX+'streak_days')) || 0, streak_last = localStorage.getItem(PREFIX+'streak_last') || "";
 let q_taps = parseInt(localStorage.getItem(PREFIX+'q_taps')) || 0, q_wins = parseInt(localStorage.getItem(PREFIX+'q_wins')) || 0, q_msgs = parseInt(localStorage.getItem(PREFIX+'q_msgs')) || 0, q_date = localStorage.getItem(PREFIX+'q_date') || ""; let q_claimed = localStorage.getItem(PREFIX+'q_claimed') === '1';
-let my_friends = JSON.parse(localStorage.getItem(PREFIX+'friends') || "[]");
-let donate_rank = parseInt(localStorage.getItem(PREFIX + 'donate_rank')) || 0, donate_until = parseInt(localStorage.getItem(PREFIX + 'donate_until')) || 0;
 
 // БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ ИНВЕНТАРЯ И ЧАР
-let inv = {}; try { inv = JSON.parse(localStorage.getItem(PREFIX + 'inv') || "{}"); } catch(e) { inv = {}; }
-let last_kit_time = parseInt(localStorage.getItem(PREFIX + 'last_kit_v2')) || 0;
-let enchants = {}; try { enchants = JSON.parse(localStorage.getItem(PREFIX + 'enchants') || "{}"); } catch(e) { enchants = {}; }
+let my_friends = safeParse('friends', []);
+let inv = safeParse('inv', {});
+let enchants = safeParse('enchants', {});
+let mined_ores = safeParse('mined_ores', {});
 
+let donate_rank = parseInt(localStorage.getItem(PREFIX + 'donate_rank')) || 0, donate_until = parseInt(localStorage.getItem(PREFIX + 'donate_until')) || 0;
+let last_kit_time = parseInt(localStorage.getItem(PREFIX + 'last_kit_v2')) || 0;
+let loc_x = parseInt(localStorage.getItem(PREFIX + 'loc_x')) || 0, loc_z = parseInt(localStorage.getItem(PREFIX + 'loc_z')) || 0;
 let weapon_dur = parseInt(localStorage.getItem(PREFIX + 'w_dur')); if (isNaN(weapon_dur)) weapon_dur = 1000;
 let armor_dur = parseInt(localStorage.getItem(PREFIX + 'a_dur')); if (isNaN(armor_dur)) armor_dur = 1000;
+let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now(), last_sync = 0, last_stash_check = 0;
+let global_event_data = null, cached_last_winner = "", cached_players = {}, cached_clubs = {};
+
+window.current_top_tab = 'players'; window.current_tab = 'mine';
 
 const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, density:5, breach:4, protection:4, thorns:3, fire_protection:4, unbreaking:3, mending:1 };
 const ENCHANT_NAMES = { sharpness:'Острота (Урон)', fire_aspect:'Заговор Огня', looting:'Добыча (Скрепки)', knockback:'Отдача (Стан)', density:'Плотность (Булава)', breach:'Пробитие (Булава)', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность (Не ломается)', mending:'Починка (от Скрепок)' };
 for(let k in ENCHANT_LIMITS) { if(enchants[k] === undefined) enchants[k] = 0; }
-
-let loc_x = parseInt(localStorage.getItem(PREFIX + 'loc_x')) || 0, loc_z = parseInt(localStorage.getItem(PREFIX + 'loc_z')) || 0;
-let mined_ores = {}; try { mined_ores = JSON.parse(localStorage.getItem(PREFIX + 'mined_ores') || "{}"); } catch(e) { mined_ores = {}; }
-let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now(), last_sync = 0, last_stash_check = 0;
-let global_event_data = null, cached_last_winner = "", cached_players = {}, cached_clubs = {};
-window.current_top_tab = 'players'; window.current_tab = 'mine';
 
 // === КОНСТАНТЫ ===
 const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
@@ -84,11 +93,13 @@ let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
 
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
+// === ТОЧКА ВХОДА (Запуск) ===
 if (!nickname || !my_pin) { 
-    document.getElementById('auth-modal').style.display = 'flex'; 
+    let modal = document.getElementById('auth-modal');
+    if (modal) modal.style.display = 'flex'; 
 } else { 
     check_admin(); sync_cloud(); render_inventory(); update_rtp_ui(); init_map(); 
-    my_cur_hp = get_pvp_stats().max_hp; // Теперь безопасно!
+    my_cur_hp = get_pvp_stats().max_hp;
     setup_dmg_listener();
 }
 
@@ -108,8 +119,9 @@ window.auth_player = async function() {
                 inv = {}; skrepki = 0; loc_x = 0; loc_z = 0;
                 database.ref('players/' + nickname + '/died_offline').remove();
             }
+        } else { 
+            nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; 
         } 
-        else { nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; } 
         
         localStorage.setItem(PREFIX + 'nickname', nickname); localStorage.setItem(PREFIX + 'pin', my_pin); document.getElementById('auth-modal').style.display = 'none'; 
         save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui(); init_map();
@@ -155,9 +167,9 @@ function save_data() {
     localStorage.setItem(PREFIX+'rank', player_rank); localStorage.setItem(PREFIX+'max_rank', max_rank); 
     localStorage.setItem(PREFIX+'last_time', Date.now()); localStorage.setItem(PREFIX+'color', my_color); localStorage.setItem(PREFIX+'og_pro', og_pro); 
     localStorage.setItem(PREFIX+'donate_rank', donate_rank); localStorage.setItem(PREFIX+'donate_until', donate_until); 
-    localStorage.setItem(PREFIX+'inv', JSON.stringify(inv)); localStorage.setItem(PREFIX+'last_kit_v2', last_kit_time); 
-    localStorage.setItem(PREFIX+'loc_x', loc_x); localStorage.setItem(PREFIX+'loc_z', loc_z); localStorage.setItem(PREFIX+'mined_ores', JSON.stringify(mined_ores));
-    localStorage.setItem(PREFIX+'enchants', JSON.stringify(enchants)); localStorage.setItem(PREFIX+'w_dur', weapon_dur); localStorage.setItem(PREFIX+'a_dur', armor_dur);
+    localStorage.setItem(PREFIX+'inv', JSON.stringify(inv || {})); localStorage.setItem(PREFIX+'last_kit_v2', last_kit_time); 
+    localStorage.setItem(PREFIX+'loc_x', loc_x); localStorage.setItem(PREFIX+'loc_z', loc_z); localStorage.setItem(PREFIX+'mined_ores', JSON.stringify(mined_ores || {}));
+    localStorage.setItem(PREFIX+'enchants', JSON.stringify(enchants || {})); localStorage.setItem(PREFIX+'w_dur', weapon_dur); localStorage.setItem(PREFIX+'a_dur', armor_dur);
     localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl); localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl); localStorage.setItem(PREFIX+'regen_price', regen_price); 
     localStorage.setItem(PREFIX+'c1_price', c1_price); localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); localStorage.setItem(PREFIX+'c2_price', c2_price); localStorage.setItem(PREFIX+'c2_lvl', c2_lvl); localStorage.setItem(PREFIX+'c3_price', c3_price); localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); localStorage.setItem(PREFIX+'c4_price', c4_price); localStorage.setItem(PREFIX+'c4_lvl', c4_lvl); localStorage.setItem(PREFIX+'c5_price', c5_price); localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); localStorage.setItem(PREFIX+'c6_price', c6_price); localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); localStorage.setItem(PREFIX+'c7_price', c7_price); localStorage.setItem(PREFIX+'c7_lvl', c7_lvl); localStorage.setItem(PREFIX+'c8_price', c8_price); localStorage.setItem(PREFIX+'c8_lvl', c8_lvl); localStorage.setItem(PREFIX+'c9_price', c9_price); localStorage.setItem(PREFIX+'c9_lvl', c9_lvl); localStorage.setItem(PREFIX+'c10_price', c10_price); localStorage.setItem(PREFIX+'c10_lvl', c10_lvl); localStorage.setItem(PREFIX+'c11_price', c11_price); localStorage.setItem(PREFIX+'c11_lvl', c11_lvl); localStorage.setItem(PREFIX+'c12_price', c12_price); localStorage.setItem(PREFIX+'c12_lvl', c12_lvl); localStorage.setItem(PREFIX+'c13_price', c13_price); localStorage.setItem(PREFIX+'c13_lvl', c13_lvl); 
     localStorage.setItem(PREFIX+'tot_taps', total_taps); localStorage.setItem(PREFIX+'r_wins', r_wins); localStorage.setItem(PREFIX+'r_loss', r_loss); localStorage.setItem(PREFIX+'r_streak', r_streak); localStorage.setItem(PREFIX+'title', my_title); 
@@ -167,12 +179,14 @@ function apply_cloud_data(p) {
     if(!p) return; 
     vrgk = parseFloat(p.vrgk) || 0; skrepki = parseInt(p.skrepki) || 0; player_rank = parseInt(p.rank) || 0; 
     donate_rank = parseInt(p.donate_rank) || 0; donate_until = parseInt(p.donate_until) || 0; 
-    if(p.inventory) { try { inv = JSON.parse(p.inventory); } catch(e) { inv = {}; } }
+    
+    if(p.inventory && p.inventory !== 'undefined') { try { inv = JSON.parse(p.inventory); } catch(e) { inv = {}; } }
     last_kit_time = parseInt(p.last_kit_v2) || 0; 
-    if(p.enchants) { 
+    if(p.enchants && p.enchants !== 'undefined') { 
         try { enchants = JSON.parse(p.enchants); } catch(e) { enchants = {}; }
         for(let k in ENCHANT_LIMITS) if(enchants[k]===undefined) enchants[k]=0; 
     }
+    
     if(p.stats) { 
         let s = p.stats; profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3; 
         tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; regen_price = parseInt(s[8]) || 5000; 
@@ -188,24 +202,38 @@ function apply_cloud_data(p) {
 }
 
 function get_current_buff() { return 0; }
-
 function check_donate_expire() { if(donate_rank > 0 && donate_until !== -1 && Date.now() > donate_until) { alert(`Твоя привилегия [${RANKS_INFO[donate_rank].name}] истекла!`); donate_rank = 0; donate_until = 0; save_data(); sync_cloud(); } }
 
 function upd_ui() { 
-    check_donate_expire(); document.getElementById('vrgk-balance').innerText = fmt(vrgk); document.getElementById('skrepki-val').innerText = fmt(skrepki); 
-    let buff = get_current_buff(); document.getElementById('profit-val').innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : ""); 
+    check_donate_expire(); 
+    let bEl = document.getElementById('vrgk-balance'); if(bEl) bEl.innerText = fmt(vrgk); 
+    let sEl = document.getElementById('skrepki-val'); if(sEl) sEl.innerText = fmt(skrepki); 
+    let buff = get_current_buff(); 
+    let pEl = document.getElementById('profit-val'); if(pEl) pEl.innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : ""); 
+    
     let b = get_d_bonus(); let actual_max_eng = max_energy + b.e; 
-    document.getElementById('energy-current').innerText = Math.floor(cur_energy); document.getElementById('energy-max').innerText = actual_max_eng; document.getElementById('energy-fill').style.width = `${(cur_energy / actual_max_eng) * 100}%`; 
-    document.getElementById('rank-name').innerText = RANKS[player_rank] || 'Бронза I'; document.getElementById('rank-display').innerText = RANKS[player_rank] || 'Бронза I'; 
-    let coin = document.getElementById('vorg-coin'); if(player_rank >= 21) { coin.classList.add('neon-pro'); } else { coin.classList.remove('neon-pro'); } 
+    let ecEl = document.getElementById('energy-current'); if(ecEl) ecEl.innerText = Math.floor(cur_energy); 
+    let emEl = document.getElementById('energy-max'); if(emEl) emEl.innerText = actual_max_eng; 
+    let efEl = document.getElementById('energy-fill'); if(efEl) efEl.style.width = `${(cur_energy / actual_max_eng) * 100}%`; 
+    
+    let rnEl = document.getElementById('rank-name'); if(rnEl) rnEl.innerText = RANKS[player_rank] || 'Бронза I'; 
+    let rdEl = document.getElementById('rank-display'); if(rdEl) rdEl.innerText = RANKS[player_rank] || 'Бронза I'; 
+    let coin = document.getElementById('vorg-coin'); 
+    if(coin) { if(player_rank >= 21) { coin.classList.add('neon-pro'); } else { coin.classList.remove('neon-pro'); } }
+    
     let badge = document.getElementById('my-donate-badge'); 
-    if (donate_rank > 0) { badge.style.display = 'inline-block'; badge.innerText = `[${RANKS_INFO[donate_rank].name}]`; badge.style.background = RANKS_INFO[donate_rank].color; badge.style.color = '#000'; if(donate_rank === 11) { badge.className = 'rank-badge neon-gertsog'; badge.style.background='transparent'; } else { badge.className = 'rank-badge'; } let d_txt = donate_until === -1 ? "НАВСЕГДА" : Math.ceil((donate_until - Date.now())/86400000) + " дн."; document.getElementById('donate-expire').innerText = d_txt; } else { badge.style.display = 'none'; document.getElementById('donate-expire').innerText = ''; } 
+    if (badge) {
+        if (donate_rank > 0) { badge.style.display = 'inline-block'; badge.innerText = `[${RANKS_INFO[donate_rank].name}]`; badge.style.background = RANKS_INFO[donate_rank].color; badge.style.color = '#000'; if(donate_rank === 11) { badge.className = 'rank-badge neon-gertsog'; badge.style.background='transparent'; } else { badge.className = 'rank-badge'; } let d_txt = donate_until === -1 ? "НАВСЕГДА" : Math.ceil((donate_until - Date.now())/86400000) + " дн."; document.getElementById('donate-expire').innerText = d_txt; } else { badge.style.display = 'none'; document.getElementById('donate-expire').innerText = ''; } 
+    }
     init_prices(); 
     if(current_tab === 'anarchy') { let mapX = document.getElementById('map-x'); let mapZ = document.getElementById('map-z'); if(mapX) mapX.innerText = Math.floor(loc_x); if(mapZ) mapZ.innerText = Math.floor(loc_z); }
 }
 
-document.getElementById('vorg-coin').addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false}); 
-document.getElementById('vorg-coin').addEventListener('mousedown', (e) => { if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); });
+let btn_coin = document.getElementById('vorg-coin');
+if (btn_coin) {
+    btn_coin.addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false}); 
+    btn_coin.addEventListener('mousedown', (e) => { if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); });
+}
 
 function do_tap(touches) { 
     let b = get_d_bonus(); let actual_tap = tap_power + b.t; 
@@ -218,7 +246,7 @@ function do_tap(touches) {
     } save_quests(); upd_ui(); save_data(); 
 }
 
-function spawn_txt(x, y, txt) { const el = document.createElement('div'); el.classList.add('floating-text'); el.innerText = txt; const rect = document.getElementById('tap-area') ? document.getElementById('tap-area').getBoundingClientRect() : {left:0,top:0}; el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; el.style.top = `${y - rect.top - 20}px`; if(document.getElementById('tap-area')) document.getElementById('tap-area').appendChild(el); setTimeout(() => el.remove(), 800); }
+function spawn_txt(x, y, txt) { const el = document.createElement('div'); el.classList.add('floating-text'); el.innerText = txt; let tapA = document.getElementById('tap-area'); const rect = tapA ? tapA.getBoundingClientRect() : {left:0,top:0}; el.style.left = `${x - rect.left - 20 + (Math.random() - 0.5) * 40}px`; el.style.top = `${y - rect.top - 20}px`; if(tapA) tapA.appendChild(el); setTimeout(() => el.remove(), 800); }
 
 let streak_checked = false;
 function check_streak() { if(!nickname || streak_checked) return; streak_checked = true; let today = new Date().toLocaleDateString(); if(streak_last !== today) { let diffDays = 1; if(streak_last) { let lastD = new Date(streak_last); let currD = new Date(today); diffDays = Math.ceil(Math.abs(currD - lastD) / (1000 * 60 * 60 * 24)); } if(diffDays === 1 || streak_last === "") { streak_days++; } else { streak_days = 1; } document.getElementById('streak-count').innerText = streak_days; document.getElementById('streak-modal').style.display = 'flex'; } }
@@ -253,24 +281,24 @@ window.unequip_offhand = function() { inv['active_offhand'] = ''; my_cur_hp = Ma
 const CASE_LOOT = [ { r: 1, d: 14, w: 25.0 }, { r: 1, d: 30, w: 5.0 }, { r: 1, d: -1, w: 1.5 }, { r: 2, d: 14, w: 20.0 }, { r: 2, d: 30, w: 4.5 }, { r: 2, d: -1, w: 1.2 }, { r: 3, d: 14, w: 15.0 }, { r: 3, d: 30, w: 3.5 }, { r: 3, d: -1, w: 1.0 }, { r: 4, d: 14, w: 12.0 }, { r: 4, d: 30, w: 3.0 }, { r: 4, d: -1, w: 0.8 }, { r: 5, d: 14, w: 8.0 }, { r: 5, d: 30, w: 2.0 }, { r: 5, d: -1, w: 0.5 }, { r: 6, d: 14, w: 5.0 }, { r: 6, d: 30, w: 1.2 }, { r: 6, d: -1, w: 0.3 }, { r: 7, d: 14, w: 3.0 }, { r: 7, d: 30, w: 0.8 }, { r: 7, d: -1, w: 0.15}, { r: 8, d: 14, w: 1.5 }, { r: 8, d: 30, w: 0.4 }, { r: 8, d: -1, w: 0.08}, { r: 9, d: 14, w: 0.8 }, { r: 9, d: 30, w: 0.15}, { r: 9, d: -1, w: 0.04}, { r: 10,d: 14, w: 0.2 }, { r: 10,d: 30, w: 0.05}, { r: 10,d: -1, w: 0.02} ];
 window.open_case = function() { if (skrepki < 50) return alert("Не хватает скрепок! Нужно 50."); skrepki -= 50; upd_ui(); save_data(); let anim = document.getElementById('case-roll-anim'); anim.style.display = 'block'; setTimeout(() => { anim.style.display = 'none'; let total = CASE_LOOT.reduce((s, i) => s + i.w, 0); let rand = Math.random() * total; let picked = null; for(let item of CASE_LOOT) { if(rand < item.w) { picked = item; break; } rand -= item.w; } if (picked.r < donate_rank) { alert(`Из кейса выпал [${RANKS_INFO[picked.r].name}], но у тебя уже ранг выше! Защита от понижения спасла тебя.`); } else if (picked.r === donate_rank) { if (donate_until === -1) alert(`Выпал тот же ранг, но он у тебя уже НАВСЕГДА!`); else { if (picked.d === -1) donate_until = -1; else donate_until += picked.d * 86400 * 1000; alert(`Выпал тот же ранг! Время продлено.`); } } else { donate_rank = picked.r; donate_until = picked.d === -1 ? -1 : Date.now() + (picked.d * 86400 * 1000); alert(`🔥 ДЖЕКПОТ! Тебе выпал донат: [${RANKS_INFO[picked.r].name}] на ${picked.d === -1 ? 'НАВСЕГДА' : picked.d + ' дн.'}!`); } save_data(); upd_ui(); sync_cloud(); }, 1500); };
 window.buy_duke = function(days, cost) { if (donate_rank === 11 && donate_until === -1) return alert("У тебя уже есть Герцог навсегда!"); if (skrepki < cost) return alert("Не хватает скрепок!"); skrepki -= cost; donate_rank = 11; if (days === -1) donate_until = -1; else { if(donate_until !== -1 && donate_rank === 11) donate_until += days * 86400 * 1000; else donate_until = Date.now() + days * 86400 * 1000; } save_data(); upd_ui(); sync_cloud(); alert("💎 ПОЗДРАВЛЯЕМ! ТЫ ТЕПЕРЬ [ГЕРЦОГ]!"); };
-function add_item(id, amt) { inv[id] = (inv[id]||0) + amt; }
 
-// === ОБНОВЛЁННАЯ ВЫДАЧА КИТОВ ===
+function add_item(id, amt) { if(!inv) inv = {}; inv[id] = (inv[id]||0) + amt; }
+
 window.claim_kit = function() { 
     if (Date.now() - last_kit_time < 24*3600*1000) return alert("Кит ещё не готов!"); 
     if (donate_rank === 0) return alert("Киты доступны только игрокам с привилегией!"); 
     last_kit_time = Date.now(); 
     
-    if (donate_rank === 1) { add_item('armor_leather',1); add_item('sword_iron',1); add_item('gapple',3); } // Барон
-    else if (donate_rank === 2) { add_item('armor_iron',1); add_item('sword_iron',1); add_item('gapple',5); add_item('pearl',1); } // Страж
-    else if (donate_rank === 3) { add_item('armor_iron',1); add_item('sword_iron',1); add_item('gapple',8); add_item('pearl',2); } // Герой
-    else if (donate_rank === 4) { add_item('armor_iron',1); add_item('sword_diamond',1); add_item('gapple',10); add_item('pearl',3); } // Аспид
-    else if (donate_rank === 5) { add_item('armor_diamond',1); add_item('sword_diamond',1); add_item('gapple',12); add_item('pearl',4); } // Сквид
-    else if (donate_rank === 6) { add_item('armor_diamond',1); add_item('sword_diamond',1); add_item('gapple',15); add_item('pearl',5); add_item('egapple',1); } // Глава
-    else if (donate_rank === 7) { add_item('armor_diamond',1); add_item('sword_netherite',1); add_item('gapple',18); add_item('pearl',6); add_item('egapple',1); add_item('totem',1); } // Элита
-    else if (donate_rank === 8) { add_item('armor_netherite',1); add_item('sword_netherite',1); add_item('gapple',24); add_item('pearl',8); add_item('egapple',2); add_item('totem',1); } // Титан
-    else if (donate_rank === 9) { add_item('armor_netherite',1); add_item('sword_netherite',1); add_item('gapple',32); add_item('pearl',10); add_item('egapple',3); add_item('totem',1); } // Принц
-    else if (donate_rank === 10) { add_item('armor_netherite',1); add_item('mace',1); add_item('sword_netherite',1); add_item('gapple',48); add_item('pearl',12); add_item('egapple',4); add_item('totem',2); } // Князь
+    if (donate_rank === 1) { add_item('armor_leather',1); add_item('sword_iron',1); add_item('gapple',3); } 
+    else if (donate_rank === 2) { add_item('armor_iron',1); add_item('sword_iron',1); add_item('gapple',5); add_item('pearl',1); } 
+    else if (donate_rank === 3) { add_item('armor_iron',1); add_item('sword_iron',1); add_item('gapple',8); add_item('pearl',2); } 
+    else if (donate_rank === 4) { add_item('armor_iron',1); add_item('sword_diamond',1); add_item('gapple',10); add_item('pearl',3); } 
+    else if (donate_rank === 5) { add_item('armor_diamond',1); add_item('sword_diamond',1); add_item('gapple',12); add_item('pearl',4); } 
+    else if (donate_rank === 6) { add_item('armor_diamond',1); add_item('sword_diamond',1); add_item('gapple',15); add_item('pearl',5); add_item('egapple',1); } 
+    else if (donate_rank === 7) { add_item('armor_diamond',1); add_item('sword_netherite',1); add_item('gapple',18); add_item('pearl',6); add_item('egapple',1); add_item('totem',1); } 
+    else if (donate_rank === 8) { add_item('armor_netherite',1); add_item('sword_netherite',1); add_item('gapple',24); add_item('pearl',8); add_item('egapple',2); add_item('totem',1); } 
+    else if (donate_rank === 9) { add_item('armor_netherite',1); add_item('sword_netherite',1); add_item('gapple',32); add_item('pearl',10); add_item('egapple',3); add_item('totem',1); } 
+    else if (donate_rank === 10) { add_item('armor_netherite',1); add_item('mace',1); add_item('sword_netherite',1); add_item('gapple',48); add_item('pearl',12); add_item('egapple',4); add_item('totem',2); } 
     else if (donate_rank === 11) { 
         add_item('armor_netherite',1); add_item('mace',1); add_item('gapple',64); add_item('pearl',16); add_item('egapple',6); add_item('totem',3); 
         let spheres = ['sphere_titan','sphere_chaos','sphere_bestia','talisman_crusher','talisman_punisher'];
@@ -290,7 +318,7 @@ function render_inventory() {
         } 
     } 
     if(html === '') html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:12px;">Пусто. Выбей донат и забери Кит!</div>'; 
-    document.getElementById('inv-container').innerHTML = html; 
+    let cEl = document.getElementById('inv-container'); if(cEl) cEl.innerHTML = html; 
     let off_id = inv['active_offhand']; let off_disp = document.getElementById('active-offhand-display');
     if(off_disp) { if(off_id && ITEM_NAMES[off_id]) { off_disp.innerText = ITEM_NAMES[off_id]; } else { off_disp.innerText = "ПУСТО"; } }
 }
@@ -309,7 +337,7 @@ window.open_enchant_modal = function() {
     e_html += `<div style="max-height:60vh; overflow-y:auto; padding-right:5px;">`;
     
     for(let key in ENCHANT_LIMITS) {
-        let curlvl = enchants[key];
+        let curlvl = enchants[key] || 0;
         let maxlvl = ENCHANT_LIMITS[key];
         let cost = curlvl === 0 ? 1 : curlvl === 1 ? 3 : curlvl === 2 ? 5 : curlvl === 3 ? 10 : 15;
         if(key === 'mending') cost = 20; 
@@ -328,9 +356,9 @@ window.open_enchant_modal = function() {
 
 window.upgrade_enchant = function(key, cost) {
     if (skrepki < cost) return alert("Не хватает скрепок!");
-    if (enchants[key] >= ENCHANT_LIMITS[key]) return alert("Максимальный уровень!");
+    if ((enchants[key] || 0) >= ENCHANT_LIMITS[key]) return alert("Максимальный уровень!");
     skrepki -= cost;
-    enchants[key]++;
+    enchants[key] = (enchants[key] || 0) + 1;
     save_data(); upd_ui(); open_enchant_modal(); sync_my_pos();
     alert(`Чары ${ENCHANT_NAMES[key]} успешно улучшены!`);
 }
@@ -376,12 +404,14 @@ window.use_locator = async function() { if(vrgk < 50000) return alert("Лока�
 // === CANVAS И КАРТА ЛОГИКА ===
 function init_map() {
     inject_enchant_button();
-    let wrap = document.getElementById('map-wrapper'); if(!wrap) return;
+    let wrap = document.getElementById('map-wrapper'); if(!wrap || !canvas) return;
     canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight;
     let joyZone = document.getElementById('joystick-zone'); let joyKnob = document.getElementById('joystick-knob'); let jRect = null;
-    joyZone.addEventListener('touchstart', e => { e.preventDefault(); isJoyActive = true; jRect = joyZone.getBoundingClientRect(); handleJoy(e.touches[0]); }, {passive:false});
-    joyZone.addEventListener('touchmove', e => { e.preventDefault(); if(isJoyActive) handleJoy(e.touches[0]); }, {passive:false});
-    joyZone.addEventListener('touchend', e => { e.preventDefault(); isJoyActive = false; joyX = 0; joyY = 0; joyKnob.style.transform = `translate(0px, 0px)`; }, {passive:false});
+    if(joyZone) {
+        joyZone.addEventListener('touchstart', e => { e.preventDefault(); isJoyActive = true; jRect = joyZone.getBoundingClientRect(); handleJoy(e.touches[0]); }, {passive:false});
+        joyZone.addEventListener('touchmove', e => { e.preventDefault(); if(isJoyActive) handleJoy(e.touches[0]); }, {passive:false});
+        joyZone.addEventListener('touchend', e => { e.preventDefault(); isJoyActive = false; joyX = 0; joyY = 0; joyKnob.style.transform = `translate(0px, 0px)`; }, {passive:false});
+    }
     function handleJoy(t) { let dx = t.clientX - (jRect.left + 50); let dy = t.clientY - (jRect.top + 50); let dist = Math.sqrt(dx*dx + dy*dy); let maxD = 35; if(dist > maxD) { dx = (dx/dist)*maxD; dy = (dy/dist)*maxD; } joyKnob.style.transform = `translate(${dx}px, ${dy}px)`; joyX = dx / maxD; joyY = dy / maxD; }
     
     canvas.addEventListener('touchstart', e => {
@@ -400,8 +430,8 @@ function init_map() {
     setInterval(sync_my_pos, 2000);
 }
 
-function get_best_armor() { if(inv['armor_netherite'] > 0) return 'netherite'; if(inv['armor_diamond'] > 0) return 'diamond'; if(inv['armor_iron'] > 0) return 'iron'; if(inv['armor_leather'] > 0) return 'leather'; return 'none'; }
-function get_best_weapon() { if(inv['mace'] > 0) return 'mace'; if(inv['sword_netherite'] > 0) return 'sword_netherite'; if(inv['sword_diamond'] > 0) return 'sword_diamond'; if(inv['sword_iron'] > 0) return 'sword_iron'; return 'none'; }
+function get_best_armor() { if(!inv) return 'none'; if(inv['armor_netherite'] > 0) return 'netherite'; if(inv['armor_diamond'] > 0) return 'diamond'; if(inv['armor_iron'] > 0) return 'iron'; if(inv['armor_leather'] > 0) return 'leather'; return 'none'; }
+function get_best_weapon() { if(!inv) return 'none'; if(inv['mace'] > 0) return 'mace'; if(inv['sword_netherite'] > 0) return 'sword_netherite'; if(inv['sword_diamond'] > 0) return 'sword_diamond'; if(inv['sword_iron'] > 0) return 'sword_iron'; return 'none'; }
 function get_armor_color(type) { if(type === 'netherite') return '#303'; if(type === 'diamond') return '#0ff'; if(type === 'iron') return '#aaa'; if(type === 'leather') return '#8B4513'; return '#fff'; }
 function get_ore_at(x, z) { let gridX = Math.floor(x/100); let gridZ = Math.floor(z/100); if(mined_ores[gridX + '_' + gridZ]) return null; let noise = Math.sin(gridX * 12.9898 + gridZ * 78.233) * 43758.5453; noise = noise - Math.floor(noise); if(noise > 0.95) return 'diamond'; if(noise > 0.80) return 'iron'; return null; }
 
@@ -414,13 +444,14 @@ function sync_my_pos() {
 
 function draw_map() {
     if(current_tab !== 'anarchy') return requestAnimationFrame(draw_map);
-    let wrap = document.getElementById('map-wrapper'); if(wrap && (canvas.width !== wrap.clientWidth || canvas.height !== wrap.clientHeight)) { canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight; }
+    let wrap = document.getElementById('map-wrapper'); if(wrap && canvas && (canvas.width !== wrap.clientWidth || canvas.height !== wrap.clientHeight)) { canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight; }
     
     if(isJoyActive && !is_stunned) { 
         loc_x += joyX * 4; loc_z += joyY * 4; upd_ui(); 
         if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); }
     }
     
+    if(!ctx) return requestAnimationFrame(draw_map);
     ctx.fillStyle = '#1e331e'; ctx.fillRect(0,0, canvas.width, canvas.height); 
     let cx = canvas.width/2; let cy = canvas.height/2; is_on_ore = null;
     let myGridX = Math.floor(loc_x/100); let myGridZ = Math.floor(loc_z/100);
@@ -430,7 +461,7 @@ function draw_map() {
     ctx.strokeStyle = '#0f0'; ctx.strokeRect(sx, sy, 200, 200);
 
     for(let i = -3; i <= 3; i++) { for(let j = -3; j <= 3; j++) { let gx = myGridX + i; let gz = myGridZ + j; let ore = get_ore_at(gx*100, gz*100); if(ore) { let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); ctx.fillStyle = ore === 'diamond' ? '#0ff' : '#ccc'; ctx.beginPath(); ctx.arc(screenX, screenY, 8, 0, Math.PI*2); ctx.fill(); if(i === 0 && j === 0) is_on_ore = ore; } } }
-    let btn = document.getElementById('mine-btn'); if(is_on_ore) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; }
+    let btn = document.getElementById('mine-btn'); if(btn) { if(is_on_ore) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; } }
     
     for(let d_id in world_drops) {
         let drop = world_drops[d_id];
@@ -459,9 +490,9 @@ function draw_map() {
     ctx.fillStyle = get_armor_color(get_best_armor()); ctx.fillRect(cx - 10, cy - 10, 20, 20); ctx.strokeStyle = '#fff'; ctx.strokeRect(cx - 10, cy - 10, 20, 20);
     
     ctx.fillStyle = '#000'; ctx.fillRect(cx - 10, cy + 12, 20, 2);
-    ctx.fillStyle = '#0ff'; ctx.fillRect(cx - 10, cy + 12, 20 * (weapon_dur/1000), 2); 
+    ctx.fillStyle = '#0ff'; ctx.fillRect(cx - 10, cy + 12, 20 * (Math.max(0, weapon_dur)/1000), 2); 
     ctx.fillStyle = '#000'; ctx.fillRect(cx - 10, cy + 15, 20, 2);
-    ctx.fillStyle = '#aaa'; ctx.fillRect(cx - 10, cy + 15, 20 * (armor_dur/1000), 2); 
+    ctx.fillStyle = '#aaa'; ctx.fillRect(cx - 10, cy + 15, 20 * (Math.max(0, armor_dur)/1000), 2); 
 
     update_target_hud();
     requestAnimationFrame(draw_map);
@@ -474,9 +505,9 @@ function get_pvp_stats() {
     if(ar === 'netherite') armor_reduct = 0.70; else if(ar === 'diamond') armor_reduct = 0.50; else if(ar === 'iron') armor_reduct = 0.30; else if(ar === 'leather') armor_reduct = 0.10; 
     if(wp === 'mace') dmg = 12; else if(wp === 'sword_netherite') dmg = 8; else if(wp === 'sword_diamond') dmg = 7; else if(wp === 'sword_iron') dmg = 6; 
     
-    if(wp.includes('sword')) dmg += enchants.sharpness * 0.5;
-    if(wp === 'mace') dmg += enchants.density * 1.0;
-    armor_reduct += enchants.protection * 0.04;
+    if(wp.includes('sword')) dmg += (enchants.sharpness || 0) * 0.5;
+    if(wp === 'mace') dmg += (enchants.density || 0) * 1.0;
+    armor_reduct += (enchants.protection || 0) * 0.04;
     if(armor_reduct > 0.90) armor_reduct = 0.90;
 
     let offhand = inv['active_offhand'];
@@ -503,6 +534,7 @@ function get_pvp_stats() {
 // === НОВАЯ БОЕВАЯ СИСТЕМА И ЗАЧАРОВАНИЯ ===
 
 function setup_dmg_listener() {
+    if(!nickname) return;
     database.ref('world_players/' + nickname + '/dmg_queue').on('child_added', snap => {
         let data = snap.val(); snap.ref.remove();
         process_incoming_damage(data);
@@ -537,7 +569,7 @@ function trigger_attack_logic() {
     let stats = get_pvp_stats();
     if (stats.wp === 'none') return; 
 
-    if(Math.random() >= (enchants.unbreaking * 0.25)) {
+    if(Math.random() >= ((enchants.unbreaking || 0) * 0.25)) {
         weapon_dur -= 15;
         if(weapon_dur <= 0) {
             inv[stats.wp]--; weapon_dur = 1000;
@@ -565,7 +597,7 @@ function trigger_attack_logic() {
         dmg: final_dmg, attacker: nickname, is_crit: is_crit, is_sweeping: is_sweeping, ts: now, ench: enchants, wp: stats.wp
     });
 
-    let btn = document.getElementById('map-btn-attack'); btn.style.transform = 'scale(0.8)'; setTimeout(() => btn.style.transform = 'scale(1)', 100);
+    let btn = document.getElementById('map-btn-attack'); if(btn) { btn.style.transform = 'scale(0.8)'; setTimeout(() => btn.style.transform = 'scale(1)', 100); }
     if(navigator.vibrate) navigator.vibrate(20);
 }
 
@@ -574,7 +606,7 @@ function process_incoming_damage(data) {
     let armor = stats.armor;
     let atk_ench = data.ench || {};
     
-    if(stats.ar !== 'none' && Math.random() >= (enchants.unbreaking * 0.25)) {
+    if(stats.ar !== 'none' && Math.random() >= ((enchants.unbreaking || 0) * 0.25)) {
         armor_dur -= 20;
         if(armor_dur <= 0) {
             inv[stats.ar]--; armor_dur = 1000;
@@ -588,8 +620,8 @@ function process_incoming_damage(data) {
     
     let actual_dmg = data.dmg * (1 - armor);
     
-    if (atk_ench.fire_aspect > 0) {
-        let fire_dmg = (atk_ench.fire_aspect * 1.5) * (1 - (enchants.fire_protection * 0.20));
+    if ((atk_ench.fire_aspect || 0) > 0) {
+        let fire_dmg = ((atk_ench.fire_aspect || 0) * 1.5) * (1 - ((enchants.fire_protection || 0) * 0.20));
         actual_dmg += Math.max(0, fire_dmg);
     }
 
@@ -599,15 +631,15 @@ function process_incoming_damage(data) {
     let stun_time = 350 + ((atk_ench.knockback||0) * 150);
     is_stunned = true; setTimeout(() => { is_stunned = false; }, stun_time);
 
-    if (enchants.thorns > 0 && Math.random() < 0.3 && !data.is_thorns) {
-        database.ref('world_players/' + data.attacker + '/dmg_queue').push({ dmg: enchants.thorns * 1, attacker: nickname, is_thorns: true });
+    if ((enchants.thorns || 0) > 0 && Math.random() < 0.3 && !data.is_thorns) {
+        database.ref('world_players/' + data.attacker + '/dmg_queue').push({ dmg: (enchants.thorns || 0) * 1, attacker: nickname, is_thorns: true });
     }
 
     set_combat_log();
     combo_count = 0; update_combo_ui(false);
 
-    document.getElementById('map-wrapper').style.transform = 'translate(5px, 5px)';
-    setTimeout(() => document.getElementById('map-wrapper').style.transform = 'none', 100);
+    let mapW = document.getElementById('map-wrapper');
+    if(mapW) { mapW.style.transform = 'translate(5px, 5px)'; setTimeout(() => mapW.style.transform = 'none', 100); }
 
     if (my_cur_hp <= 0) {
         if(inv['totem'] > 0) {
@@ -637,40 +669,47 @@ function handle_death(killer) {
 function set_combat_log() {
     combat_timer = 30;
     if (!in_combat) {
-        in_combat = true; document.getElementById('combat-log-badge').style.display = 'block';
+        in_combat = true; let bdg = document.getElementById('combat-log-badge'); if(bdg) bdg.style.display = 'block';
         database.ref('players/' + nickname + '/died_offline').onDisconnect().set(true);
     }
     if (combat_interval) clearInterval(combat_interval);
-    document.getElementById('combat-log-timer').innerText = combat_timer;
-    combat_interval = setInterval(() => { combat_timer--; document.getElementById('combat-log-timer').innerText = combat_timer; if (combat_timer <= 0) end_combat_log(); }, 1000);
+    let lTm = document.getElementById('combat-log-timer'); if(lTm) lTm.innerText = combat_timer;
+    combat_interval = setInterval(() => { 
+        combat_timer--; 
+        let tEl = document.getElementById('combat-log-timer'); if(tEl) tEl.innerText = combat_timer; 
+        if (combat_timer <= 0) end_combat_log(); 
+    }, 1000);
 }
 
 function end_combat_log() {
-    in_combat = false; clearInterval(combat_interval); document.getElementById('combat-log-badge').style.display = 'none';
-    database.ref('players/' + nickname + '/died_offline').onDisconnect().cancel();
+    in_combat = false; clearInterval(combat_interval); let bdg = document.getElementById('combat-log-badge'); if(bdg) bdg.style.display = 'none';
+    if(nickname) database.ref('players/' + nickname + '/died_offline').onDisconnect().cancel();
 }
 
 function update_combo_ui(was_sweeping) {
     let badge = document.getElementById('combat-combo-badge');
+    if(!badge) return;
     if (combo_count >= 3 && !was_sweeping) {
         badge.style.display = 'block'; let boost = Math.min((combo_count - 2) * 20, 40);
-        document.getElementById('combat-combo-count').innerText = combo_count;
-        document.getElementById('combat-combo-boost').innerText = `+${boost}%`;
+        let cbCount = document.getElementById('combat-combo-count'); if(cbCount) cbCount.innerText = combo_count;
+        let cbBoost = document.getElementById('combat-combo-boost'); if(cbBoost) cbBoost.innerText = `+${boost}%`;
     } else if (was_sweeping) {
-        badge.style.display = 'block'; document.getElementById('combat-combo-count').innerText = "КЛИНКОМ!";
-        document.getElementById('combat-combo-boost').innerText = "Броня пробита";
+        badge.style.display = 'block'; 
+        let cbCount = document.getElementById('combat-combo-count'); if(cbCount) cbCount.innerText = "КЛИНКОМ!";
+        let cbBoost = document.getElementById('combat-combo-boost'); if(cbBoost) cbBoost.innerText = "Броня пробита";
         setTimeout(() => {if(combo_count<3) badge.style.display = 'none';}, 1000);
     } else { badge.style.display = 'none'; }
 }
 
 function update_target_hud() {
     let hud = document.getElementById('target-hud');
-    if (!current_target || !online_players[current_target] || (Date.now() - online_players[current_target].last > 15000)) { hud.style.display = 'none'; return; }
+    if (!current_target || !online_players[current_target] || (Date.now() - online_players[current_target].last > 15000)) { if(hud) hud.style.display = 'none'; return; }
     let p = online_players[current_target];
-    hud.style.display = 'block'; document.getElementById('target-name').innerText = current_target;
+    if(hud) hud.style.display = 'block'; 
+    let tn = document.getElementById('target-name'); if(tn) tn.innerText = current_target;
     let hp = Math.max(0, p.hp || 20).toFixed(1); let mhp = p.max_hp || 20;
-    document.getElementById('target-hp-text').innerText = `${hp}/${mhp} HP`;
-    document.getElementById('target-hp-fill').style.width = `${Math.min(100, (hp/mhp)*100)}%`;
+    let ht = document.getElementById('target-hp-text'); if(ht) ht.innerText = `${hp}/${mhp} HP`;
+    let hf = document.getElementById('target-hp-fill'); if(hf) hf.style.width = `${Math.min(100, (hp/mhp)*100)}%`;
 }
 
 window.map_heal = function() {
@@ -701,13 +740,13 @@ function pickup_drop(id) {
             let d = snap.val();
             if(d) {
                 database.ref('world_drops/'+id).remove();
-                if(enchants.mending > 0) {
+                if((enchants.mending || 0) > 0) {
                     weapon_dur = Math.min(1000, weapon_dur + 150);
                     armor_dur = Math.min(1000, armor_dur + 150);
                 }
                 
                 let drop_skr = d.skrepki || 0;
-                if(enchants.looting > 0 && d.from && Math.random() < (enchants.looting * 0.15)) {
+                if((enchants.looting || 0) > 0 && d.from && Math.random() < ((enchants.looting || 0) * 0.15)) {
                     drop_skr = Math.floor(drop_skr * 1.5);
                     spawn_txt(canvas.width/2, canvas.height/2, "ДОБЫЧА СРАБОТАЛА!");
                 }
@@ -732,16 +771,17 @@ window.sw_tab = function(tabid, el) {
 
 window.switch_top = function(tab) { current_top_tab = tab; document.getElementById('btn-top-players').className = 'buy-btn'; document.getElementById('btn-top-clubs').className = 'buy-btn'; document.getElementById('btn-top-ranked').className = 'buy-btn'; document.getElementById('btn-top-hof').className = 'buy-btn'; document.getElementById('btn-top-' + tab).className = 'buy-btn gold'; render_leaderboard(); }
 function render_leaderboard() { 
-    if (Object.keys(cached_players).length === 0 && current_top_tab !== 'clubs') { document.getElementById('leaderboard-content').innerHTML = '<div style="text-align:center; color:#555;">загрузка...</div>'; return; } 
+    let lb = document.getElementById('leaderboard-content'); if(!lb) return;
+    if (Object.keys(cached_players).length === 0 && current_top_tab !== 'clubs') { lb.innerHTML = '<div style="text-align:center; color:#555;">загрузка...</div>'; return; } 
     let html = ''; 
     if (current_top_tab === 'players') { let sorted = Object.keys(cached_players).map(k => { return { name: k, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club, stats: cached_players[k].stats || [], drank: cached_players[k].donate_rank||0 }; }).sort((a, b) => b.vrgk - a.vrgk); sorted.forEach((p, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; let col = p.stats[24] || '#fff'; let og = p.stats[25] ? ' 🌟' : ''; let t_disp = p.stats[42] ? `[${p.stats[42]}] ` : ''; let d_badge = p.drank > 0 ? `<span style="font-size:10px; color:${RANKS_INFO[p.drank].color}; font-weight:bold; margin-right:4px;">[${RANKS_INFO[p.drank].name}]</span>` : ''; html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_profile('${p.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name" style="color:${col}">${d_badge}${t_disp}${p.name}${og}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price">${fmt(p.vrgk)}</div></div>`; }); } 
     else if (current_top_tab === 'clubs') { let club_arr = []; for (let cname in cached_clubs) { let c = cached_clubs[cname]; let total = 0; c.members.forEach(m => { if(cached_players[m]) total += (cached_players[m].vrgk || 0); }); club_arr.push({name: cname, vrgk: total, mems: c.members.length, e_pts: c.event_pts || 0}); } let is_event = (global_event_data && global_event_data.active); if (is_event) club_arr.sort((a,b) => b.e_pts - a.e_pts); else club_arr.sort((a,b) => b.vrgk - a.vrgk); club_arr.forEach((c, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; let crown = c.name === cached_last_winner ? ' 👑' : ''; let val_disp = is_event ? `🏆 ${c.e_pts} очков` : `🏆 ${fmt(c.vrgk)}`; html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_club_details('${c.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name">${c.name}${crown}</span><span style="font-size: 10px; color: #888; margin-top: -3px;">${c.mems} чел.</span></div><div class="upgrade-price">${val_disp}</div></div>`; }); if (club_arr.length === 0) html = '<div style="text-align:center; color:#555;">клубов пока нет</div>'; } 
     else if (current_top_tab === 'ranked') { let sorted = Object.keys(cached_players).map(k => { return { name: k, rank: cached_players[k].rank || 0, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club, stats: cached_players[k].stats || [], drank: cached_players[k].donate_rank||0 }; }).sort((a, b) => { if (b.rank !== a.rank) return b.rank - a.rank; return b.vrgk - a.vrgk; }); sorted.forEach((p, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; let col = p.stats[24] || '#fff'; let og = p.stats[25] ? ' 🌟' : ''; let rank_name = RANKS[p.rank] || "Бронза I"; let d_badge = p.drank > 0 ? `<span style="font-size:10px; color:${RANKS_INFO[p.drank].color}; font-weight:bold; margin-right:4px;">[${RANKS_INFO[p.drank].name}]</span>` : ''; html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_profile('${p.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name" style="color:${col}">${d_badge}${p.name}${og}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price" style="color: #0f0;">${rank_name}</div></div>`; }); } 
     else if (current_top_tab === 'hof') { html = `<div style="text-align:center; margin-bottom:15px; color:#d4af37; font-weight:bold;">УВЕКОВЕЧЕННЫЕ ЛЕГЕНДЫ</div>`; let top_taps = Object.keys(cached_players).map(k => ({n:k, t:cached_players[k].stats?.[38]||0})).sort((a,b)=>b.t-a.t)[0]; if(top_taps && top_taps.t > 0) html += `<div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">Бог Тапов</span><span class="upgrade-desc">${top_taps.n}</span></div><div style="font-weight:bold; color:#fff;">${fmt(top_taps.t)} тапов</div></div>`; let top_ws = Object.keys(cached_players).map(k => ({n:k, t:cached_players[k].stats?.[41]||0})).sort((a,b)=>b.t-a.t)[0]; if(top_ws && top_ws.t > 0) html += `<div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">Непобедимый</span><span class="upgrade-desc">${top_ws.n}</span></div><div style="font-weight:bold; color:#fff;">Стрик: ${top_ws.t} 🔥</div></div>`; if(cached_last_winner) html += `<div class="upgrade-item"><div class="upgrade-info"><span class="upgrade-name">Чемпионы Ивента</span><span class="upgrade-desc">Клуб</span></div><div style="font-weight:bold; color:#d4af37;">${cached_last_winner} 👑</div></div>`; } 
-    document.getElementById('leaderboard-content').innerHTML = html; 
+    lb.innerHTML = html; 
 }
 window.submit_club = async function() { let name = document.getElementById('c-name').value.trim(); let desc = document.getElementById('c-desc').value.trim(); let req = parseInt(document.getElementById('c-req').value) || 0; let type = document.getElementById('c-type').value; if(!name || name.length < 3) return alert("Минимум 3 символа!"); let snap = await database.ref('clubs/' + name).once('value'); if(snap.val()) return alert("Клуб уже существует!"); if(donate_rank < 7) { if(vrgk < 20000) return alert("Создание клуба стоит 20,000. Или выбей донат [Элита]!"); vrgk -= 20000; } let cdata = { owner: nickname, desc: desc, req: req, type: type, members: [nickname], event_pts: 0 }; await database.ref('clubs/' + name).set(cdata); localStorage.setItem(PREFIX+'club', name); save_data(); upd_ui(); document.getElementById('create-club-modal').style.display='none'; sync_cloud(); alert("Клуб создан!"); };
-window.render_clubs_list = function() { let create_cost = donate_rank >= 7 ? "Бесплатно" : "20 000 воргиков"; let html = `<button class="buy-btn gold" style="width:100%; margin-bottom:10px;" onclick="document.getElementById('create-club-modal').style.display='flex'">Создать клуб (${create_cost})</button>`; for(let cname in cached_clubs) { let c = cached_clubs[cname]; html += `<div class="club-card" onclick="open_club_details('${cname}')"><div class="club-name-big">${cname}</div><div style="color:#aaa; font-size:12px;">Участников: ${c.members.length}</div></div>`; } document.getElementById('club-content').innerHTML = html; };
+window.render_clubs_list = function() { let cc = document.getElementById('club-content'); if(!cc) return; let create_cost = donate_rank >= 7 ? "Бесплатно" : "20 000 воргиков"; let html = `<button class="buy-btn gold" style="width:100%; margin-bottom:10px;" onclick="document.getElementById('create-club-modal').style.display='flex'">Создать клуб (${create_cost})</button>`; for(let cname in cached_clubs) { let c = cached_clubs[cname]; html += `<div class="club-card" onclick="open_club_details('${cname}')"><div class="club-name-big">${cname}</div><div style="color:#aaa; font-size:12px;">Участников: ${c.members.length}</div></div>`; } cc.innerHTML = html; };
 window.open_club_details = function(cname) { let c = cached_clubs[cname]; if(!c) return; let html = `<div class="modal-title">${cname}</div><div class="club-desc-box">${c.desc||''}</div><div style="margin-top:10px;">Владелец: <b>${c.owner}</b></div>`; let my_c = localStorage.getItem(PREFIX+'club'); if(my_c !== cname) html += `<button class="buy-btn" style="width:100%; margin-top:10px;" onclick="join_club('${cname}')">Вступить</button>`; else html += `<button class="buy-btn" style="width:100%; margin-top:10px; background:#511;" onclick="leave_club('${cname}')">Выйти</button>`; html += `<button class="buy-btn" style="width:100%; margin-top:5px;" onclick="document.getElementById('view-club-modal').style.display='none'">Закрыть</button>`; document.getElementById('view-club-content').innerHTML = html; document.getElementById('view-club-modal').style.display = 'flex'; };
 window.join_club = async function(cname) { let c = cached_clubs[cname]; if(vrgk < (c.req||0)) return alert("Нужно " + c.req + " воргиков!"); c.members.push(nickname); await database.ref('clubs/'+cname+'/members').set(c.members); localStorage.setItem(PREFIX+'club', cname); document.getElementById('view-club-modal').style.display='none'; sync_cloud(); };
 window.leave_club = async function(cname) { let c = cached_clubs[cname]; c.members = c.members.filter(m => m !== nickname); if(c.owner === nickname && c.members.length > 0) c.owner = c.members[0]; if(c.members.length === 0) await database.ref('clubs/'+cname).remove(); else await database.ref('clubs/'+cname).set(c); localStorage.removeItem(PREFIX+'club'); document.getElementById('view-club-modal').style.display='none'; sync_cloud(); };
@@ -786,7 +826,7 @@ async function sync_cloud(is_bg = false) {
         let wipeSnapHard = await Promise.race([database.ref('force_wipe_time').once('value'), timeoutPromise]);
         let wipe_time_hard = wipeSnapHard.val() || 0; let local_wipe = parseInt(localStorage.getItem(PREFIX + 'wipe_time')) || 0;
         if (wipe_time_hard > local_wipe) { let mySnap = await database.ref('players/' + nickname).once('value'); let p = mySnap.val(); if (p) { player_rank = p.rank || 0; if (p.stats) { profit = p.stats[0] || profit; max_rank = p.stats[23] || 0; } localStorage.setItem(PREFIX + 'wipe_time', wipe_time_hard); save_data(); upd_ui(); } }
-        let p_data = { pin: my_pin, vrgk: Math.floor(vrgk), skrepki: skrepki, rank: player_rank, last_seen: Date.now(), donate_rank: donate_rank, donate_until: donate_until, inventory: JSON.stringify(inv), last_kit_v2: last_kit_time, enchants: JSON.stringify(enchants), stats: [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank, my_color, og_pro, c8_price, c9_price, c10_price, c11_price, c12_price, c13_price, c8_lvl, c9_lvl, c10_lvl, c11_lvl, c12_lvl, c13_lvl, total_taps, r_wins, r_loss, r_streak, my_title, streak_days, q_taps, q_wins, q_msgs, q_date, q_claimed ? 1 : 0, streak_last] };
+        let p_data = { pin: my_pin, vrgk: Math.floor(vrgk), skrepki: skrepki, rank: player_rank, last_seen: Date.now(), donate_rank: donate_rank, donate_until: donate_until, inventory: JSON.stringify(inv || {}), last_kit_v2: last_kit_time, enchants: JSON.stringify(enchants || {}), stats: [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank, my_color, og_pro, c8_price, c9_price, c10_price, c11_price, c12_price, c13_price, c8_lvl, c9_lvl, c10_lvl, c11_lvl, c12_lvl, c13_lvl, total_taps, r_wins, r_loss, r_streak, my_title, streak_days, q_taps, q_wins, q_msgs, q_date, q_claimed ? 1 : 0, streak_last] };
         let my_c = localStorage.getItem(PREFIX + 'club'); if (my_c) p_data.club = my_c; 
         await Promise.race([database.ref('players/' + nickname).update(p_data), timeoutPromise]);
         if(!is_bg) { let snap = await Promise.race([database.ref().once('value'), timeoutPromise]); let d = snap.val() || {}; cached_players = d.players || {}; cached_clubs = d.clubs || {}; global_event_data = d.global_event || null; cached_last_winner = d.last_winner || ""; render_leaderboard(); render_clubs_list(); } 
