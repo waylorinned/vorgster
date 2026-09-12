@@ -377,10 +377,101 @@ window.open_stash = async function(s_id) {
     if(in_combat) return alert("Нельзя открыть стэш во время боя!"); 
     current_stash_id = s_id; let sm = document.getElementById('stash-modal'); if(sm) sm.style.display = 'flex'; refresh_stash_ui(); 
 }
-async function refresh_stash_ui() { if(!current_stash_id) return; let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); let sm = document.getElementById('stash-modal'); if(!data) { if(sm) sm.style.display = 'none'; return; } let sinv = JSON.parse(data.inv || "{}"); let shtml = `<b>Скрепки:</b> ${data.skrepki||0}<br>`; for(let k in sinv) { if(sinv[k]>0) shtml += `<b>${ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k}:</b> ${sinv[k]}<br>`; } let si = document.getElementById('stash-info'); if(si) si.innerHTML = shtml; }
-window.move_to_stash = async function(item) { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; if(item === 'skrepki') { if(skrepki > 0) { skrepki--; data.skrepki = (data.skrepki||0) + 1; } else return alert("Нет скрепок!"); } else { if(inv[item] > 0) { inv[item]--; let sinv = JSON.parse(data.inv||"{}"); sinv[item] = (sinv[item]||0)+1; data.inv = JSON.stringify(sinv); } else return alert("Нет предмета!"); } await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); }
-window.move_from_stash = async function(item) { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; if(item === 'skrepki') { if((data.skrepki||0) > 0) { skrepki++; data.skrepki--; } else return alert("В стэше нет скрепок!"); } else { let sinv = JSON.parse(data.inv||"{}"); if(sinv[item] > 0) { inv[item] = (inv[item]||0)+1; sinv[item]--; data.inv = JSON.stringify(sinv); } else return alert("В стэше нет предмета!"); } await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); }
-window.hide_all_armor = async function() { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; let sinv = JSON.parse(data.inv||"{}"); let moved = 0; const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; gear.forEach(g => { if(inv[g]>0) { sinv[g] = (sinv[g]||0)+inv[g]; moved+=inv[g]; inv[g]=0; } }); if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); alert(`Спрятано вещей: ${moved}`); } else alert("Нет вещей в рюкзаке!"); }
+
+window.refresh_stash_ui = async function() { 
+    if(!current_stash_id) return; 
+    let snap = await database.ref('stashes/' + current_stash_id).once('value'); 
+    let data = snap.val(); 
+    let sm = document.getElementById('stash-modal'); 
+    if(!data) { if(sm) sm.style.display = 'none'; return; } 
+    let sinv = JSON.parse(data.inv || "{}"); 
+    
+    let s_html = '';
+    if((data.skrepki||0) > 0) s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('skrepki', ${data.skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${data.skrepki}</div></div>`;
+    for(let k in sinv) { 
+        if(sinv[k]>0) {
+            let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; 
+            let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; 
+            s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('${k}', ${sinv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${iname}</div><div class="inv-count">x${sinv[k]}</div></div>`;
+        }
+    }
+    if(s_html === '') s_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Тайник пуст</div>';
+    let sg = document.getElementById('stash-items-grid'); if(sg) sg.innerHTML = s_html;
+
+    let p_html = '';
+    if(skrepki > 0) p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('skrepki', ${skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${skrepki}</div></div>`;
+    for(let k in inv) { 
+        if(inv[k]>0 && k !== 'active_offhand') {
+            let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; 
+            let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; 
+            let eq = (k === inv['active_offhand']) ? '<span style="color:#0f0; font-weight:bold;">[E]</span> ' : '';
+            p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('${k}', ${inv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${eq}${iname}</div><div class="inv-count">x${inv[k]}</div></div>`;
+        }
+    }
+    if(p_html === '') p_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Рюкзак пуст</div>';
+    let pg = document.getElementById('stash-player-grid'); if(pg) pg.innerHTML = p_html;
+};
+
+window.move_to_stash_prompt = function(item, max_count) {
+    let amt = 1;
+    if (max_count > 1) {
+        let res = prompt(`Сколько положить? (Макс: ${max_count})`, max_count);
+        if(res === null) return;
+        amt = parseInt(res);
+        if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!");
+    }
+    move_to_stash(item, amt);
+};
+
+window.move_from_stash_prompt = function(item, max_count) {
+    let amt = 1;
+    if (max_count > 1) {
+        let res = prompt(`Сколько забрать? (Макс: ${max_count})`, max_count);
+        if(res === null) return;
+        amt = parseInt(res);
+        if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!");
+    }
+    move_from_stash(item, amt);
+};
+
+window.move_to_stash = async function(item, amt=1) { 
+    let snap = await database.ref('stashes/' + current_stash_id).once('value'); 
+    let data = snap.val(); if(!data) return; 
+    if(item === 'skrepki') { 
+        if(skrepki >= amt) { skrepki-=amt; data.skrepki = (data.skrepki||0) + amt; } 
+        else return alert("Не хватает скрепок!"); 
+    } else { 
+        if((inv[item]||0) >= amt) { 
+            if(item === inv['active_offhand']) { inv['active_offhand'] = ''; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); sync_my_pos(); }
+            inv[item]-=amt; 
+            let sinv = JSON.parse(data.inv||"{}"); 
+            sinv[item] = (sinv[item]||0)+amt; 
+            data.inv = JSON.stringify(sinv); 
+        } else return alert("Нет предмета!"); 
+    } 
+    await database.ref('stashes/' + current_stash_id).set(data); 
+    save_data(); upd_ui(); refresh_stash_ui(); 
+};
+
+window.move_from_stash = async function(item, amt=1) { 
+    let snap = await database.ref('stashes/' + current_stash_id).once('value'); 
+    let data = snap.val(); if(!data) return; 
+    if(item === 'skrepki') { 
+        if((data.skrepki||0) >= amt) { skrepki+=amt; data.skrepki-=amt; } 
+        else return alert("В стэше нет столько скрепок!"); 
+    } else { 
+        let sinv = JSON.parse(data.inv||"{}"); 
+        if((sinv[item]||0) >= amt) { 
+            inv[item] = (inv[item]||0)+amt; 
+            sinv[item]-=amt; 
+            data.inv = JSON.stringify(sinv); 
+        } else return alert("В стэше нет столько!"); 
+    } 
+    await database.ref('stashes/' + current_stash_id).set(data); 
+    save_data(); upd_ui(); refresh_stash_ui(); 
+};
+
+window.hide_all_armor = async function() { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; let sinv = JSON.parse(data.inv||"{}"); let moved = 0; const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; gear.forEach(g => { if(inv[g]>0) { if(g === inv['active_offhand']) { inv['active_offhand'] = ''; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); sync_my_pos(); } sinv[g] = (sinv[g]||0)+inv[g]; moved+=inv[g]; inv[g]=0; } }); if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); alert(`Спрятано вещей: ${moved}`); } else alert("Нет вещей в рюкзаке!"); }
 window.take_all_armor = async function() { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; let sinv = JSON.parse(data.inv||"{}"); let moved = 0; const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; gear.forEach(g => { if(sinv[g]>0) { inv[g] = (inv[g]||0)+sinv[g]; moved+=sinv[g]; sinv[g]=0; } }); if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); alert(`Взято вещей: ${moved}`); } else alert("Нет вещей в стэше!"); }
 window.use_locator = async function() { if(vrgk < 50000) return alert("Локатор стоит 50 000 воргиков!"); vrgk -= 50000; upd_ui(); save_data(); let snap = await database.ref('stashes').once('value'); let all_st = snap.val(); let found = null; for(let id in all_st) { let s = all_st[id]; if(s.owner !== nickname && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } if(found) { if(confirm("ЛОКАТОР НАШЁЛ ЧУЖОЙ ТАЙНИК РЯДОМ!\nВзломать его и забрать все вещи?")) { let s_data = all_st[found]; let sinv = JSON.parse(s_data.inv||"{}"); if(s_data.skrepki > 0) { skrepki += s_data.skrepki; } for(let k in sinv) { inv[k] = (inv[k]||0) + sinv[k]; } await database.ref('stashes/' + found).remove(); save_data(); upd_ui(); render_inventory(); alert(`✅ ТАЙНИК УСПЕШНО ОГРАБЛЕН!\nВсе вещи и ${s_data.skrepki||0} скрепок перенесены в твой рюкзак.`); } } else { alert("В радиусе 500 блоков нет чужих тайников. Сделай /RTP и попробуй снова."); } }
 
