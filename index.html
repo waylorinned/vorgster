@@ -289,15 +289,16 @@
     </div>
 
     <div id="stash-modal" class="modal-overlay">
-      <div class="modal-content">
+      <div class="modal-content" style="max-width: 400px; width: 95%;">
         <div class="modal-title">ТВОЙ СТЭШ</div>
-        <div style="display:flex; gap:10px; flex-direction:column; margin-top:10px;">
-          <button class="buy-btn blue" onclick="move_to_stash('skrepki')">Положить 1 скрепку</button>
-          <button class="buy-btn gold" onclick="move_from_stash('skrepki')">Забрать 1 скрепку</button>
-          <button class="buy-btn red" onclick="hide_all_armor()">Спрятать броню и артефакты</button>
-          <button class="buy-btn green" onclick="take_all_armor()">Забрать всё</button>
-        </div>
-        <div style="margin-top:10px; color:#aaa; font-size:11px; text-align:left;" id="stash-info">В стэше: ...</div>
+        <div style="font-size:10px; color:#aaa; margin-bottom:10px;">Кликай по предметам для перемещения</div>
+        
+        <div class="section-title" style="font-size:12px; margin-top:0;">В ТАЙНИКЕ</div>
+        <div class="inv-grid" id="stash-items-grid" style="min-height: 80px; max-height: 150px; overflow-y: auto; background:#0a0a0a; padding:5px; border-radius:8px; border:1px solid #333;"></div>
+        
+        <div class="section-title" style="font-size:12px; margin-top:15px;">ТВОЙ РЮКЗАК</div>
+        <div class="inv-grid" id="stash-player-grid" style="min-height: 80px; max-height: 150px; overflow-y: auto; background:#0a0a0a; padding:5px; border-radius:8px; border:1px solid #333;"></div>
+        
         <button class="buy-btn" style="margin-top:15px;" onclick="document.getElementById('stash-modal').style.display='none'; render_inventory();">Закрыть</button>
       </div>
     </div>
