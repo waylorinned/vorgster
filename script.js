@@ -331,7 +331,11 @@ window.open_enchant_modal = function() {
     let e_html = `<div class="modal-content"><div class="modal-title">СТОЛ ЗАЧАРОВАНИЙ 🔮</div><div style="text-align:left; color:#aaa; font-size:11px; margin-bottom:10px;">Чары применяются ко всему твоему оружию и броне глобально. Цена: Скрепки.</div><div style="max-height:60vh; overflow-y:auto; padding-right:5px;">`;
     for(let key in ENCHANT_LIMITS) {
         let curlvl = enchants[key] || 0; let maxlvl = ENCHANT_LIMITS[key];
-        let cost = curlvl === 0 ? 1 : curlvl === 1 ? 3 : curlvl === 2 ? 5 : curlvl === 3 ? 10 : 15; if(key === 'mending') cost = 20; 
+        
+        let is_imba = ['sharpness', 'unbreaking', 'mending', 'protection', 'density'].includes(key);
+        let multiplier = is_imba ? 10 : 5;
+        let cost = (curlvl + 1) * multiplier;
+        
         let btn_html = curlvl >= maxlvl ? `<button class="buy-btn" disabled style="background:#222; color:#555;">МАКС.</button>` : `<button class="buy-btn purple" onclick="upgrade_enchant('${key}', ${cost})">За ${cost} 📎</button>`;
         e_html += `<div class="upgrade-item" style="margin-bottom:5px;"><div class="upgrade-info"><span class="upgrade-name" style="color:#d4af37;">${ENCHANT_NAMES[key]}</span><span class="upgrade-desc">Ур. ${curlvl}/${maxlvl}</span></div>${btn_html}</div>`;
     }
@@ -705,6 +709,17 @@ async function sync_cloud(is_bg = false) {
         let wipeSnap = await Promise.race([database.ref('wipe_skrepki_time').once('value'), timeoutPromise]);
         let wipe_time = wipeSnap.val() || 0; let loc_w = parseInt(localStorage.getItem(PREFIX+'w_skr')) || 0;
         if(wipe_time > loc_w) { skrepki = 0; localStorage.setItem(PREFIX+'w_skr', wipe_time); save_data(); upd_ui(); }
+        
+        let wipeSnapEnch = await Promise.race([database.ref('wipe_enchants_time').once('value'), timeoutPromise]);
+        let wipe_time_ench = wipeSnapEnch.val() || 0; 
+        let loc_w_ench = parseInt(localStorage.getItem(PREFIX+'w_ench')) || 0;
+        if(wipe_time_ench > loc_w_ench) { 
+            enchants = {}; 
+            for(let k in ENCHANT_LIMITS) enchants[k] = 0; 
+            localStorage.setItem(PREFIX+'w_ench', wipe_time_ench); 
+            save_data(); upd_ui(); 
+        }
+
         let wipeSnapHard = await Promise.race([database.ref('force_wipe_time').once('value'), timeoutPromise]);
         let wipe_time_hard = wipeSnapHard.val() || 0; let local_wipe = parseInt(localStorage.getItem(PREFIX + 'wipe_time')) || 0;
         if (wipe_time_hard > local_wipe) { let mySnap = await database.ref('players/' + nickname).once('value'); let p = mySnap.val(); if (p) { player_rank = p.rank || 0; if (p.stats) { profit = p.stats[0] || profit; max_rank = p.stats[23] || 0; } localStorage.setItem(PREFIX + 'wipe_time', wipe_time_hard); save_data(); upd_ui(); } }
@@ -721,6 +736,20 @@ window.create_promo = async function() { let amt = parseInt(prompt("Скольк
 window.use_promo = async function() { let pIn = document.getElementById('promo-input'); if(!pIn) return; let code = pIn.value.trim().toUpperCase(); if (!code) return alert("Введите код!"); let snap = await database.ref('promocodes/' + code).once('value'); let promo = snap.val(); if (!promo || !promo.active) { return alert("Промокод недействителен или уже использован!"); } vrgk += promo.reward; await database.ref('promocodes/' + code + '/active').set(false); pIn.value = ''; save_data(); upd_ui(); alert("✅ Успешно! Ты получил " + fmt(promo.reward) + " воргиков!"); sync_cloud(true); };
 window.admin_wipe_skrepki = async function() { if(!confirm('ТОЧНО ВАЙПНУТЬ СКРЕПКИ У ВСЕХ? ЭТО НЕЛЬЗЯ ОТМЕНИТЬ!')) return; let snap = await database.ref('players').once('value'); let pl = snap.val(); for(let key in pl) { pl[key].skrepki = 0; } await database.ref('players').set(pl); await database.ref('wipe_skrepki_time').set(Date.now()); skrepki = 0; save_data(); upd_ui(); alert('Вайп скрепок прошел успешно!'); sync_cloud(); };
 window.admin_reset_ranks = async function(is_hard) { if(!confirm(is_hard ? 'ЖЕСТКИЙ СБРОС: Всем ранг 0 + отнять прибыль?' : 'МЯГКИЙ СБРОС: Всем ранг 0 (без потери прибыли)?')) return; let snap = await database.ref('players').once('value'); let players = snap.val() || {}; let count = 0; for (let k in players) { players[k].rank = 0; if(is_hard && players[k].stats) { let mr = players[k].stats[23] || 0; let rm = 0; if(mr >= 12) rm += 5000; if(mr >= 15) rm += 15000; if(mr >= 18) rm += 45000; if(mr >= 21) rm += 65000; players[k].stats[0] = Math.max(0, (players[k].stats[0]||0) - rm); players[k].stats[23] = 0; } count++; } await database.ref('players').set(players); await database.ref('force_wipe_time').set(Date.now()); player_rank = 0; if(is_hard) { let rm = 0; if(max_rank >= 12) rm += 5000; if(max_rank >= 15) rm += 15000; if(max_rank >= 18) rm += 45000; if(max_rank >= 21) rm += 65000; profit = Math.max(0, profit - rm); max_rank = 0; } save_data(); upd_ui(); alert(`Сброс применен к ${count} игрокам!`); location.reload(); }
+
+window.admin_wipe_enchants = async function() { 
+    if(!confirm('ТОЧНО ВАЙПНУТЬ ЧАРЫ У ВСЕХ? ЭТО НЕЛЬЗЯ ОТМЕНИТЬ!')) return; 
+    let snap = await database.ref('players').once('value'); 
+    let pl = snap.val(); 
+    for(let key in pl) { pl[key].enchants = "{}"; } 
+    await database.ref('players').set(pl); 
+    await database.ref('wipe_enchants_time').set(Date.now()); 
+    enchants = {}; 
+    for(let k in ENCHANT_LIMITS) enchants[k] = 0; 
+    save_data(); 
+    alert('Вайп чар прошел успешно!'); 
+    sync_cloud(); 
+};
 
 window.open_profile = function(user) { 
     let p = cached_players[user]; if(!p) return; 
