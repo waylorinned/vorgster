@@ -404,17 +404,17 @@ function init_map() {
                 e.preventDefault(); let rect = canvas.getBoundingClientRect(); let tx = e.touches[0].clientX - rect.left; let ty = e.touches[0].clientY - rect.top;
                 let clicked_nick = null; let cx = canvas.width/2; let cy = canvas.height/2;
                 for(let p in online_players) { 
-                    if(p === nickname || Date.now() - online_players[p].last > 60000) continue; 
+                    if(p === nickname || Date.now() - (online_players[p].local_last || online_players[p].last) > 300000) continue; 
                     let pdx = online_players[p].x - loc_x; let pdz = online_players[p].z - loc_z; 
                     let screenX = cx + pdx; let screenY = cy + pdz; 
-                    if(Math.abs(tx - screenX) < 25 && Math.abs(ty - screenY) < 25) { clicked_nick = p; break; } 
+                    if(Math.abs(tx - screenX) < 40 && Math.abs(ty - screenY) < 40) { clicked_nick = p; break; } 
                 }
                 if(clicked_nick) { current_target = clicked_nick; update_target_hud(); }
             }, {passive:false});
         }
 
         requestAnimationFrame(draw_map); 
-        setInterval(sync_my_pos, 2000);
+        setInterval(sync_my_pos, 600);
     } catch(e) {}
 }
 
@@ -465,13 +465,19 @@ function draw_map() {
     }
 
     for(let p in online_players) { 
-        if(p === nickname || Date.now() - online_players[p].last > 60000) continue; 
-        let dx = online_players[p].x - loc_x; let dz = online_players[p].z - loc_z; 
+        if(p === nickname) continue; 
+        let pl = online_players[p];
+        if(Date.now() - (pl.local_last || pl.last) > 300000) continue; 
+
+        if(pl.target_x !== undefined) pl.x += (pl.target_x - pl.x) * 0.1;
+        if(pl.target_z !== undefined) pl.z += (pl.target_z - pl.z) * 0.1;
+
+        let dx = pl.x - loc_x; let dz = pl.z - loc_z; 
         if(Math.abs(dx) < canvas.width/2 + 20 && Math.abs(dz) < canvas.height/2 + 20) { 
-            ctx.fillStyle = (current_target === p) ? '#f55' : get_armor_color(online_players[p].armor); 
+            ctx.fillStyle = (current_target === p) ? '#f55' : get_armor_color(pl.armor); 
             ctx.fillRect(cx + dx - 10, cy + dz - 10, 20, 20); 
             ctx.fillStyle = '#fff'; ctx.font = '10px Arial'; ctx.textAlign = 'center'; ctx.fillText(p, cx + dx, cy + dz - 15); 
-            let en_hp = Math.max(0, online_players[p].hp || 20); let en_mhp = online_players[p].max_hp || 20;
+            let en_hp = Math.max(0, pl.hp || 20); let en_mhp = pl.max_hp || 20;
             ctx.fillStyle = '#f00'; ctx.fillRect(cx + dx - 10, cy + dz + 12, 20, 3);
             ctx.fillStyle = '#0f0'; ctx.fillRect(cx + dx - 10, cy + dz + 12, 20 * (en_hp/en_mhp), 3);
         } 
@@ -503,7 +509,34 @@ function setup_dmg_listener() {
     if(!nickname) return;
     database.ref('world_players/' + nickname + '/dmg_queue').on('child_added', snap => { let data = snap.val(); snap.ref.remove(); process_incoming_damage(data); });
     database.ref('world_drops').on('value', snap => { world_drops = snap.val() || {}; });
-    database.ref('world_players').on('value', snap => { online_players = snap.val() || {}; });
+    
+    database.ref('world_players').on('value', snap => { 
+        let data = snap.val() || {}; 
+        let localNow = Date.now();
+        for(let key in data) {
+            if(key === nickname) continue;
+            if(!online_players[key]) {
+                online_players[key] = data[key];
+                online_players[key].target_x = data[key].x;
+                online_players[key].target_z = data[key].z;
+                online_players[key].local_last = localNow;
+            } else {
+                online_players[key].target_x = data[key].x;
+                online_players[key].target_z = data[key].z;
+                online_players[key].hp = data[key].hp;
+                online_players[key].max_hp = data[key].max_hp;
+                online_players[key].armor = data[key].armor;
+                if(online_players[key].last !== data[key].last) {
+                    online_players[key].local_last = localNow;
+                }
+                online_players[key].last = data[key].last;
+            }
+        }
+        for(let key in online_players) {
+            if(key !== nickname && !data[key]) delete online_players[key];
+        }
+    });
+    
     database.ref('world_players/' + nickname).onDisconnect().remove();
 }
 
@@ -511,10 +544,12 @@ window.map_attack = function() {
     if(is_stunned) return;
     if(Math.abs(loc_x) <= 100 && Math.abs(loc_z) <= 100) return;
 
-    let closest = null; let min_d = 45;
+    let closest = null; let min_d = 60;
     for (let key in online_players) {
-        if (key === nickname || Date.now() - online_players[key].last > 60000) continue;
-        let p = online_players[key]; if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; 
+        if (key === nickname) continue;
+        let p = online_players[key]; 
+        if (Date.now() - (p.local_last || p.last) > 300000) continue; 
+        if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; 
         let d = Math.hypot(p.x - loc_x, p.z - loc_z); if (d < min_d) { min_d = d; closest = key; }
     }
     if(!closest) return; current_target = closest; trigger_attack_logic();
@@ -602,7 +637,7 @@ function update_combo_ui(was_sweeping) {
 
 function update_target_hud() {
     let hud = document.getElementById('target-hud');
-    if (!current_target || !online_players[current_target] || (Date.now() - online_players[current_target].last > 60000)) { if(hud) hud.style.display = 'none'; return; }
+    if (!current_target || !online_players[current_target] || (Date.now() - (online_players[current_target].local_last || online_players[current_target].last) > 300000)) { if(hud) hud.style.display = 'none'; return; }
     let p = online_players[current_target]; if(hud) hud.style.display = 'block'; 
     let tn = document.getElementById('target-name'); if(tn) tn.innerText = current_target;
     let hp = Math.max(0, p.hp || 20).toFixed(1); let mhp = p.max_hp || 20;
