@@ -164,7 +164,7 @@
           
           <div class="joystick-zone" id="joystick-zone"><div class="joystick-knob" id="joystick-knob"></div></div>
           
-          <div class="action-btn-map" id="mine-btn" style="display:none;" onclick="mine_ore()">⛏️</div>
+          <div class="action-btn-map" id="mine-btn" style="display:none; position:absolute; top:50%; bottom:auto; right:15px; transform:translateY(-50%); z-index:25;" onclick="mine_ore()">⛏️</div>
           
           <div style="position:absolute; right:15px; bottom:20px; display:flex; flex-direction:column; gap:8px; z-index:20;">
             <button class="buy-btn red" style="width:60px; height:60px; border-radius:50%; font-size:22px; padding:0; box-shadow: 0 0 10px rgba(255,0,0,0.5);" onclick="map_attack()" id="map-btn-attack">⚔️</button>
@@ -264,6 +264,7 @@
           <button class="buy-btn gold" style="width:100%; margin-bottom:5px;" onclick="create_promo()">выдать промокод</button>
           <button class="buy-btn" style="width:100%; margin-bottom:5px; background:#411;" onclick="admin_reset_ranks(false)">мягкий сброс</button>
           <button class="buy-btn red" style="width:100%; margin-bottom:5px;" onclick="admin_wipe_skrepki()">ВАЙП СКРЕПОК</button>
+          <button class="buy-btn red" style="width:100%; margin-bottom:5px;" onclick="admin_wipe_enchants()">ВАЙП ЧАР</button>
         </div>
         <button class="buy-btn" style="background:#311; border:1px solid #a33; color:#f88;" onclick="delete_acc()">удалить аккаунт</button>
         <button class="buy-btn" style="margin-top:10px;" onclick="document.getElementById('settings-modal').style.display='none'">закрыть</button>
