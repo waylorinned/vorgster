@@ -404,7 +404,7 @@ function init_map() {
                 e.preventDefault(); let rect = canvas.getBoundingClientRect(); let tx = e.touches[0].clientX - rect.left; let ty = e.touches[0].clientY - rect.top;
                 let clicked_nick = null; let cx = canvas.width/2; let cy = canvas.height/2;
                 for(let p in online_players) { 
-                    if(p === nickname || Date.now() - online_players[p].last > 15000) continue; 
+                    if(p === nickname || Date.now() - online_players[p].last > 60000) continue; 
                     let pdx = online_players[p].x - loc_x; let pdz = online_players[p].z - loc_z; 
                     let screenX = cx + pdx; let screenY = cy + pdz; 
                     if(Math.abs(tx - screenX) < 25 && Math.abs(ty - screenY) < 25) { clicked_nick = p; break; } 
@@ -465,7 +465,7 @@ function draw_map() {
     }
 
     for(let p in online_players) { 
-        if(p === nickname || Date.now() - online_players[p].last > 15000) continue; 
+        if(p === nickname || Date.now() - online_players[p].last > 60000) continue; 
         let dx = online_players[p].x - loc_x; let dz = online_players[p].z - loc_z; 
         if(Math.abs(dx) < canvas.width/2 + 20 && Math.abs(dz) < canvas.height/2 + 20) { 
             ctx.fillStyle = (current_target === p) ? '#f55' : get_armor_color(online_players[p].armor); 
@@ -504,6 +504,7 @@ function setup_dmg_listener() {
     database.ref('world_players/' + nickname + '/dmg_queue').on('child_added', snap => { let data = snap.val(); snap.ref.remove(); process_incoming_damage(data); });
     database.ref('world_drops').on('value', snap => { world_drops = snap.val() || {}; });
     database.ref('world_players').on('value', snap => { online_players = snap.val() || {}; });
+    database.ref('world_players/' + nickname).onDisconnect().remove();
 }
 
 window.map_attack = function() {
@@ -512,7 +513,7 @@ window.map_attack = function() {
 
     let closest = null; let min_d = 45;
     for (let key in online_players) {
-        if (key === nickname || Date.now() - online_players[key].last > 15000) continue;
+        if (key === nickname || Date.now() - online_players[key].last > 60000) continue;
         let p = online_players[key]; if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; 
         let d = Math.hypot(p.x - loc_x, p.z - loc_z); if (d < min_d) { min_d = d; closest = key; }
     }
@@ -601,7 +602,7 @@ function update_combo_ui(was_sweeping) {
 
 function update_target_hud() {
     let hud = document.getElementById('target-hud');
-    if (!current_target || !online_players[current_target] || (Date.now() - online_players[current_target].last > 15000)) { if(hud) hud.style.display = 'none'; return; }
+    if (!current_target || !online_players[current_target] || (Date.now() - online_players[current_target].last > 60000)) { if(hud) hud.style.display = 'none'; return; }
     let p = online_players[current_target]; if(hud) hud.style.display = 'block'; 
     let tn = document.getElementById('target-name'); if(tn) tn.innerText = current_target;
     let hp = Math.max(0, p.hp || 20).toFixed(1); let mhp = p.max_hp || 20;
