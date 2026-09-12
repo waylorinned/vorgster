@@ -13,6 +13,12 @@
   <script src="script.js" defer></script>
 </head>
 <body>
+  <!-- Оверлей при повышении ранга (чтобы не крашилось) -->
+  <div id="rankup-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:10000; justify-content:center; align-items:center; pointer-events:none;">
+    <div id="rankup-glow" style="position:absolute; width:200%; height:200%; opacity:0.5;"></div>
+    <div id="rankup-overlay-text" style="font-size:40px; font-weight:900; color:#fff; z-index:2;"></div>
+  </div>
+
   <div class="container">
     <div class="header">
       <div class="top-nav">
@@ -136,7 +142,9 @@
       <div class="upgrade-list" style="padding-top:5px;">
         <div class="section-title">МИР АНАРХИИ</div>
         <div class="map-wrapper" id="map-wrapper" style="position: relative; overflow: hidden; border: 2px solid #333; border-radius: 8px;">
+          <!-- Сама карта -->
           <canvas id="rtp-canvas"></canvas>
+          
           <div class="coord-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-size: 12px; color: #fff; z-index: 10;">
             X: <span id="map-x">0</span> Z: <span id="map-z">0</span>
           </div>
@@ -162,6 +170,7 @@
           <button class="buy-btn gold craft-overlay-btn" onclick="open_craft_modal()" style="position: absolute; top: 10px; right: 10px; z-index: 20; padding: 5px 10px; font-size: 10px;">КРАФТ ⚒️</button>
           
           <div class="joystick-zone" id="joystick-zone"><div class="joystick-knob" id="joystick-knob"></div></div>
+          
           <div class="action-btn-map" id="mine-btn" style="display:none;" onclick="mine_ore()">⛏️</div>
           
           <div style="position:absolute; right:15px; bottom:20px; display:flex; flex-direction:column; gap:8px; z-index:20;">
@@ -381,4 +390,4 @@
     </div>
   </div>
 </body>
-</html>
+                                    </html>
