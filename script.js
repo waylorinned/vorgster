@@ -1,13 +1,10 @@
-// === ИНИЦИАЛИЗАЦИЯ FIREBASE ===
 const firebaseConfig = { apiKey: "AIzaSyDBQuKaUkor9AiiP5QsqHsrJMGebh8EUK0", authDomain: "vorgster-kombat-a1100.firebaseapp.com", databaseURL: "https://vorgster-kombat-a1100-default-rtdb.europe-west1.firebasedatabase.app", projectId: "vorgster-kombat-a1100", storageBucket: "vorgster-kombat-a1100.firebasestorage.app", messagingSenderId: "1070503708882", appId: "1:1070503708882:web:66bfab9dbab363f2ee050b" };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const PREFIX = 'v4_';
 
-// === ГЛОБАЛЬНЫЙ ПЕРЕХВАТЧИК ОШИБОК ===
 window.onerror = function(msg, url, line) { console.error("GLOBAL CRASH:", msg, "Line:", line); return false; };
 
-// === БЕЗОПАСНОЕ ЧТЕНИЕ ДАННЫХ ===
 function safeParse(key, def) {
     try {
         let val = localStorage.getItem(PREFIX + key);
@@ -16,7 +13,6 @@ function safeParse(key, def) {
     } catch(e) { return def; }
 }
 
-// === БАЗОВЫЕ ПЕРЕМЕННЫЕ ИГРОКА ===
 let nickname = localStorage.getItem(PREFIX + 'nickname') || "";
 let my_pin = localStorage.getItem(PREFIX + 'pin') || "";
 let vrgk = parseFloat(localStorage.getItem(PREFIX + 'vrgk')) || 0;
@@ -51,7 +47,6 @@ let my_title = localStorage.getItem(PREFIX+'title') || "";
 let streak_days = parseInt(localStorage.getItem(PREFIX+'streak_days')) || 0, streak_last = localStorage.getItem(PREFIX+'streak_last') || "";
 let q_taps = parseInt(localStorage.getItem(PREFIX+'q_taps')) || 0, q_wins = parseInt(localStorage.getItem(PREFIX+'q_wins')) || 0, q_msgs = parseInt(localStorage.getItem(PREFIX+'q_msgs')) || 0, q_date = localStorage.getItem(PREFIX+'q_date') || ""; let q_claimed = localStorage.getItem(PREFIX+'q_claimed') === '1';
 
-// БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ ИНВЕНТАРЯ И ЧАР
 let my_friends = safeParse('friends', []);
 let inv = safeParse('inv', {});
 let enchants = safeParse('enchants', {});
@@ -71,23 +66,20 @@ const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, den
 const ENCHANT_NAMES = { sharpness:'Острота (Урон)', fire_aspect:'Заговор Огня', looting:'Добыча (Скрепки)', knockback:'Отдача (Стан)', density:'Плотность (Булава)', breach:'Пробитие (Булава)', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность (Не ломается)', mending:'Починка (от Скрепок)' };
 for(let k in ENCHANT_LIMITS) { if(enchants[k] === undefined) enchants[k] = 0; }
 
-// === КОНСТАНТЫ ИГРЫ ===
 const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
 const RANK_COLORS = ['#cd7f32', '#c0c0c0', '#ffd700', '#00ffff', '#8a2be2', '#ff00ff', '#ff4500', '#ff0000'];
 const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'mythic.mp3', 'legendary.mp3', 'masters.mp3', 'pro.mp3'];
 const RANKS_INFO = [{name: "Нет", color: "#fff"}, {name: "Барон", color: "#aaa"}, {name: "Страж", color: "#aaddaa"}, {name: "Герой", color: "#55ccff"}, {name: "Аспид", color: "#00ff00"}, {name: "Сквид", color: "#00ffff"}, {name: "Глава", color: "#ffa500"}, {name: "Элита", color: "#a020f0"}, {name: "Титан", color: "#ff4500"}, {name: "Принц", color: "#ffd700"}, {name: "Князь", color: "#ff00ff"}, {name: "ГЕРЦОГ", color: "#fff"} ];
 const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_diamond": "Алмаз 💎", "ingot_iron": "Слиток железа 🪙", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈" };
 
-// === ПЕРЕМЕННЫЕ КАРТЫ И БОЁВКИ ===
-let canvas = document.getElementById('rtp-canvas');
-let ctx = canvas ? canvas.getContext('2d') : null;
+let canvas = null;
+let ctx = null;
 let online_players = {}, joyX = 0, joyY = 0, isJoyActive = false;
 let is_on_ore = null, current_stash_id = null, world_drops = {};
 let my_cur_hp = 20, in_combat = false, combat_timer = 0, combat_interval = null;
 let combo_count = 0, last_combat_hit_time = 0, sword_hits = 0;
 let is_stunned = false, current_target = null, last_heal_time = 0;
 
-// === РАНКЕД ПЕРЕМЕННЫЕ ===
 let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_target_max = 100, arena_mode = 1; 
 let arena_dots_left = 3, click_times = [], arena_locked_until = 0, last_hit_time = 0; 
 let is_game_over = false, tug_score = 50, swipe_dir = '', startX=0, startY=0; 
@@ -96,7 +88,6 @@ let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
 
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
-// === ЗАПУСК ИГРЫ ===
 if (!nickname || !my_pin) { 
     let modal = document.getElementById('auth-modal');
     if (modal) modal.style.display = 'flex'; 
@@ -104,6 +95,7 @@ if (!nickname || !my_pin) {
     check_admin(); sync_cloud(); render_inventory(); update_rtp_ui(); init_map(); 
     my_cur_hp = get_pvp_stats().max_hp;
     setup_dmg_listener();
+    if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
 }
 
 function check_admin() { try { let cn = document.getElementById('current-nick'); if(cn) cn.innerText = 'текущий ник: ' + nickname; if(nickname && nickname.toLowerCase() === 'conexion') { let ap = document.getElementById('admin-panel'); if(ap) ap.style.display = 'block'; } let ts = document.getElementById('title-select'); if(ts) ts.value = my_title; } catch(e){} }
@@ -124,6 +116,7 @@ window.auth_player = async function() {
         let am = document.getElementById('auth-modal'); if(am) am.style.display = 'none'; 
         save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui(); init_map();
         my_cur_hp = get_pvp_stats().max_hp; setup_dmg_listener();
+        if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
     } catch(e) { let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'вход / регистрация'; alert('Ошибка сети!'); } 
 };
 
@@ -379,9 +372,11 @@ window.hide_all_armor = async function() { let snap = await database.ref('stashe
 window.take_all_armor = async function() { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; let sinv = JSON.parse(data.inv||"{}"); let moved = 0; const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; gear.forEach(g => { if(sinv[g]>0) { inv[g] = (inv[g]||0)+sinv[g]; moved+=sinv[g]; sinv[g]=0; } }); if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); alert(`Взято вещей: ${moved}`); } else alert("Нет вещей в стэше!"); }
 window.use_locator = async function() { if(vrgk < 50000) return alert("Локатор стоит 50 000 воргиков!"); vrgk -= 50000; upd_ui(); save_data(); let snap = await database.ref('stashes').once('value'); let all_st = snap.val(); let found = null; for(let id in all_st) { let s = all_st[id]; if(s.owner !== nickname && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } if(found) { if(confirm("ЛОКАТОР НАШЁЛ ЧУЖОЙ ТАЙНИК РЯДОМ!\nВзломать его и забрать все вещи?")) { let s_data = all_st[found]; let sinv = JSON.parse(s_data.inv||"{}"); if(s_data.skrepki > 0) { skrepki += s_data.skrepki; } for(let k in sinv) { inv[k] = (inv[k]||0) + sinv[k]; } await database.ref('stashes/' + found).remove(); save_data(); upd_ui(); render_inventory(); alert(`✅ ТАЙНИК УСПЕШНО ОГРАБЛЕН!\nВсе вещи и ${s_data.skrepki||0} скрепок перенесены в твой рюкзак.`); } } else { alert("В радиусе 500 блоков нет чужих тайников. Сделай /RTP и попробуй снова."); } }
 
-// === CANVAS И КАРТА ЛОГИКА ===
 function init_map() {
     try {
+        canvas = document.getElementById('rtp-canvas');
+        ctx = canvas ? canvas.getContext('2d') : null;
+        
         inject_enchant_button();
         let wrap = document.getElementById('map-wrapper'); if(!wrap || !canvas) return;
         canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight;
@@ -486,11 +481,12 @@ function setup_dmg_listener() {
     if(!nickname) return;
     database.ref('world_players/' + nickname + '/dmg_queue').on('child_added', snap => { let data = snap.val(); snap.ref.remove(); process_incoming_damage(data); });
     database.ref('world_drops').on('value', snap => { world_drops = snap.val() || {}; });
+    database.ref('world_players').on('value', snap => { online_players = snap.val() || {}; });
 }
 
 window.map_attack = function() {
     if(is_stunned) return;
-    if(Math.abs(loc_x) <= 100 && Math.abs(loc_z) <= 100) return alert("Мирная Зона!");
+    if(Math.abs(loc_x) <= 100 && Math.abs(loc_z) <= 100) return;
 
     let closest = null; let min_d = 45;
     for (let key in online_players) {
@@ -625,7 +621,6 @@ function pickup_drop(id) {
     }
 }
 
-// === УПРАВЛЕНИЕ ВКЛАДКАМИ И ОСТАЛЬНОЕ ===
 window.sw_tab = function(tabid, el) { 
     if (in_combat && tabid !== 'anarchy') return alert("Внимание! Ты в бою! Нельзя переключать вкладки!");
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
