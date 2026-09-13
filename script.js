@@ -51,13 +51,14 @@ let my_friends = safeParse('friends', []);
 let inv = safeParse('inv', {});
 let enchants = safeParse('enchants', {});
 let mined_ores = safeParse('mined_ores', {});
+let my_homes = safeParse('homes', {});
 
 let donate_rank = parseInt(localStorage.getItem(PREFIX + 'donate_rank')) || 0, donate_until = parseInt(localStorage.getItem(PREFIX + 'donate_until')) || 0;
 let last_kit_time = parseInt(localStorage.getItem(PREFIX + 'last_kit_v2')) || 0;
 let loc_x = parseInt(localStorage.getItem(PREFIX + 'loc_x')) || 0, loc_z = parseInt(localStorage.getItem(PREFIX + 'loc_z')) || 0;
 let weapon_dur = parseInt(localStorage.getItem(PREFIX + 'w_dur')); if (isNaN(weapon_dur)) weapon_dur = 1000;
 let armor_dur = parseInt(localStorage.getItem(PREFIX + 'a_dur')); if (isNaN(armor_dur)) armor_dur = 1000;
-let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now(), last_sync = 0, last_stash_check = 0;
+let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now(), last_sync = 0, last_stash_check = 0, last_pearl_time = 0;
 let global_event_data = null, cached_last_winner = "", cached_players = {}, cached_clubs = {};
 
 window.current_top_tab = 'players'; window.current_tab = 'mine';
@@ -173,6 +174,7 @@ function save_data() {
         localStorage.setItem(PREFIX+'tap_price', tap_price); localStorage.setItem(PREFIX+'tap_lvl', tap_lvl); localStorage.setItem(PREFIX+'eng_price', eng_price); localStorage.setItem(PREFIX+'eng_lvl', eng_lvl); localStorage.setItem(PREFIX+'regen_price', regen_price); 
         localStorage.setItem(PREFIX+'c1_price', c1_price); localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); localStorage.setItem(PREFIX+'c2_price', c2_price); localStorage.setItem(PREFIX+'c2_lvl', c2_lvl); localStorage.setItem(PREFIX+'c3_price', c3_price); localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); localStorage.setItem(PREFIX+'c4_price', c4_price); localStorage.setItem(PREFIX+'c4_lvl', c4_lvl); localStorage.setItem(PREFIX+'c5_price', c5_price); localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); localStorage.setItem(PREFIX+'c6_price', c6_price); localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); localStorage.setItem(PREFIX+'c7_price', c7_price); localStorage.setItem(PREFIX+'c7_lvl', c7_lvl); localStorage.setItem(PREFIX+'c8_price', c8_price); localStorage.setItem(PREFIX+'c8_lvl', c8_lvl); localStorage.setItem(PREFIX+'c9_price', c9_price); localStorage.setItem(PREFIX+'c9_lvl', c9_lvl); localStorage.setItem(PREFIX+'c10_price', c10_price); localStorage.setItem(PREFIX+'c10_lvl', c10_lvl); localStorage.setItem(PREFIX+'c11_price', c11_price); localStorage.setItem(PREFIX+'c11_lvl', c11_lvl); localStorage.setItem(PREFIX+'c12_price', c12_price); localStorage.setItem(PREFIX+'c12_lvl', c12_lvl); localStorage.setItem(PREFIX+'c13_price', c13_price); localStorage.setItem(PREFIX+'c13_lvl', c13_lvl); 
         localStorage.setItem(PREFIX+'tot_taps', total_taps); localStorage.setItem(PREFIX+'r_wins', r_wins); localStorage.setItem(PREFIX+'r_loss', r_loss); localStorage.setItem(PREFIX+'r_streak', r_streak); localStorage.setItem(PREFIX+'title', my_title); 
+        localStorage.setItem(PREFIX+'homes', JSON.stringify(my_homes || {}));
     } catch(e) {}
 }
 
@@ -186,6 +188,7 @@ function apply_cloud_data(p) {
         try { enchants = JSON.parse(p.enchants); } catch(e) { enchants = {}; }
         for(let k in ENCHANT_LIMITS) if(enchants[k]===undefined) enchants[k]=0; 
     }
+    if(p.homes) { try { my_homes = JSON.parse(p.homes); } catch(e) { my_homes = {}; } }
     if(p.stats) { 
         let s = p.stats; profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3; 
         tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; regen_price = parseInt(s[8]) || 5000; 
@@ -369,6 +372,69 @@ window.do_rtp = function() {
     if (in_combat) return alert("В бою нельзя использовать RTP!"); 
     loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; 
     save_data(); update_rtp_ui(); sync_my_pos(); 
+}
+
+window.tp_spawn = function() {
+    if (in_combat) return alert("В бою нельзя телепортироваться на спавн!");
+    loc_x = 0; loc_z = 0;
+    save_data(); update_rtp_ui(); sync_my_pos();
+    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП НА СПАВН");
+}
+
+window.open_homes_modal = function() {
+    let max_homes = 1 + donate_rank;
+    let hl = document.getElementById('homes-limit');
+    if(hl) hl.innerText = Object.keys(my_homes).length + " / " + max_homes;
+    
+    let list = document.getElementById('homes-list');
+    if(list) {
+        let html = '';
+        for(let k in my_homes) {
+            let h = my_homes[k];
+            html += `<div class="upgrade-item" style="flex-direction:row; align-items:center;">
+                <div class="upgrade-info" style="flex:1;">
+                    <span class="upgrade-name">${h.name}</span>
+                    <span class="upgrade-desc" style="font-size:10px;">X: ${Math.floor(h.x)} Z: ${Math.floor(h.z)}</span>
+                </div>
+                <button class="buy-btn blue" style="padding:5px 10px; margin-right:5px; font-size:10px;" onclick="tp_home('${k}')">ТП</button>
+                <button class="buy-btn red" style="padding:5px 10px; font-size:10px;" onclick="delete_home('${k}')">УДАЛИТЬ</button>
+            </div>`;
+        }
+        if(html === '') html = '<div style="text-align:center; color:#555; font-size:12px; padding:10px;">У тебя пока нет домов</div>';
+        list.innerHTML = html;
+    }
+    document.getElementById('homes-modal').style.display = 'flex';
+}
+
+window.set_home = function() {
+    let max_homes = 1 + donate_rank;
+    if(Object.keys(my_homes).length >= max_homes) return alert("Достигнут лимит сетхомов! Удали старый или повысь донат.");
+    
+    let id = 'home_' + Date.now();
+    let def_name = "Дом " + (Object.keys(my_homes).length + 1);
+    let name = prompt("Название дома:", def_name);
+    if(name === null) return;
+    if(name.trim() === '') name = def_name;
+    
+    my_homes[id] = { name: name, x: loc_x, z: loc_z };
+    save_data(); sync_cloud(); open_homes_modal();
+}
+
+window.tp_home = function(id) {
+    if(in_combat) return alert("В бою нельзя телепортироваться домой!");
+    let h = my_homes[id];
+    if(!h) return;
+    loc_x = h.x; loc_z = h.z;
+    save_data(); update_rtp_ui(); sync_my_pos();
+    document.getElementById('homes-modal').style.display = 'none';
+    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП ДОМОЙ");
+}
+
+window.delete_home = function(id) {
+    if(confirm("Точно удалить этот сетхом?")) {
+        delete my_homes[id];
+        save_data(); sync_cloud(); open_homes_modal();
+    }
 }
 
 window.place_stash = async function() { if(vrgk < 100000) return alert("Нужно 100 000 воргиков для создания стэша!"); let s_id = nickname + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); if(snap.exists()) return alert("Тут уже есть тайник!"); vrgk -= 100000; upd_ui(); save_data(); await database.ref('stashes/' + s_id).set({ owner: nickname, x: loc_x, z: loc_z, inv: "{}", skrepki: 0 }); alert("Тайник установлен!"); check_local_stashes(); }
@@ -842,6 +908,35 @@ window.map_heal = function() {
     spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, `+${heal_amt} HP`); save_data(); sync_my_pos(); render_inventory();
 }
 
+window.map_pearl = function() {
+    if((inv['pearl']||0) <= 0) return alert("Нет эндер-пёрлов!");
+    let now = Date.now();
+    if(now - last_pearl_time < 5000) return alert("КД на пёрл! Подожди.");
+    
+    let dx = 0; let dy = 0; let dist = 150;
+    
+    if (joyX !== 0 || joyY !== 0) {
+        let mag = Math.sqrt(joyX*joyX + joyY*joyY);
+        dx = (joyX / mag) * dist; dy = (joyY / mag) * dist;
+    } else if (current_target && online_players[current_target]) {
+        let p = online_players[current_target];
+        let pdx = p.x - loc_x; let pdz = p.z - loc_z;
+        let pmag = Math.hypot(pdx, pdz);
+        if(pmag > 0) { dx = (pdx/pmag)*dist; dy = (pdz/pmag)*dist; }
+    } else {
+        return alert("Потяни джойстик в сторону броска!");
+    }
+
+    last_pearl_time = now;
+    inv['pearl']--;
+    loc_x += dx; loc_z += dy;
+    my_cur_hp -= 3;
+    if(my_cur_hp <= 0.5) my_cur_hp = 0.5;
+    
+    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🔮 ПУУНЬЬ!");
+    save_data(); sync_my_pos(); render_inventory(); update_rtp_ui();
+}
+
 window.pvp_swap_offhand = function() {
     let options = []; for(let key in inv) { if(inv[key] > 0 && (key.startsWith('sphere') || key.startsWith('talisman')) && key !== inv['active_offhand']) options.push(key); }
     if(options.length === 0) return; 
@@ -947,7 +1042,7 @@ async function sync_cloud(is_bg = false) {
         let wipeSnapHard = await Promise.race([database.ref('force_wipe_time').once('value'), timeoutPromise]);
         let wipe_time_hard = wipeSnapHard.val() || 0; let local_wipe = parseInt(localStorage.getItem(PREFIX + 'wipe_time')) || 0;
         if (wipe_time_hard > local_wipe) { let mySnap = await database.ref('players/' + nickname).once('value'); let p = mySnap.val(); if (p) { player_rank = p.rank || 0; if (p.stats) { profit = p.stats[0] || profit; max_rank = p.stats[23] || 0; } localStorage.setItem(PREFIX + 'wipe_time', wipe_time_hard); save_data(); upd_ui(); } }
-        let p_data = { pin: my_pin, vrgk: Math.floor(vrgk), skrepki: skrepki, rank: player_rank, last_seen: Date.now(), donate_rank: donate_rank, donate_until: donate_until, inventory: JSON.stringify(inv || {}), last_kit_v2: last_kit_time, enchants: JSON.stringify(enchants || {}), stats: [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank, my_color, og_pro, c8_price, c9_price, c10_price, c11_price, c12_price, c13_price, c8_lvl, c9_lvl, c10_lvl, c11_lvl, c12_lvl, c13_lvl, total_taps, r_wins, r_loss, r_streak, my_title, streak_days, q_taps, q_wins, q_msgs, q_date, q_claimed ? 1 : 0, streak_last] };
+        let p_data = { pin: my_pin, vrgk: Math.floor(vrgk), skrepki: skrepki, rank: player_rank, last_seen: Date.now(), donate_rank: donate_rank, donate_until: donate_until, inventory: JSON.stringify(inv || {}), homes: JSON.stringify(my_homes || {}), last_kit_v2: last_kit_time, enchants: JSON.stringify(enchants || {}), stats: [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank, my_color, og_pro, c8_price, c9_price, c10_price, c11_price, c12_price, c13_price, c8_lvl, c9_lvl, c10_lvl, c11_lvl, c12_lvl, c13_lvl, total_taps, r_wins, r_loss, r_streak, my_title, streak_days, q_taps, q_wins, q_msgs, q_date, q_claimed ? 1 : 0, streak_last] };
         let my_c = localStorage.getItem(PREFIX + 'club'); if (my_c) p_data.club = my_c; 
         await Promise.race([database.ref('players/' + nickname).update(p_data), timeoutPromise]);
         if(!is_bg) { let snap = await Promise.race([database.ref().once('value'), timeoutPromise]); let d = snap.val() || {}; cached_players = d.players || {}; cached_clubs = d.clubs || {}; global_event_data = d.global_event || null; cached_last_winner = d.last_winner || ""; render_leaderboard(); render_clubs_list(); } 
