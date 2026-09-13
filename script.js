@@ -360,7 +360,7 @@ function inject_enchant_button() {
 }
 
 window.open_craft_modal = function() { let u1=document.getElementById('ui-ore-iron'); if(u1)u1.innerText = inv['ore_iron'] || 0; let u2=document.getElementById('ui-ingot-iron'); if(u2)u2.innerText = inv['ingot_iron'] || 0; let u3=document.getElementById('ui-gem-diamond'); if(u3)u3.innerText = inv['ore_diamond'] || 0; let cm=document.getElementById('craft-modal'); if(cm)cm.style.display = 'flex'; }
-window.mine_ore = function() { if(is_on_ore) { if(navigator.vibrate) navigator.vibrate(50); if(is_on_ore === 'diamond') { inv['ore_diamond'] = (inv['ore_diamond']||0)+1; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Алмаз"); } if(is_on_ore === 'iron') { inv['ore_iron'] = (inv['ore_iron']||0)+1; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Железная руда"); } let myGridX = Math.floor(loc_x/100); let myGridZ = Math.floor(loc_z/100); mined_ores[myGridX + '_' + myGridZ] = true; is_on_ore = null; let mb = document.getElementById('mine-btn'); if(mb) mb.style.display = 'none'; save_data(); render_inventory(); } }
+window.mine_ore = function() { if(is_on_ore) { if(navigator.vibrate) navigator.vibrate(50); if(is_on_ore === 'diamond') { inv['ore_diamond'] = (inv['ore_diamond']||0)+1; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Алмаз"); } if(is_on_ore === 'iron') { inv['ore_iron'] = (inv['ore_iron']||0)+1; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Железная руда"); } mined_ores[window.cur_ore_x + '_' + window.cur_ore_z] = true; is_on_ore = null; let mb = document.getElementById('mine-btn'); if(mb) mb.style.display = 'none'; save_data(); render_inventory(); } }
 window.smelt = function(type) { if(type === 'iron') { if((inv['ore_iron']||0) >= 1) { inv['ore_iron']--; inv['ingot_iron'] = (inv['ingot_iron']||0)+1; save_data(); open_craft_modal(); } else alert("Нет железной руды!"); } }
 window.craft_item = function(res_item, cost) { let is_diamond = res_item.includes('diamond'); let req_mat = is_diamond ? 'ore_diamond' : 'ingot_iron'; if((inv[req_mat]||0) >= cost) { inv[req_mat] -= cost; inv[res_item] = (inv[res_item]||0)+1; save_data(); open_craft_modal(); alert("Успешный крафт!"); } else alert(`Нужно ${cost} ${is_diamond ? 'Алмазов' : 'Слитков железа'}!`); }
 
@@ -511,21 +511,9 @@ function init_map() {
 
 function get_best_armor() { if(!inv) return 'none'; if(inv['armor_netherite'] > 0) return 'netherite'; if(inv['armor_diamond'] > 0) return 'diamond'; if(inv['armor_iron'] > 0) return 'iron'; if(inv['armor_leather'] > 0) return 'leather'; return 'none'; }
 function get_best_weapon() { if(!inv) return 'none'; if(inv['mace'] > 0) return 'mace'; if(inv['sword_netherite'] > 0) return 'sword_netherite'; if(inv['sword_diamond'] > 0) return 'sword_diamond'; if(inv['sword_iron'] > 0) return 'sword_iron'; return 'none'; }
-function get_armor_color(type) { if(type === 'netherite') return '#3b3638'; if(type === 'diamond') return '#23b4b8'; if(type === 'iron') return '#e5e5e5'; if(type === 'leather') return '#a65d2b'; return '#4169E1'; }
-
-function get_offhand_color(id) {
-    if(!id) return 'transparent';
-    if(id.includes('titan')) return '#a0f'; if(id.includes('chaos')) return '#f0f'; if(id.includes('satyr')) return '#0f8'; if(id.includes('bestia')) return '#0f0'; if(id.includes('ares')) return '#f00'; if(id.includes('hydra')) return '#00f'; if(id.includes('icarus')) return '#f0a'; if(id.includes('erida')) return '#fd0'; if(id.includes('crusher')) return '#f55'; if(id.includes('punisher')) return '#a5f'; if(id.includes('discord')) return '#ff0'; if(id.includes('tyrant')) return '#aaa'; if(id.includes('rage')) return '#f22'; if(id.includes('vortex')) return '#fff'; if(id.includes('darkness')) return '#333'; if(id.includes('demon')) return '#c00'; return '#fff';
-}
-
-function get_weapon_color(type) {
-    if(type === 'mace') return {c:'#444', l:14, m:true};
-    if(type === 'sword_netherite') return {c:'#303', l:16, m:false};
-    if(type === 'sword_diamond') return {c:'#0ff', l:16, m:false};
-    if(type === 'sword_iron') return {c:'#ccc', l:16, m:false};
-    return null;
-}
-
+function get_armor_color(type) { if(type === 'netherite') return '#2a2527'; if(type === 'diamond') return '#2bf'; if(type === 'iron') return '#ddd'; if(type === 'leather') return '#963'; return '#fff'; }
+function get_weapon_color(type) { if(type === 'mace') return {c:'#444', l:14, m:true}; if(type === 'sword_netherite') return {c:'#303', l:16, m:false}; if(type === 'sword_diamond') return {c:'#2bf', l:16, m:false}; if(type === 'sword_iron') return {c:'#ddd', l:16, m:false}; return null; }
+function get_offhand_color(id) { if(!id) return 'transparent'; if(id.includes('titan')) return '#a0f'; if(id.includes('chaos')) return '#f0f'; if(id.includes('satyr')) return '#0f8'; if(id.includes('bestia')) return '#0f0'; if(id.includes('ares')) return '#f00'; if(id.includes('hydra')) return '#00f'; if(id.includes('icarus')) return '#f0a'; if(id.includes('erida')) return '#fd0'; if(id.includes('crusher')) return '#f55'; if(id.includes('punisher')) return '#a5f'; if(id.includes('discord')) return '#ff0'; if(id.includes('tyrant')) return '#aaa'; if(id.includes('rage')) return '#f22'; if(id.includes('vortex')) return '#fff'; if(id.includes('darkness')) return '#333'; if(id.includes('demon')) return '#c00'; return '#fff'; }
 function get_ore_at(x, z) { let gridX = Math.floor(x/100); let gridZ = Math.floor(z/100); if(mined_ores[gridX + '_' + gridZ]) return null; let noise = Math.sin(gridX * 12.9898 + gridZ * 78.233) * 43758.5453; noise = noise - Math.floor(noise); if(noise > 0.95) return 'diamond'; if(noise > 0.80) return 'iron'; return null; }
 
 function sync_my_pos() { 
@@ -536,34 +524,74 @@ function sync_my_pos() {
 function draw_entity(px, py, d, is_me, n) {
     let is_safe = Math.abs(d.x) <= 100 && Math.abs(d.z) <= 100;
     let arm = get_armor_color(d.armor);
-    ctx.fillStyle = is_safe ? 'rgba(0,255,0,0.2)' : 'rgba(0,0,0,0.4)';
-    ctx.beginPath(); ctx.ellipse(px, py + 10, 14, 6, 0, 0, Math.PI*2); ctx.fill();
+    if(d.armor === 'none') arm = '#55f'; 
 
-    ctx.fillStyle = arm; ctx.fillRect(px - 7, py - 5, 14, 8);
-    ctx.fillStyle = '#fdb'; ctx.fillRect(px - 4, py - 6, 8, 8);
-    if(d.armor !== 'none') { ctx.fillStyle = arm; ctx.fillRect(px - 5, py - 7, 10, 4); }
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Arial';
+    ctx.textAlign = 'center';
+    let ehp = Math.max(0, d.hp || 20).toFixed(1);
+    if(ehp.endsWith('.0')) ehp = Math.floor(ehp);
+    ctx.fillText(ehp + ' HP', px, py - 32);
+
+    let tw = ctx.measureText(n).width;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(px - tw/2 - 4, py - 28, tw + 8, 14);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px - tw/2 - 4, py - 28, tw + 8, 14);
+    ctx.fillStyle = '#000';
+    ctx.fillText(n, px, py - 17);
+
+    if(is_safe) {
+        ctx.fillStyle = 'rgba(0,255,0,0.1)';
+        ctx.beginPath(); ctx.arc(px, py+5, 20, 0, Math.PI*2); ctx.fill();
+    }
+
+    ctx.fillStyle = arm;
+    ctx.fillRect(px - 8, py + 10, 16, 12);
+
+    ctx.fillStyle = '#f5c6a5';
+    ctx.fillRect(px - 10, py - 10, 20, 20);
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(px - 6, py - 4, 4, 4);
+    ctx.fillRect(px + 2, py - 4, 4, 4);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(px - 5, py - 3, 2, 2);
+    ctx.fillRect(px + 3, py - 3, 2, 2);
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(px - 4, py + 4, 8, 2);
+
+    if(d.armor !== 'none') {
+        ctx.fillStyle = arm;
+        ctx.fillRect(px - 11, py - 11, 22, 9); 
+        ctx.fillRect(px - 11, py - 2, 4, 7);  
+        ctx.fillRect(px + 7, py - 2, 4, 7);   
+    }
 
     let w = get_weapon_color(d.wp);
     if(w) {
-        ctx.save(); ctx.translate(px + 7, py);
+        ctx.save();
+        ctx.translate(px + 14, py + 10); 
         let a_time = is_me ? (Date.now() - last_combat_hit_time) : 1000;
-        if (a_time < 150) ctx.rotate(Math.PI/3); else if (a_time < 300) ctx.rotate(-Math.PI/6);
-        if(w.m) { ctx.fillStyle='#522'; ctx.fillRect(0, -1, 10, 2); ctx.fillStyle=w.c; ctx.fillRect(8, -4, 8, 8); } 
-        else { ctx.fillStyle=w.c; ctx.fillRect(0, -1, w.l, 2); ctx.fillStyle='#555'; ctx.fillRect(2, -3, 2, 6); }
+        if (a_time < 150) ctx.rotate(-Math.PI/2); else ctx.rotate(-Math.PI/4);
+        
+        if(w.m) { 
+            ctx.fillStyle='#522'; ctx.fillRect(-2, -10, 4, 10); 
+            ctx.fillStyle=w.c; ctx.fillRect(-6, -18, 12, 8); 
+        } else { 
+            ctx.fillStyle='#522'; ctx.fillRect(-1, -4, 2, 6); 
+            ctx.fillStyle='#555'; ctx.fillRect(-4, -6, 8, 2); 
+            ctx.fillStyle=w.c; ctx.fillRect(-2, -6 - w.l, 4, w.l); 
+        }
         ctx.restore();
     }
 
     if (d.offhand) {
         ctx.fillStyle = get_offhand_color(d.offhand);
-        ctx.beginPath(); ctx.arc(px - 8, py + 2, 4, 0, Math.PI*2); ctx.fill();
-    }
-
-    if(!is_me) {
-        ctx.fillStyle = (current_target === n) ? '#f55' : '#fff'; 
-        ctx.font = '10px Arial'; ctx.textAlign = 'center'; ctx.fillText(n, px, py - 14);
-        let ehp = Math.max(0, d.hp || 20); let emhp = d.max_hp || 20;
-        ctx.fillStyle = '#f00'; ctx.fillRect(px - 10, py + 13, 20, 3);
-        ctx.fillStyle = '#0f0'; ctx.fillRect(px - 10, py + 13, 20*(ehp/emhp), 3);
+        ctx.beginPath(); ctx.arc(px - 14, py + 12, 5, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke();
     }
 }
 
@@ -584,8 +612,10 @@ function draw_map() {
     if(isJoyActive && !is_stunned) { loc_x += joyX * 4; loc_z += joyY * 4; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } }
     
     ctx.fillStyle = '#26381b'; ctx.fillRect(0,0, canvas.width, canvas.height); 
-    let cx = canvas.width/2; let cy = canvas.height/2; is_on_ore = null;
-    
+    let cx = canvas.width/2; let cy = canvas.height/2; 
+    let found_ore = null; let found_gx = 0; let found_gz = 0;
+    let myGridX = Math.floor(loc_x/100); let myGridZ = Math.floor(loc_z/100);
+
     ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1; ctx.beginPath();
     let offX = (cx - loc_x) % 50; let offZ = (cy - loc_z) % 50;
     for(let i=-50; i<canvas.width+50; i+=50) { ctx.moveTo(i+offX, 0); ctx.lineTo(i+offX, canvas.height); }
@@ -598,17 +628,23 @@ function draw_map() {
 
     for(let i = -6; i <= 6; i++) { 
         for(let j = -6; j <= 6; j++) { 
-            let gx = Math.floor(loc_x/100) + i; let gz = Math.floor(loc_z/100) + j; 
+            let gx = myGridX + i; let gz = myGridZ + j; 
             let ore = get_ore_at(gx*100, gz*100); 
             if(ore) { 
                 let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); 
                 ctx.fillStyle = '#444'; ctx.fillRect(screenX-12, screenY-12, 24, 24);
                 ctx.fillStyle = ore === 'diamond' ? '#0ff' : '#f5deb3'; 
                 ctx.fillRect(screenX-8, screenY-8, 6, 6); ctx.fillRect(screenX+4, screenY-4, 4, 4); ctx.fillRect(screenX-4, screenY+4, 6, 6);
-                if(Math.abs(gx*100 - loc_x) < 20 && Math.abs(gz*100 - loc_z) < 20) is_on_ore = ore; 
+                if(Math.abs(gx*100 - loc_x) < 20 && Math.abs(gz*100 - loc_z) < 20) {
+                    found_ore = ore; found_gx = gx; found_gz = gz;
+                } 
             } 
         } 
     }
+    is_on_ore = found_ore;
+    window.cur_ore_x = found_gx;
+    window.cur_ore_z = found_gz;
+    
     let btn = document.getElementById('mine-btn'); if(btn) { if(is_on_ore) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; } }
     
     for(let d_id in world_drops) {
@@ -635,10 +671,7 @@ function draw_map() {
         } 
     }
     
-    draw_entity(cx, cy, {x:loc_x, z:loc_z, armor:get_best_armor(), wp:get_best_weapon(), offhand:inv['active_offhand']}, true, nickname);
-
-    ctx.fillStyle = '#000'; ctx.fillRect(cx - 15, cy + 16, 30, 3); ctx.fillStyle = '#0ff'; ctx.fillRect(cx - 15, cy + 16, 30 * (Math.max(0, weapon_dur)/1000), 3); 
-    ctx.fillStyle = '#000'; ctx.fillRect(cx - 15, cy + 20, 30, 3); ctx.fillStyle = '#aaa'; ctx.fillRect(cx - 15, cy + 20, 30 * (Math.max(0, armor_dur)/1000), 3); 
+    draw_entity(cx, cy, {x:loc_x, z:loc_z, armor:get_best_armor(), wp:get_best_weapon(), offhand:inv['active_offhand'], hp:my_cur_hp, max_hp:get_pvp_stats().max_hp}, true, nickname);
 
     update_target_hud();
     requestAnimationFrame(draw_map);
