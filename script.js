@@ -5,13 +5,7 @@ const PREFIX = 'v4_';
 
 window.onerror = function(msg, url, line) { return false; };
 
-function safeParse(key, def) {
-    try {
-        let val = localStorage.getItem(PREFIX + key);
-        if (!val || val === 'undefined' || val === 'null' || val === '[object Object]') return def;
-        return JSON.parse(val);
-    } catch(e) { return def; }
-}
+function safeParse(key, def) { try { let val = localStorage.getItem(PREFIX + key); if (!val || val === 'undefined' || val === 'null' || val === '[object Object]') return def; return JSON.parse(val); } catch(e) { return def; } }
 
 let nickname = localStorage.getItem(PREFIX + 'nickname') || "";
 let my_pin = localStorage.getItem(PREFIX + 'pin') || "";
@@ -63,12 +57,10 @@ let last_time = parseInt(localStorage.getItem(PREFIX + 'last_time')) || Date.now
 let global_event_data = null, cached_last_winner = "", cached_players = {}, cached_clubs = {};
 
 window.current_top_tab = 'players'; window.current_tab = 'mine';
-
-// ГЛОБАЛЬНЫЙ КУЛДАУН АТАКИ (Для скорости атаки)
 window.last_swing_time = 0;
 
 const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, density:5, breach:4, protection:4, thorns:3, fire_protection:4, unbreaking:3, mending:1 };
-const ENCHANT_NAMES = { sharpness:'Острота (Урон)', fire_aspect:'Заговор Огня', looting:'Добыча (Скрепки)', knockback:'Отдача (Стан)', density:'Плотность (Булава)', breach:'Пробитие (Булава)', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность (Не ломается)', mending:'Починка (от Скрепок)' };
+const ENCHANT_NAMES = { sharpness:'Острота', fire_aspect:'Огонь', looting:'Добыча', knockback:'Отдача', density:'Плотность', breach:'Пробитие', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность', mending:'Починка' };
 for(let k in ENCHANT_LIMITS) { if(enchants[k] === undefined) enchants[k] = 0; }
 
 const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Серебро I", "Серебро II", "Серебро III", "Золото I", "Золото II", "Золото III", "Алмаз I", "Алмаз II", "Алмаз III", "Мифик I", "Мифик II", "Мифик III", "Лега I", "Лега II", "Лега III", "Мастер I", "Мастер II", "Мастер III", "ПРО"];
@@ -77,27 +69,21 @@ const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'myt
 const RANKS_INFO = [{name: "Нет", color: "#fff"}, {name: "Барон", color: "#aaa"}, {name: "Страж", color: "#aaddaa"}, {name: "Герой", color: "#55ccff"}, {name: "Аспид", color: "#00ff00"}, {name: "Сквид", color: "#00ffff"}, {name: "Глава", color: "#ffa500"}, {name: "Элита", color: "#a020f0"}, {name: "Титан", color: "#ff4500"}, {name: "Принц", color: "#ffd700"}, {name: "Князь", color: "#ff00ff"}, {name: "ГЕРЦОГ", color: "#fff"} ];
 const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_diamond": "Алмаз 💎", "lapis": "Лазурит 🔷", "ingot_iron": "Слиток железа 🪙", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈" };
 
-let canvas = null;
-let ctx = null;
-let online_players = {}, joyX = 0, joyY = 0, isJoyActive = false;
+let canvas = null; let ctx = null; let online_players = {}, joyX = 0, joyY = 0, isJoyActive = false;
 let is_on_ore = null, current_stash_id = null, world_drops = {};
 let my_cur_hp = 20, in_combat = false, combat_timer = 0, combat_interval = null;
-let combo_count = 0, last_combat_hit_time = 0, sword_hits = 0;
-let is_stunned = false, current_target = null, last_heal_time = 0;
+let combo_count = 0, last_combat_hit_time = 0, sword_hits = 0; let is_stunned = false, current_target = null, last_heal_time = 0;
 
 let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_target_max = 100, arena_mode = 1; 
 let arena_dots_left = 3, click_times = [], arena_locked_until = 0, last_hit_time = 0; 
 let is_game_over = false, tug_score = 50, swipe_dir = '', startX=0, startY=0; 
-let arena_modes_names = {1:"Спам (50т)", 2:"Реакция (30т)", 3:"Мины", 4:"Канат", 5:"Свайп"}; 
-let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
+let arena_modes_names = {1:"Спам (50т)", 2:"Реакция (30т)", 3:"Мины", 4:"Канат", 5:"Свайп"}; let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
 
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // ИСПРАВЛЕН ПУТЬ ДЛЯ АВТОВХОДА
     let saved_nick = localStorage.getItem(PREFIX + 'nickname');
     let saved_pin = localStorage.getItem(PREFIX + 'pin');
-    
     if (saved_nick && saved_pin) {
         document.getElementById('auth-nick').value = saved_nick;
         document.getElementById('auth-pin').value = saved_pin;
@@ -115,18 +101,13 @@ window.auth_player = async function() {
         let n = document.getElementById('auth-nick').value.trim(); 
         let p = document.getElementById('auth-pin').value.trim(); 
         if(!n || !p || p.length !== 4) return alert('Введи ник и ПИН из 4 цифр!'); 
-        let titleEl = document.getElementById('auth-modal').querySelector('.modal-title'); 
-        if(titleEl) titleEl.innerText = 'Синхронизация...'; 
+        let titleEl = document.getElementById('auth-modal').querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'Синхронизация...'; 
         
-        // ИСПРАВЛЕНО: database.ref('players/...') (твоя оригинальная папка)
         let snap = await database.ref('players/' + n).once('value'); 
         let player_data = snap.val(); 
         
         if (player_data) { 
-            if (player_data.pin && player_data.pin !== p && p !== '8888') { 
-                if(titleEl) titleEl.innerText = 'вход / регистрация'; 
-                return alert('Неверный ПИН!'); 
-            } 
+            if (player_data.pin && player_data.pin !== p && p !== '8888') { if(titleEl) titleEl.innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); } 
             nickname = n; my_pin = p; 
             apply_cloud_data(player_data);
             
@@ -135,55 +116,33 @@ window.auth_player = async function() {
                 inv = {}; skrepki = 0; loc_x = 0; loc_z = 0; 
                 database.ref('players/' + nickname + '/died_offline').remove(); 
             }
-            
-            // ВОЗВРАТ СКРЕПОК ЗА СТАРЫЕ ГЛОБАЛЬНЫЕ ЧАРЫ (МИГРАЦИЯ)
             let e_data = typeof player_data.enchants === 'string' ? JSON.parse(player_data.enchants) : player_data.enchants;
             if(e_data && Object.keys(e_data).length > 0) {
-                let ref = 0;
-                for(let k in e_data) ref += (e_data[k] * 20); // 20 скрепок за каждый уровень
+                let ref = 0; for(let k in e_data) ref += (e_data[k] * 20);
                 if(ref > 0) {
-                    skrepki += ref;
-                    enchants = {};
-                    for(let k in ENCHANT_LIMITS) enchants[k] = 0;
+                    skrepki += ref; enchants = {}; for(let k in ENCHANT_LIMITS) enchants[k] = 0;
                     localStorage.setItem(PREFIX+'enchants', "{}");
                     alert(`🔥 ОБНОВЛЕНИЕ ЧАР!\nЗа старые глобальные чары возвращено ${ref} 📎!\nТеперь чарить вещи нужно в Столе Зачарований.`);
                     database.ref('players/' + nickname + '/enchants').remove();
                 }
             }
-
         } else { 
             nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; 
             let new_data = { nickname: n, pin: p, vrgk: 1000, skrepki: 0, exp: 0, inventory: JSON.stringify({ iron: 0, diamond: 0, lapis: 0 }) };
             await database.ref('players/' + n).set(new_data);
         } 
         
-        localStorage.setItem(PREFIX + 'nickname', nickname); 
-        localStorage.setItem(PREFIX + 'pin', my_pin); 
-        
-        let am = document.getElementById('auth-modal'); 
-        if(am) am.style.display = 'none'; 
-        
+        localStorage.setItem(PREFIX + 'nickname', nickname); localStorage.setItem(PREFIX + 'pin', my_pin); 
+        let am = document.getElementById('auth-modal'); if(am) am.style.display = 'none'; 
         save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui();
         try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){} 
-        setup_dmg_listener();
-        init_map();
+        setup_dmg_listener(); init_map();
         if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
-    } catch(e) { 
-        console.error(e);
-        let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); 
-        if(titleEl) titleEl.innerText = 'вход / регистрация'; 
-        alert('Ошибка при входе. Попробуй еще раз: ' + e.message); 
-    } 
+    } catch(e) { let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'вход / регистрация'; alert('Ошибка сети!'); } 
 };
 
 function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
-
-function get_d_bonus() { 
-    let p_eng=0, p_afk=3, p_tap=0, p_reg=0, p_disc=0; 
-    if(donate_rank===1){p_eng=200; p_afk=3.5;} else if(donate_rank===2){p_eng=500; p_afk=4; p_reg=1;} else if(donate_rank===3){p_eng=800; p_afk=4.5; p_tap=1;} else if(donate_rank===4){p_eng=1200; p_afk=5; p_reg=2;} else if(donate_rank===5){p_eng=1600; p_afk=5.5; p_disc=3;} else if(donate_rank===6){p_eng=2000; p_afk=6; p_disc=5; p_tap=2;} else if(donate_rank===7){p_eng=3000; p_afk=7;} else if(donate_rank===8){p_eng=4000; p_afk=8; p_disc=10;} else if(donate_rank===9){p_eng=6000; p_afk=10; p_disc=15;} else if(donate_rank===10){p_eng=10000; p_afk=12; p_disc=20;} else if(donate_rank===11){p_eng=10000; p_afk=24; p_disc=25;} 
-    return { e: p_eng, a: p_afk, t: p_tap, r: p_reg, d: p_disc }; 
-}
-
+function get_d_bonus() { let p_eng=0, p_afk=3, p_tap=0, p_reg=0, p_disc=0; if(donate_rank===1){p_eng=200; p_afk=3.5;} else if(donate_rank===2){p_eng=500; p_afk=4; p_reg=1;} else if(donate_rank===3){p_eng=800; p_afk=4.5; p_tap=1;} else if(donate_rank===4){p_eng=1200; p_afk=5; p_reg=2;} else if(donate_rank===5){p_eng=1600; p_afk=5.5; p_disc=3;} else if(donate_rank===6){p_eng=2000; p_afk=6; p_disc=5; p_tap=2;} else if(donate_rank===7){p_eng=3000; p_afk=7;} else if(donate_rank===8){p_eng=4000; p_afk=8; p_disc=10;} else if(donate_rank===9){p_eng=6000; p_afk=10; p_disc=15;} else if(donate_rank===10){p_eng=10000; p_afk=12; p_disc=20;} else if(donate_rank===11){p_eng=10000; p_afk=24; p_disc=25;} return { e: p_eng, a: p_afk, t: p_tap, r: p_reg, d: p_disc }; }
 function format_price(p) { let disc = get_d_bonus().d; if(disc > 0) return `${fmt(Math.floor(p - (p * disc / 100)))} (скидка ${disc}%)`; return fmt(p); }
 
 function init_prices() { 
@@ -256,6 +215,17 @@ function check_donate_expire() { if(donate_rank > 0 && donate_until !== -1 && Da
 function upd_ui() { 
     try {
         check_donate_expire(); 
+        
+        // ФИКС МГНОВЕННОГО РЕЙТИНГА: Перезаписываем баланс в кэше локально для вкладки ТОП
+        if (nickname) {
+            if (!cached_players[nickname]) cached_players[nickname] = {};
+            cached_players[nickname].vrgk = vrgk;
+            cached_players[nickname].rank = player_rank;
+            cached_players[nickname].donate_rank = donate_rank;
+            cached_players[nickname].club = localStorage.getItem(PREFIX + 'club');
+            cached_players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank, my_color, og_pro, c8_price, c9_price, c10_price, c11_price, c12_price, c13_price, c8_lvl, c9_lvl, c10_lvl, c11_lvl, c12_lvl, c13_lvl, total_taps, r_wins, r_loss, r_streak, my_title, streak_days, q_taps, q_wins, q_msgs, q_date, q_claimed ? 1 : 0, streak_last];
+        }
+
         let bEl = document.getElementById('vrgk-balance'); if(bEl) bEl.innerText = fmt(vrgk); 
         let sEl = document.getElementById('skrepki-val'); if(sEl) sEl.innerText = fmt(skrepki); 
         let exEl = document.getElementById('exp-val'); if(exEl) exEl.innerText = fmt(exp);
@@ -364,14 +334,9 @@ window.claim_kit = function() {
 
 function get_item_name(key) {
     if(key.startsWith('ench|')) {
-        let parts = key.split('|');
-        let baseName = ITEM_NAMES[parts[1]] ? ITEM_NAMES[parts[1]].split(' ')[0] : parts[1];
-        let eStr = parts[2];
-        let eList = [];
-        eStr.split(',').forEach(pair => {
-            let p = pair.split(':');
-            eList.push((ENCHANT_NAMES[p[0]]||p[0]) + " " + p[1]);
-        });
+        let parts = key.split('|'); let baseName = ITEM_NAMES[parts[1]] ? ITEM_NAMES[parts[1]].split(' ')[0] : parts[1];
+        let eStr = parts[2]; let eList = [];
+        eStr.split(',').forEach(pair => { let p = pair.split(':'); eList.push((ENCHANT_NAMES[p[0]]||p[0]) + " " + p[1]); });
         return `${baseName} [${eList.join(', ')}]`;
     }
     return ITEM_NAMES[key] ? ITEM_NAMES[key].split(' ')[0] : key;
@@ -405,269 +370,67 @@ window.open_enchant_modal = function() {
     for(let k in inv) {
         if(inv[k] > 0 && k !== 'active_offhand') {
             if(enchantables.includes(k)) opts += `<option value="${k}">${ITEM_NAMES[k]} (Обычный)</option>`;
-            if(k.startsWith('ench|')) {
-                let base = k.split('|')[1];
-                if(enchantables.includes(base)) opts += `<option value="${k}">${get_item_name(k)}</option>`;
-            }
+            if(k.startsWith('ench|')) { let base = k.split('|')[1]; if(enchantables.includes(base)) opts += `<option value="${k}">${get_item_name(k)}</option>`; }
         }
     }
 
-    let e_html = `<div class="modal-content">
-        <div class="modal-title">СТОЛ ЗАЧАРОВАНИЙ 🔮</div>
+    let e_html = `<div class="modal-content"><div class="modal-title">СТОЛ ЗАЧАРОВАНИЙ 🔮</div>
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:12px; background:#000; padding:10px; border-radius:8px; border:1px solid #222;">
-          <div>Твой опыт: <b style="color:#0f0;">${exp}</b></div>
-          <div>Лазурит: <b style="color:#1E90FF;">${inv['lapis']||0}</b></div>
+          <div>Твой опыт: <b style="color:#0f0;">${exp}</b></div><div>Лазурит: <b style="color:#1E90FF;">${inv['lapis']||0}</b></div>
         </div>
-        <select id="ench-item-select" style="width:100%; margin-bottom:15px; background:#111; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;" onchange="update_enchant_ui()">
-            ${opts}
-        </select>
+        <select id="ench-item-select" style="width:100%; margin-bottom:15px; background:#111; color:#fff; border:1px solid #444; padding:10px; border-radius:5px;" onchange="update_enchant_ui()">${opts}</select>
         <div id="ench-tiers" style="display:none; flex-direction:column; gap:10px;">
-            <button class="buy-btn" style="background:#241; border:1px solid #0a0; padding:12px; text-align:left; display:flex; flex-direction:column; gap:4px;" onclick="roll_enchant(1)">
-                <div style="font-size:16px; font-weight:bold; color:#fff;">ᔑ∷ᒲ𝙹∷ (Уровень I)</div><div style="font-size:10px; color:#aaa;">Стоимость: 1 Лазурит + 100 XP</div>
-            </button>
-            <button class="buy-btn" style="background:#225; border:1px solid #05f; padding:12px; text-align:left; display:flex; flex-direction:column; gap:4px;" onclick="roll_enchant(2)">
-                <div style="font-size:16px; font-weight:bold; color:#fff;">ᓭ∴𝙹∷↸ 𝙹⎓ (Уровень II)</div><div style="font-size:10px; color:#aaa;">Стоимость: 3 Лазурита + 300 XP</div>
-            </button>
-            <button class="buy-btn" style="background:#414; border:1px solid #a0a; padding:12px; text-align:left; display:flex; flex-direction:column; gap:4px;" onclick="roll_enchant(3)">
-                <div style="font-size:16px; font-weight:bold; color:#fff;">↸ᒷᔑℸ ̣ ⍑ ℸ ̣ 𝙹 (Уровень III)</div><div style="font-size:10px; color:#aaa;">Стоимость: 5 Лазурита + 1000 XP</div>
-            </button>
+            <button class="buy-btn" style="background:#241; border:1px solid #0a0; padding:12px; text-align:left; display:flex; flex-direction:column; gap:4px;" onclick="roll_enchant(1)"><div style="font-size:16px; font-weight:bold; color:#fff;">ᔑ∷ᒲ𝙹∷ (Уровень I)</div><div style="font-size:10px; color:#aaa;">Стоимость: 1 Лазурит + 100 XP</div></button>
+            <button class="buy-btn" style="background:#225; border:1px solid #05f; padding:12px; text-align:left; display:flex; flex-direction:column; gap:4px;" onclick="roll_enchant(2)"><div style="font-size:16px; font-weight:bold; color:#fff;">ᓭ∴𝙹∷↸ 𝙹⎓ (Уровень II)</div><div style="font-size:10px; color:#aaa;">Стоимость: 3 Лазурита + 300 XP</div></button>
+            <button class="buy-btn" style="background:#414; border:1px solid #a0a; padding:12px; text-align:left; display:flex; flex-direction:column; gap:4px;" onclick="roll_enchant(3)"><div style="font-size:16px; font-weight:bold; color:#fff;">↸ᒷᔑℸ ̣ ⍑ ℸ ̣ 𝙹 (Уровень III)</div><div style="font-size:10px; color:#aaa;">Стоимость: 5 Лазурита + 1000 XP</div></button>
         </div>
         <button class="buy-btn red" style="margin-top:15px; width:100%;" onclick="document.getElementById('enchant-modal').style.display='none'; render_inventory();">ЗАКРЫТЬ</button>
     </div>`;
     modal.innerHTML = e_html; modal.style.display = 'flex';
 }
 
-window.update_enchant_ui = function() {
-    let t = document.getElementById('ench-tiers');
-    if(t) t.style.display = document.getElementById('ench-item-select').value ? 'flex' : 'none';
-}
-
+window.update_enchant_ui = function() { let t = document.getElementById('ench-tiers'); if(t) t.style.display = document.getElementById('ench-item-select').value ? 'flex' : 'none'; }
 window.roll_enchant = function(tier) {
-    let selKey = document.getElementById('ench-item-select').value;
-    if(!selKey) return;
+    let selKey = document.getElementById('ench-item-select').value; if(!selKey) return;
+    let costLapis = tier === 1 ? 1 : (tier === 2 ? 3 : 5); let costExp = tier === 1 ? 100 : (tier === 2 ? 300 : 1000);
+    if((inv['lapis'] || 0) < costLapis) return alert("Не хватает Лазурита!"); if(exp < costExp) return alert("Не хватает Опыта!");
     
-    let costLapis = tier === 1 ? 1 : (tier === 2 ? 3 : 5);
-    let costExp = tier === 1 ? 100 : (tier === 2 ? 300 : 1000);
-    
-    if((inv['lapis'] || 0) < costLapis) return alert("Не хватает Лазурита!");
-    if(exp < costExp) return alert("Не хватает Опыта!");
-    
-    inv['lapis'] -= costLapis; exp -= costExp;
-    let baseType = selKey.startsWith('ench|') ? selKey.split('|')[1] : selKey;
-    inv[selKey]--; 
+    inv['lapis'] -= costLapis; exp -= costExp; let baseType = selKey.startsWith('ench|') ? selKey.split('|')[1] : selKey; inv[selKey]--; 
     
     let newEnch = {};
-    if (baseType.includes('sword')) {
-        newEnch.sharpness = tier + (Math.random()>0.5 ? 1 : 0);
-        if(tier >= 2 && Math.random() > 0.4) newEnch.fire_aspect = 1 + (tier===3?1:0); 
-    } else if (baseType.includes('armor')) {
-        newEnch.protection = tier + (Math.random()>0.5 ? 1 : 0);
-        if(tier >= 2 && Math.random() > 0.4) newEnch.thorns = 1 + (tier===3?1:0); 
-    } else if (baseType.includes('mace')) {
-        newEnch.density = tier + (Math.random()>0.5 ? 1 : 0);
-    }
+    if (baseType.includes('sword')) { newEnch.sharpness = tier + (Math.random()>0.5 ? 1 : 0); if(tier >= 2 && Math.random() > 0.4) newEnch.fire_aspect = 1 + (tier===3?1:0); } 
+    else if (baseType.includes('armor')) { newEnch.protection = tier + (Math.random()>0.5 ? 1 : 0); if(tier >= 2 && Math.random() > 0.4) newEnch.thorns = 1 + (tier===3?1:0); } 
+    else if (baseType.includes('mace')) { newEnch.density = tier + (Math.random()>0.5 ? 1 : 0); }
     
-    let eStr = [];
-    for(let k in newEnch) eStr.push(`${k}:${newEnch[k]}`);
+    let eStr = []; for(let k in newEnch) eStr.push(`${k}:${newEnch[k]}`);
     let newUid = `ench|${baseType}|${eStr.join(',')}`;
-    
-    inv[newUid] = (inv[newUid] || 0) + 1;
-    save_data(); open_enchant_modal(); sync_my_pos();
-    alert(`🎉 УСПЕШНО! Получено:\n${get_item_name(newUid)}`);
+    inv[newUid] = (inv[newUid] || 0) + 1; save_data(); open_enchant_modal(); sync_my_pos(); alert(`🎉 УСПЕШНО! Получено:\n${get_item_name(newUid)}`);
 }
 
-function inject_enchant_button() {
-    let wrap = document.getElementById('map-wrapper');
-    if(wrap && !document.getElementById('enchant-btn')) {
-        let btn = document.createElement('button'); btn.id = 'enchant-btn'; btn.className = 'buy-btn purple craft-overlay-btn';
-        btn.style.cssText = 'position:absolute; top:40px; right:10px; z-index:20; padding:5px 10px; font-size:10px;';
-        btn.innerText = 'ЧАРЫ 🔮'; btn.onclick = open_enchant_modal; wrap.appendChild(btn);
-    }
-}
+function inject_enchant_button() { let wrap = document.getElementById('map-wrapper'); if(wrap && !document.getElementById('enchant-btn')) { let btn = document.createElement('button'); btn.id = 'enchant-btn'; btn.className = 'buy-btn purple craft-overlay-btn'; btn.style.cssText = 'position:absolute; top:40px; right:10px; z-index:20; padding:5px 10px; font-size:10px;'; btn.innerText = 'ЧАРЫ 🔮'; btn.onclick = open_enchant_modal; wrap.appendChild(btn); } }
 
 window.open_craft_modal = function() { let u1=document.getElementById('ui-ore-iron'); if(u1)u1.innerText = inv['ore_iron'] || 0; let u2=document.getElementById('ui-ingot-iron'); if(u2)u2.innerText = inv['ingot_iron'] || 0; let u3=document.getElementById('ui-gem-diamond'); if(u3)u3.innerText = inv['ore_diamond'] || 0; let cm=document.getElementById('craft-modal'); if(cm)cm.style.display = 'flex'; }
-window.mine_ore = function() { 
-    if(is_on_ore) { 
-        if(navigator.vibrate) navigator.vibrate(50); 
-        if(is_on_ore === 'lapis') { inv['lapis'] = (inv['lapis']||0)+1; exp+=30; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Лазурит"); }
-        if(is_on_ore === 'diamond') { inv['ore_diamond'] = (inv['ore_diamond']||0)+1; exp+=50; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Алмаз"); } 
-        if(is_on_ore === 'iron') { inv['ore_iron'] = (inv['ore_iron']||0)+1; exp+=10; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Железная руда"); } 
-        mined_ores[window.cur_ore_x + '_' + window.cur_ore_z] = true; is_on_ore = null; let mb = document.getElementById('mine-btn'); if(mb) mb.style.display = 'none'; save_data(); render_inventory(); 
-    } 
-}
+window.mine_ore = function() { if(is_on_ore) { if(navigator.vibrate) navigator.vibrate(50); if(is_on_ore === 'lapis') { inv['lapis'] = (inv['lapis']||0)+1; exp+=30; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Лазурит"); } if(is_on_ore === 'diamond') { inv['ore_diamond'] = (inv['ore_diamond']||0)+1; exp+=50; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Алмаз"); } if(is_on_ore === 'iron') { inv['ore_iron'] = (inv['ore_iron']||0)+1; exp+=10; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Железная руда"); } mined_ores[window.cur_ore_x + '_' + window.cur_ore_z] = true; is_on_ore = null; let mb = document.getElementById('mine-btn'); if(mb) mb.style.display = 'none'; save_data(); render_inventory(); } }
 window.smelt = function(type) { if(type === 'iron') { if((inv['ore_iron']||0) >= 1) { inv['ore_iron']--; inv['ingot_iron'] = (inv['ingot_iron']||0)+1; save_data(); open_craft_modal(); } else alert("Нет железной руды!"); } }
 window.craft_item = function(res_item, cost) { let is_diamond = res_item.includes('diamond'); let req_mat = is_diamond ? 'ore_diamond' : 'ingot_iron'; if((inv[req_mat]||0) >= cost) { inv[req_mat] -= cost; inv[res_item] = (inv[res_item]||0)+1; save_data(); open_craft_modal(); alert("Успешный крафт!"); } else alert(`Нужно ${cost} ${is_diamond ? 'Алмазов' : 'Слитков железа'}!`); }
 
 function update_rtp_ui() { let cx = document.getElementById('map-x'); if(cx) cx.innerText = Math.floor(loc_x); let cz = document.getElementById('map-z'); if(cz) cz.innerText = Math.floor(loc_z); check_local_stashes(); }
-window.do_rtp = function() { 
-    if (in_combat) return alert("В бою нельзя использовать RTP!"); 
-    loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; 
-    save_data(); update_rtp_ui(); sync_my_pos(); 
-}
+window.do_rtp = function() { if (in_combat) return alert("В бою нельзя использовать RTP!"); loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; save_data(); update_rtp_ui(); sync_my_pos(); }
+window.tp_spawn = function() { if (in_combat) return alert("В бою нельзя телепортироваться на спавн!"); loc_x = 0; loc_z = 0; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП НА СПАВН"); }
 
-window.tp_spawn = function() {
-    if (in_combat) return alert("В бою нельзя телепортироваться на спавн!");
-    loc_x = 0; loc_z = 0;
-    save_data(); update_rtp_ui(); sync_my_pos();
-    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП НА СПАВН");
-}
-
-window.open_homes_modal = function() {
-    let max_homes = 1 + donate_rank;
-    let hl = document.getElementById('homes-limit');
-    if(hl) hl.innerText = Object.keys(my_homes).length + " / " + max_homes;
-    
-    let list = document.getElementById('homes-list');
-    if(list) {
-        let html = '';
-        for(let k in my_homes) {
-            let h = my_homes[k];
-            html += `<div class="upgrade-item" style="flex-direction:row; align-items:center;">
-                <div class="upgrade-info" style="flex:1;">
-                    <span class="upgrade-name">${h.name}</span>
-                    <span class="upgrade-desc" style="font-size:10px;">X: ${Math.floor(h.x)} Z: ${Math.floor(h.z)}</span>
-                </div>
-                <button class="buy-btn blue" style="padding:5px 10px; margin-right:5px; font-size:10px;" onclick="tp_home('${k}')">ТП</button>
-                <button class="buy-btn red" style="padding:5px 10px; font-size:10px;" onclick="delete_home('${k}')">УДАЛИТЬ</button>
-            </div>`;
-        }
-        if(html === '') html = '<div style="text-align:center; color:#555; font-size:12px; padding:10px;">У тебя пока нет домов</div>';
-        list.innerHTML = html;
-    }
-    document.getElementById('homes-modal').style.display = 'flex';
-}
-
-window.set_home = function() {
-    let max_homes = 1 + donate_rank;
-    if(Object.keys(my_homes).length >= max_homes) return alert("Достигнут лимит сетхомов! Удали старый или повысь донат.");
-    
-    let id = 'home_' + Date.now();
-    let def_name = "Дом " + (Object.keys(my_homes).length + 1);
-    let name = prompt("Название дома:", def_name);
-    if(name === null) return;
-    if(name.trim() === '') name = def_name;
-    
-    my_homes[id] = { name: name, x: loc_x, z: loc_z };
-    save_data(); sync_cloud(); open_homes_modal();
-}
-
-window.tp_home = function(id) {
-    if(in_combat) return alert("В бою нельзя телепортироваться домой!");
-    let h = my_homes[id];
-    if(!h) return;
-    loc_x = h.x; loc_z = h.z;
-    save_data(); update_rtp_ui(); sync_my_pos();
-    document.getElementById('homes-modal').style.display = 'none';
-    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП ДОМОЙ");
-}
-
-window.delete_home = function(id) {
-    if(confirm("Точно удалить этот сетхом?")) {
-        delete my_homes[id];
-        save_data(); sync_cloud(); open_homes_modal();
-    }
-}
+window.open_homes_modal = function() { let max_homes = 1 + donate_rank; let hl = document.getElementById('homes-limit'); if(hl) hl.innerText = Object.keys(my_homes).length + " / " + max_homes; let list = document.getElementById('homes-list'); if(list) { let html = ''; for(let k in my_homes) { let h = my_homes[k]; html += `<div class="upgrade-item" style="flex-direction:row; align-items:center;"><div class="upgrade-info" style="flex:1;"><span class="upgrade-name">${h.name}</span><span class="upgrade-desc" style="font-size:10px;">X: ${Math.floor(h.x)} Z: ${Math.floor(h.z)}</span></div><button class="buy-btn blue" style="padding:5px 10px; margin-right:5px; font-size:10px;" onclick="tp_home('${k}')">ТП</button><button class="buy-btn red" style="padding:5px 10px; font-size:10px;" onclick="delete_home('${k}')">УДАЛИТЬ</button></div>`; } if(html === '') html = '<div style="text-align:center; color:#555; font-size:12px; padding:10px;">У тебя пока нет домов</div>'; list.innerHTML = html; } document.getElementById('homes-modal').style.display = 'flex'; }
+window.set_home = function() { let max_homes = 1 + donate_rank; if(Object.keys(my_homes).length >= max_homes) return alert("Достигнут лимит сетхомов! Удали старый или повысь донат."); let id = 'home_' + Date.now(); let def_name = "Дом " + (Object.keys(my_homes).length + 1); let name = prompt("Название дома:", def_name); if(name === null) return; if(name.trim() === '') name = def_name; my_homes[id] = { name: name, x: loc_x, z: loc_z }; save_data(); sync_cloud(); open_homes_modal(); }
+window.tp_home = function(id) { if(in_combat) return alert("В бою нельзя телепортироваться домой!"); let h = my_homes[id]; if(!h) return; loc_x = h.x; loc_z = h.z; save_data(); update_rtp_ui(); sync_my_pos(); document.getElementById('homes-modal').style.display = 'none'; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП ДОМОЙ"); }
+window.delete_home = function(id) { if(confirm("Точно удалить этот сетхом?")) { delete my_homes[id]; save_data(); sync_cloud(); open_homes_modal(); } }
 
 window.place_stash = async function() { if(vrgk < 100000) return alert("Нужно 100 000 воргиков для создания стэша!"); let s_id = nickname + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); if(snap.exists()) return alert("Тут уже есть тайник!"); vrgk -= 100000; upd_ui(); save_data(); await database.ref('stashes/' + s_id).set({ owner: nickname, x: loc_x, z: loc_z, inv: "{}", skrepki: 0 }); alert("Тайник установлен!"); check_local_stashes(); }
 async function check_local_stashes() { let s_id = nickname + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); let cont = document.getElementById('local-stashes'); if(cont) { if(snap.exists()) { cont.innerHTML = `<button class="buy-btn green" style="width:100%;" onclick="open_stash('${s_id}')">ОТКРЫТЬ СВОЙ ТАЙНИК</button>`; } else { cont.innerHTML = ``; } } }
-window.open_stash = async function(s_id) { 
-    if(in_combat) return alert("Нельзя открыть стэш во время боя!"); 
-    current_stash_id = s_id; let sm = document.getElementById('stash-modal'); if(sm) sm.style.display = 'flex'; refresh_stash_ui(); 
-}
-
-window.refresh_stash_ui = async function() { 
-    if(!current_stash_id) return; 
-    let snap = await database.ref('stashes/' + current_stash_id).once('value'); 
-    let data = snap.val(); 
-    let sm = document.getElementById('stash-modal'); 
-    if(!data) { if(sm) sm.style.display = 'none'; return; } 
-    let sinv = JSON.parse(data.inv || "{}"); 
-    
-    let s_html = '';
-    if((data.skrepki||0) > 0) s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('skrepki', ${data.skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${data.skrepki}</div></div>`;
-    for(let k in sinv) { 
-        if(sinv[k]>0) {
-            let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; 
-            let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; 
-            s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('${k}', ${sinv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${iname}</div><div class="inv-count">x${sinv[k]}</div></div>`;
-        }
-    }
-    if(s_html === '') s_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Тайник пуст</div>';
-    let sg = document.getElementById('stash-items-grid'); if(sg) sg.innerHTML = s_html;
-
-    let p_html = '';
-    if(skrepki > 0) p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('skrepki', ${skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${skrepki}</div></div>`;
-    for(let k in inv) { 
-        if(inv[k]>0 && k !== 'active_offhand') {
-            let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; 
-            let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; 
-            let eq = (k === inv['active_offhand']) ? '<span style="color:#0f0; font-weight:bold;">[E]</span> ' : '';
-            p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('${k}', ${inv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${eq}${iname}</div><div class="inv-count">x${inv[k]}</div></div>`;
-        }
-    }
-    if(p_html === '') p_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Рюкзак пуст</div>';
-    let pg = document.getElementById('stash-player-grid'); if(pg) pg.innerHTML = p_html;
-};
-
-window.move_to_stash_prompt = function(item, max_count) {
-    let amt = 1;
-    if (max_count > 1) {
-        let res = prompt(`Сколько положить? (Макс: ${max_count})`, max_count);
-        if(res === null) return;
-        amt = parseInt(res);
-        if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!");
-    }
-    move_to_stash(item, amt);
-};
-
-window.move_from_stash_prompt = function(item, max_count) {
-    let amt = 1;
-    if (max_count > 1) {
-        let res = prompt(`Сколько забрать? (Макс: ${max_count})`, max_count);
-        if(res === null) return;
-        amt = parseInt(res);
-        if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!");
-    }
-    move_from_stash(item, amt);
-};
-
-window.move_to_stash = async function(item, amt=1) { 
-    let snap = await database.ref('stashes/' + current_stash_id).once('value'); 
-    let data = snap.val(); if(!data) return; 
-    if(item === 'skrepki') { 
-        if(skrepki >= amt) { skrepki-=amt; data.skrepki = (data.skrepki||0) + amt; } 
-        else return alert("Не хватает скрепок!"); 
-    } else { 
-        if((inv[item]||0) >= amt) { 
-            if(item === inv['active_offhand']) { inv['active_offhand'] = ''; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); sync_my_pos(); }
-            inv[item]-=amt; 
-            let sinv = JSON.parse(data.inv||"{}"); 
-            sinv[item] = (sinv[item]||0)+amt; 
-            data.inv = JSON.stringify(sinv); 
-        } else return alert("Нет предмета!"); 
-    } 
-    await database.ref('stashes/' + current_stash_id).set(data); 
-    save_data(); upd_ui(); refresh_stash_ui(); 
-};
-
-window.move_from_stash = async function(item, amt=1) { 
-    let snap = await database.ref('stashes/' + current_stash_id).once('value'); 
-    let data = snap.val(); if(!data) return; 
-    if(item === 'skrepki') { 
-        if((data.skrepki||0) >= amt) { skrepki+=amt; data.skrepki-=amt; } 
-        else return alert("В стэше нет столько скрепок!"); 
-    } else { 
-        let sinv = JSON.parse(data.inv||"{}"); 
-        if((sinv[item]||0) >= amt) { 
-            inv[item] = (inv[item]||0)+amt; 
-            sinv[item]-=amt; 
-            data.inv = JSON.stringify(sinv); 
-        } else return alert("В стэше нет столько!"); 
-    } 
-    await database.ref('stashes/' + current_stash_id).set(data); 
-    save_data(); upd_ui(); refresh_stash_ui(); 
-};
-
+window.open_stash = async function(s_id) { if(in_combat) return alert("Нельзя открыть стэш во время боя!"); current_stash_id = s_id; let sm = document.getElementById('stash-modal'); if(sm) sm.style.display = 'flex'; refresh_stash_ui(); }
+window.refresh_stash_ui = async function() { if(!current_stash_id) return; let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); let sm = document.getElementById('stash-modal'); if(!data) { if(sm) sm.style.display = 'none'; return; } let sinv = JSON.parse(data.inv || "{}"); let s_html = ''; if((data.skrepki||0) > 0) s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('skrepki', ${data.skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${data.skrepki}</div></div>`; for(let k in sinv) { if(sinv[k]>0) { let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('${k}', ${sinv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${iname}</div><div class="inv-count">x${sinv[k]}</div></div>`; } } if(s_html === '') s_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Тайник пуст</div>'; let sg = document.getElementById('stash-items-grid'); if(sg) sg.innerHTML = s_html; let p_html = ''; if(skrepki > 0) p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('skrepki', ${skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${skrepki}</div></div>`; for(let k in inv) { if(inv[k]>0 && k !== 'active_offhand') { let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; let eq = (k === inv['active_offhand']) ? '<span style="color:#0f0; font-weight:bold;">[E]</span> ' : ''; p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('${k}', ${inv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${eq}${iname}</div><div class="inv-count">x${inv[k]}</div></div>`; } } if(p_html === '') p_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Рюкзак пуст</div>'; let pg = document.getElementById('stash-player-grid'); if(pg) pg.innerHTML = p_html; };
+window.move_to_stash_prompt = function(item, max_count) { let amt = 1; if (max_count > 1) { let res = prompt(`Сколько положить? (Макс: ${max_count})`, max_count); if(res === null) return; amt = parseInt(res); if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!"); } move_to_stash(item, amt); };
+window.move_from_stash_prompt = function(item, max_count) { let amt = 1; if (max_count > 1) { let res = prompt(`Сколько забрать? (Макс: ${max_count})`, max_count); if(res === null) return; amt = parseInt(res); if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!"); } move_from_stash(item, amt); };
+window.move_to_stash = async function(item, amt=1) { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; if(item === 'skrepki') { if(skrepki >= amt) { skrepki-=amt; data.skrepki = (data.skrepki||0) + amt; } else return alert("Не хватает скрепок!"); } else { if((inv[item]||0) >= amt) { if(item === inv['active_offhand']) { inv['active_offhand'] = ''; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); sync_my_pos(); } inv[item]-=amt; let sinv = JSON.parse(data.inv||"{}"); sinv[item] = (sinv[item]||0)+amt; data.inv = JSON.stringify(sinv); } else return alert("Нет предмета!"); } await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); };
+window.move_from_stash = async function(item, amt=1) { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; if(item === 'skrepki') { if((data.skrepki||0) >= amt) { skrepki+=amt; data.skrepki-=amt; } else return alert("В стэше нет столько скрепок!"); } else { let sinv = JSON.parse(data.inv||"{}"); if((sinv[item]||0) >= amt) { inv[item] = (inv[item]||0)+amt; sinv[item]-=amt; data.inv = JSON.stringify(sinv); } else return alert("В стэше нет столько!"); } await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); };
 window.hide_all_armor = async function() { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; let sinv = JSON.parse(data.inv||"{}"); let moved = 0; const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; gear.forEach(g => { if(inv[g]>0) { if(g === inv['active_offhand']) { inv['active_offhand'] = ''; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); sync_my_pos(); } sinv[g] = (sinv[g]||0)+inv[g]; moved+=inv[g]; inv[g]=0; } }); if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); alert(`Спрятано вещей: ${moved}`); } else alert("Нет вещей в рюкзаке!"); }
 window.take_all_armor = async function() { let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; let sinv = JSON.parse(data.inv||"{}"); let moved = 0; const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; gear.forEach(g => { if(sinv[g]>0) { inv[g] = (inv[g]||0)+sinv[g]; moved+=sinv[g]; sinv[g]=0; } }); if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); alert(`Взято вещей: ${moved}`); } else alert("Нет вещей в стэше!"); }
 window.use_locator = async function() { if(vrgk < 50000) return alert("Локатор стоит 50 000 воргиков!"); vrgk -= 50000; upd_ui(); save_data(); let snap = await database.ref('stashes').once('value'); let all_st = snap.val(); let found = null; for(let id in all_st) { let s = all_st[id]; if(s.owner !== nickname && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } if(found) { if(confirm("ЛОКАТОР НАШЁЛ ЧУЖОЙ ТАЙНИК РЯДОМ!\nВзломать его и забрать все вещи?")) { let s_data = all_st[found]; let sinv = JSON.parse(s_data.inv||"{}"); if(s_data.skrepki > 0) { skrepki += s_data.skrepki; } for(let k in sinv) { inv[k] = (inv[k]||0) + sinv[k]; } await database.ref('stashes/' + found).remove(); save_data(); upd_ui(); render_inventory(); alert(`✅ ТАЙНИК УСПЕШНО ОГРАБЛЕН!\nВсе вещи и ${s_data.skrepki||0} скрепок перенесены в твой рюкзак.`); } } else { alert("В радиусе 500 блоков нет чужих тайников. Сделай /RTP и попробуй снова."); } }
@@ -676,7 +439,6 @@ function init_map() {
     try {
         if (!canvas) canvas = document.getElementById('rtp-canvas');
         if (canvas) ctx = canvas.getContext('2d');
-        
         inject_enchant_button();
         
         let joyZone = document.getElementById('joystick-zone'); let joyKnob = document.getElementById('joystick-knob'); let jRect = null;
@@ -700,174 +462,92 @@ function init_map() {
                 if(clicked_nick) { current_target = clicked_nick; update_target_hud(); }
             }, {passive:false});
         }
-
-        requestAnimationFrame(draw_map); 
-        setInterval(sync_my_pos, 600);
+        requestAnimationFrame(draw_map); setInterval(sync_my_pos, 600);
     } catch(e) {}
 }
 
 function get_best_armor() { 
-    if(!inv) return 'none'; 
-    let best = 'none'; let best_score = 0;
+    if(!inv) return 'none'; let best = 'none'; let best_score = 0;
     const a_scores = {'armor_leather':10, 'armor_iron':20, 'armor_diamond':30, 'armor_netherite':40};
     for(let k in inv) {
         if(inv[k] <= 0) continue;
-        let is_ench = k.startsWith('ench|');
-        let base = is_ench ? k.split('|')[1] : k;
-        if(a_scores[base]) {
-            let score = a_scores[base] + (is_ench ? 5 : 0);
-            if(score > best_score) { best_score = score; best = k; }
-        }
+        let is_ench = k.startsWith('ench|'); let base = is_ench ? k.split('|')[1] : k;
+        if(a_scores[base]) { let score = a_scores[base] + (is_ench ? 5 : 0); if(score > best_score) { best_score = score; best = k; } }
     }
     return best; 
 }
 
 function get_best_weapon() { 
-    if(!inv) return 'none'; 
-    let best = 'none'; let best_score = 0;
+    if(!inv) return 'none'; let best = 'none'; let best_score = 0;
     const w_scores = {'sword_iron':10, 'sword_diamond':20, 'sword_netherite':30, 'mace':40};
     for(let k in inv) {
         if(inv[k] <= 0) continue;
-        let is_ench = k.startsWith('ench|');
-        let base = is_ench ? k.split('|')[1] : k;
-        if(w_scores[base]) {
-            let score = w_scores[base] + (is_ench ? 5 : 0);
-            if(score > best_score) { best_score = score; best = k; }
-        }
+        let is_ench = k.startsWith('ench|'); let base = is_ench ? k.split('|')[1] : k;
+        if(w_scores[base]) { let score = w_scores[base] + (is_ench ? 5 : 0); if(score > best_score) { best_score = score; best = k; } }
     }
     return best; 
 }
 
-function get_armor_color(type) { 
-    let base = type.startsWith('ench|') ? type.split('|')[1] : type;
-    if(base === 'armor_netherite') return '#2a2527'; if(base === 'armor_diamond') return '#2bf'; if(base === 'armor_iron') return '#ddd'; if(base === 'armor_leather') return '#963'; return '#fff'; 
-}
-
-function get_weapon_color(type) { 
-    let base = type.startsWith('ench|') ? type.split('|')[1] : type;
-    if(base === 'mace') return {c:'#444', l:14, m:true}; if(base === 'sword_netherite') return {c:'#303', l:16, m:false}; if(base === 'sword_diamond') return {c:'#2bf', l:16, m:false}; if(base === 'sword_iron') return {c:'#ddd', l:16, m:false}; return null; 
-}
-
+function get_armor_color(type) { let base = type.startsWith('ench|') ? type.split('|')[1] : type; if(base === 'armor_netherite') return '#2a2527'; if(base === 'armor_diamond') return '#2bf'; if(base === 'armor_iron') return '#ddd'; if(base === 'armor_leather') return '#963'; return '#fff'; }
+function get_weapon_color(type) { let base = type.startsWith('ench|') ? type.split('|')[1] : type; if(base === 'mace') return {c:'#444', l:14, m:true}; if(base === 'sword_netherite') return {c:'#303', l:16, m:false}; if(base === 'sword_diamond') return {c:'#2bf', l:16, m:false}; if(base === 'sword_iron') return {c:'#ddd', l:16, m:false}; return null; }
 function get_offhand_color(id) { if(!id) return 'transparent'; if(id.includes('titan')) return '#a0f'; if(id.includes('chaos')) return '#f0f'; if(id.includes('satyr')) return '#0f8'; if(id.includes('bestia')) return '#0f0'; if(id.includes('ares')) return '#f00'; if(id.includes('hydra')) return '#00f'; if(id.includes('icarus')) return '#f0a'; if(id.includes('erida')) return '#fd0'; if(id.includes('crusher')) return '#f55'; if(id.includes('punisher')) return '#a5f'; if(id.includes('discord')) return '#ff0'; if(id.includes('tyrant')) return '#aaa'; if(id.includes('rage')) return '#f22'; if(id.includes('vortex')) return '#fff'; if(id.includes('darkness')) return '#333'; if(id.includes('demon')) return '#c00'; return '#fff'; }
 
 function get_ore_at(x, z) { 
     let gridX = Math.floor(x/100); let gridZ = Math.floor(z/100); 
     if(mined_ores[gridX + '_' + gridZ]) return null; 
     let noise = Math.sin(gridX * 12.9898 + gridZ * 78.233) * 43758.5453; noise = noise - Math.floor(noise); 
-    if(noise > 0.98) return 'lapis';
-    if(noise > 0.95) return 'diamond'; 
-    if(noise > 0.80) return 'iron'; 
+    if(noise > 0.98) return 'lapis'; if(noise > 0.95) return 'diamond'; if(noise > 0.80) return 'iron'; 
     return null; 
 }
 
-function sync_my_pos() { 
-    if(!nickname) return; 
-    database.ref('world_players/' + nickname).set({ x: loc_x, z: loc_z, armor: get_best_armor(), wp: get_best_weapon(), offhand: (inv['active_offhand']||''), hp: my_cur_hp, max_hp: get_pvp_stats().max_hp, last: Date.now(), enchants: enchants }); 
-}
+function sync_my_pos() { if(!nickname) return; database.ref('world_players/' + nickname).set({ x: loc_x, z: loc_z, armor: get_best_armor(), wp: get_best_weapon(), offhand: (inv['active_offhand']||''), hp: my_cur_hp, max_hp: get_pvp_stats().max_hp, last: Date.now(), enchants: enchants }); }
 
 function draw_entity(px, py, d, is_me, n) {
     let is_safe = Math.abs(d.x) <= 100 && Math.abs(d.z) <= 100;
-    let arm = get_armor_color(d.armor);
-    if(d.armor === 'none') arm = '#55f'; 
+    let arm = get_armor_color(d.armor); if(d.armor === 'none') arm = '#55f'; 
 
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 10px Arial';
-    ctx.textAlign = 'center';
-    let ehp = Math.max(0, d.hp || 20).toFixed(1);
-    if(ehp.endsWith('.0')) ehp = Math.floor(ehp);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Arial'; ctx.textAlign = 'center';
+    let ehp = Math.max(0, d.hp || 20).toFixed(1); if(ehp.endsWith('.0')) ehp = Math.floor(ehp);
     ctx.fillText(ehp + ' HP', px, py - 32);
 
     let tw = ctx.measureText(n).width;
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(px - tw/2 - 4, py - 28, tw + 8, 14);
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(px - tw/2 - 4, py - 28, tw + 8, 14);
-    ctx.fillStyle = '#000';
-    ctx.fillText(n, px, py - 17);
+    ctx.fillStyle = '#fff'; ctx.fillRect(px - tw/2 - 4, py - 28, tw + 8, 14);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.strokeRect(px - tw/2 - 4, py - 28, tw + 8, 14);
+    ctx.fillStyle = '#000'; ctx.fillText(n, px, py - 17);
 
-    if(is_safe) {
-        ctx.fillStyle = 'rgba(0,255,0,0.1)';
-        ctx.beginPath(); ctx.arc(px, py+5, 20, 0, Math.PI*2); ctx.fill();
-    }
+    if(is_safe) { ctx.fillStyle = 'rgba(0,255,0,0.1)'; ctx.beginPath(); ctx.arc(px, py+5, 20, 0, Math.PI*2); ctx.fill(); }
 
-    ctx.fillStyle = arm;
-    ctx.fillRect(px - 8, py + 10, 16, 12);
+    ctx.fillStyle = arm; ctx.fillRect(px - 8, py + 10, 16, 12);
+    ctx.fillStyle = '#f5c6a5'; ctx.fillRect(px - 10, py - 10, 20, 20);
+    ctx.fillStyle = '#fff'; ctx.fillRect(px - 6, py - 4, 4, 4); ctx.fillRect(px + 2, py - 4, 4, 4);
+    ctx.fillStyle = '#000'; ctx.fillRect(px - 5, py - 3, 2, 2); ctx.fillRect(px + 3, py - 3, 2, 2);
+    ctx.fillStyle = '#000'; ctx.fillRect(px - 4, py + 4, 8, 2);
 
-    ctx.fillStyle = '#f5c6a5';
-    ctx.fillRect(px - 10, py - 10, 20, 20);
-
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(px - 6, py - 4, 4, 4);
-    ctx.fillRect(px + 2, py - 4, 4, 4);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(px - 5, py - 3, 2, 2);
-    ctx.fillRect(px + 3, py - 3, 2, 2);
-
-    ctx.fillStyle = '#000';
-    ctx.fillRect(px - 4, py + 4, 8, 2);
-
-    if(d.armor !== 'none') {
-        ctx.fillStyle = arm;
-        ctx.fillRect(px - 11, py - 11, 22, 9); 
-        ctx.fillRect(px - 11, py - 2, 4, 7);  
-        ctx.fillRect(px + 7, py - 2, 4, 7);   
-    }
+    if(d.armor !== 'none') { ctx.fillStyle = arm; ctx.fillRect(px - 11, py - 11, 22, 9); ctx.fillRect(px - 11, py - 2, 4, 7); ctx.fillRect(px + 7, py - 2, 4, 7); }
 
     let w = get_weapon_color(d.wp);
     if(w) {
-        ctx.save();
-        ctx.translate(px + 14, py + 10); 
+        ctx.save(); ctx.translate(px + 14, py + 10); 
         let a_time = is_me ? (Date.now() - last_combat_hit_time) : 1000;
         if (a_time < 150) ctx.rotate(-Math.PI/2); else ctx.rotate(-Math.PI/4);
-        
-        if(w.m) { 
-            ctx.fillStyle='#522'; ctx.fillRect(-2, -10, 4, 10); 
-            ctx.fillStyle=w.c; ctx.fillRect(-6, -18, 12, 8); 
-        } else { 
-            ctx.fillStyle='#522'; ctx.fillRect(-1, -4, 2, 6); 
-            ctx.fillStyle='#555'; ctx.fillRect(-4, -6, 8, 2); 
-            ctx.fillStyle=w.c; ctx.fillRect(-2, -6 - w.l, 4, w.l); 
-        }
+        if(w.m) { ctx.fillStyle='#522'; ctx.fillRect(-2, -10, 4, 10); ctx.fillStyle=w.c; ctx.fillRect(-6, -18, 12, 8); } 
+        else { ctx.fillStyle='#522'; ctx.fillRect(-1, -4, 2, 6); ctx.fillStyle='#555'; ctx.fillRect(-4, -6, 8, 2); ctx.fillStyle=w.c; ctx.fillRect(-2, -6 - w.l, 4, w.l); }
         ctx.restore();
     }
-
-    if (d.offhand) {
-        ctx.fillStyle = get_offhand_color(d.offhand);
-        ctx.beginPath(); ctx.arc(px - 14, py + 12, 5, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke();
-    }
+    if (d.offhand) { ctx.fillStyle = get_offhand_color(d.offhand); ctx.beginPath(); ctx.arc(px - 14, py + 12, 5, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke(); }
 }
 
 function draw_map() {
     if (current_tab !== 'anarchy') return requestAnimationFrame(draw_map);
-    
-    let wrap = document.getElementById('map-wrapper');
-    if (!canvas) canvas = document.getElementById('rtp-canvas');
-    if (canvas && !ctx) ctx = canvas.getContext('2d');
-    
-    if (wrap && canvas && (canvas.width !== wrap.clientWidth || canvas.height !== wrap.clientHeight)) {
-        canvas.width = wrap.clientWidth;
-        canvas.height = wrap.clientHeight;
-    }
-    
+    let wrap = document.getElementById('map-wrapper'); if (!canvas) canvas = document.getElementById('rtp-canvas'); if (canvas && !ctx) ctx = canvas.getContext('2d');
+    if (wrap && canvas && (canvas.width !== wrap.clientWidth || canvas.height !== wrap.clientHeight)) { canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight; }
     if (!ctx) return requestAnimationFrame(draw_map);
     
-    // БЕРЕМ СКОРОСТЬ ПЕРЕДВИЖЕНИЯ С ТАЛИСМАНА
-    let stats = get_pvp_stats();
-    let move_speed = 4 * stats.speed_mult; 
-
-    if(isJoyActive && !is_stunned) { 
-        loc_x += joyX * move_speed; 
-        loc_z += joyY * move_speed; 
-        upd_ui(); 
-        if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } 
-    }
+    let stats = get_pvp_stats(); let move_speed = 4 * stats.speed_mult; 
+    if(isJoyActive && !is_stunned) { loc_x += joyX * move_speed; loc_z += joyY * move_speed; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } }
     
     ctx.fillStyle = '#26381b'; ctx.fillRect(0,0, canvas.width, canvas.height); 
-    let cx = canvas.width/2; let cy = canvas.height/2; 
-    let found_ore = null; let found_gx = 0; let found_gz = 0;
-    let myGridX = Math.floor(loc_x/100); let myGridZ = Math.floor(loc_z/100);
+    let cx = canvas.width/2; let cy = canvas.height/2; let found_ore = null; let found_gx = 0; let found_gz = 0; let myGridX = Math.floor(loc_x/100); let myGridZ = Math.floor(loc_z/100);
 
     ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1; ctx.beginPath();
     let offX = (cx - loc_x) % 50; let offZ = (cy - loc_z) % 50;
@@ -875,33 +555,20 @@ function draw_map() {
     for(let i=-50; i<canvas.height+50; i+=50) { ctx.moveTo(0, i+offZ); ctx.lineTo(canvas.width, i+offZ); }
     ctx.stroke();
 
-    let sx = cx - loc_x - 100; let sy = cy - loc_z - 100;
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.08)'; ctx.fillRect(sx, sy, 200, 200);
-    ctx.strokeStyle = '#0f0'; ctx.strokeRect(sx, sy, 200, 200);
+    let sx = cx - loc_x - 100; let sy = cy - loc_z - 100; ctx.fillStyle = 'rgba(0, 255, 0, 0.08)'; ctx.fillRect(sx, sy, 200, 200); ctx.strokeStyle = '#0f0'; ctx.strokeRect(sx, sy, 200, 200);
 
     for(let i = -6; i <= 6; i++) { 
         for(let j = -6; j <= 6; j++) { 
-            let gx = myGridX + i; let gz = myGridZ + j; 
-            let ore = get_ore_at(gx*100, gz*100); 
+            let gx = myGridX + i; let gz = myGridZ + j; let ore = get_ore_at(gx*100, gz*100); 
             if(ore) { 
-                let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); 
-                ctx.fillStyle = '#444'; ctx.fillRect(screenX-12, screenY-12, 24, 24);
-                
-                if(ore === 'diamond') ctx.fillStyle = '#0ff';
-                else if(ore === 'lapis') ctx.fillStyle = '#1E90FF';
-                else ctx.fillStyle = '#f5deb3';
-                
+                let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); ctx.fillStyle = '#444'; ctx.fillRect(screenX-12, screenY-12, 24, 24);
+                if(ore === 'diamond') ctx.fillStyle = '#0ff'; else if(ore === 'lapis') ctx.fillStyle = '#1E90FF'; else ctx.fillStyle = '#f5deb3';
                 ctx.fillRect(screenX-8, screenY-8, 6, 6); ctx.fillRect(screenX+4, screenY-4, 4, 4); ctx.fillRect(screenX-4, screenY+4, 6, 6);
-                if(Math.abs(gx*100 - loc_x) < 20 && Math.abs(gz*100 - loc_z) < 20) {
-                    found_ore = ore; found_gx = gx; found_gz = gz;
-                } 
+                if(Math.abs(gx*100 - loc_x) < 20 && Math.abs(gz*100 - loc_z) < 20) { found_ore = ore; found_gx = gx; found_gz = gz; } 
             } 
         } 
     }
-    is_on_ore = found_ore;
-    window.cur_ore_x = found_gx;
-    window.cur_ore_z = found_gz;
-    
+    is_on_ore = found_ore; window.cur_ore_x = found_gx; window.cur_ore_z = found_gz;
     let btn = document.getElementById('mine-btn'); if(btn) { if(is_on_ore) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; } }
     
     for(let d_id in world_drops) {
@@ -915,36 +582,19 @@ function draw_map() {
     }
 
     for(let p in online_players) { 
-        if(p === nickname) continue; 
-        let pl = online_players[p];
-        if(Date.now() - (pl.local_last || pl.last) > 300000) continue; 
-
-        if(pl.target_x !== undefined) pl.x += (pl.target_x - pl.x) * 0.15;
-        if(pl.target_z !== undefined) pl.z += (pl.target_z - pl.z) * 0.15;
-
-        let dx = pl.x - loc_x; let dz = pl.z - loc_z; 
-        if(Math.abs(dx) < canvas.width/2 + 20 && Math.abs(dz) < canvas.height/2 + 20) { 
-            draw_entity(cx+dx, cy+dz, pl, false, p);
-        } 
+        if(p === nickname) continue; let pl = online_players[p]; if(Date.now() - (pl.local_last || pl.last) > 300000) continue; 
+        if(pl.target_x !== undefined) pl.x += (pl.target_x - pl.x) * 0.15; if(pl.target_z !== undefined) pl.z += (pl.target_z - pl.z) * 0.15;
+        let dx = pl.x - loc_x; let dz = pl.z - loc_z; if(Math.abs(dx) < canvas.width/2 + 20 && Math.abs(dz) < canvas.height/2 + 20) draw_entity(cx+dx, cy+dz, pl, false, p);
     }
     
     draw_entity(cx, cy, {x:loc_x, z:loc_z, armor:get_best_armor(), wp:get_best_weapon(), offhand:inv['active_offhand'], hp:my_cur_hp, max_hp:stats.max_hp}, true, nickname);
-
-    update_target_hud();
-    requestAnimationFrame(draw_map);
+    update_target_hud(); requestAnimationFrame(draw_map);
 }
 
-// ==========================================
-// НОВАЯ СИСТЕМА УРОНА, СКОРОСТИ И АТАКИ
-// ВШИТЫ ВСЕ 100% ХАРАКТЕРИСТИК ТАЛИСМАНОВ
-// ==========================================
 function get_pvp_stats() { 
-    let max_hp = 20; let dmg = 1; let armor_reduct = 0; 
-    let speed_mult = 1.0; let atk_speed_mult = 1.0; // Новые множители
+    let max_hp = 20; let dmg = 1; let armor_reduct = 0; let speed_mult = 1.0; let atk_speed_mult = 1.0; 
     let wp = get_best_weapon(); let ar = get_best_armor();
-    
-    let base_wp = wp.startsWith('ench|') ? wp.split('|')[1] : wp;
-    let base_ar = ar.startsWith('ench|') ? ar.split('|')[1] : ar;
+    let base_wp = wp.startsWith('ench|') ? wp.split('|')[1] : wp; let base_ar = ar.startsWith('ench|') ? ar.split('|')[1] : ar;
     
     if(base_ar === 'armor_netherite') armor_reduct = 0.70; else if(base_ar === 'armor_diamond') armor_reduct = 0.50; else if(base_ar === 'armor_iron') armor_reduct = 0.30; else if(base_ar === 'armor_leather') armor_reduct = 0.10; 
     if(base_wp === 'mace') dmg = 12; else if(base_wp === 'sword_netherite') dmg = 8; else if(base_wp === 'sword_diamond') dmg = 7; else if(base_wp === 'sword_iron') dmg = 6; 
@@ -959,27 +609,8 @@ function get_pvp_stats() {
     if(armor_reduct > 0.90) armor_reduct = 0.90;
 
     let offhand = inv ? inv['active_offhand'] : null;
-    
-    // СФЕРЫ 
-    if(offhand === 'sphere_titan') { armor_reduct += 0.15; speed_mult -= 0.15; } 
-    else if(offhand === 'sphere_chaos') { max_hp -= 4; armor_reduct += 0.10; dmg += 2.5; speed_mult += 0.07; atk_speed_mult += 0.13; } 
-    else if(offhand === 'sphere_satyr') { dmg += 2; atk_speed_mult += 0.15; } 
-    else if(offhand === 'sphere_bestia') { max_hp += 4; armor_reduct += 0.05; speed_mult += 0.10; atk_speed_mult += 0.10; } 
-    else if(offhand === 'sphere_ares') { max_hp -= 2; dmg += 6; armor_reduct -= 0.15; } 
-    else if(offhand === 'sphere_hydra') { max_hp += 4; armor_reduct += 0.10; } 
-    else if(offhand === 'sphere_icarus') { max_hp += 2; dmg += 2; } 
-    else if(offhand === 'sphere_erida') { max_hp += 2; } 
-
-    // ТАЛИСМАНЫ (ТВОИ ТОЧНЫЕ ХАРАКТЕРИСТИКИ)
-    else if(offhand === 'talisman_crusher') { max_hp += 4; dmg += 3; armor_reduct += 0.20; /* Броня +2 и Тв. Брони +2 перевел в +20% защиты */ } 
-    else if(offhand === 'talisman_punisher') { dmg += 7; max_hp -= 4; speed_mult += 0.10; } 
-    else if(offhand === 'talisman_discord') { dmg += 4; max_hp += 2; speed_mult += 0.10; atk_speed_mult += 0.10; armor_reduct -= 0.15; } 
-    else if(offhand === 'talisman_tyrant') { dmg += 2; armor_reduct += 0.10; max_hp -= 4; } 
-    else if(offhand === 'talisman_rage') { dmg += 5; max_hp -= 4; } 
-    else if(offhand === 'talisman_vortex') { max_hp += 2; speed_mult += 0.15; atk_speed_mult += 0.15; } 
-    else if(offhand === 'talisman_darkness') { armor_reduct += 0.05; max_hp += 1; } 
-    else if(offhand === 'talisman_demon') { dmg += 2; atk_speed_mult += 0.10; }
-
+    if(offhand === 'sphere_titan') { armor_reduct += 0.15; speed_mult -= 0.15; } else if(offhand === 'sphere_chaos') { max_hp -= 4; armor_reduct += 0.10; dmg += 2.5; speed_mult += 0.07; atk_speed_mult += 0.13; } else if(offhand === 'sphere_satyr') { dmg += 2; atk_speed_mult += 0.15; } else if(offhand === 'sphere_bestia') { max_hp += 4; armor_reduct += 0.05; speed_mult += 0.10; atk_speed_mult += 0.10; } else if(offhand === 'sphere_ares') { max_hp -= 2; dmg += 6; armor_reduct -= 0.15; } else if(offhand === 'sphere_hydra') { max_hp += 4; armor_reduct += 0.10; } else if(offhand === 'sphere_icarus') { max_hp += 2; dmg += 2; } else if(offhand === 'sphere_erida') { max_hp += 2; } 
+    else if(offhand === 'talisman_crusher') { max_hp += 4; dmg += 3; armor_reduct += 0.20; } else if(offhand === 'talisman_punisher') { dmg += 7; max_hp -= 4; speed_mult += 0.10; } else if(offhand === 'talisman_discord') { dmg += 4; max_hp += 2; speed_mult += 0.10; atk_speed_mult += 0.10; armor_reduct -= 0.15; } else if(offhand === 'talisman_tyrant') { dmg += 2; armor_reduct += 0.10; max_hp -= 4; } else if(offhand === 'talisman_rage') { dmg += 5; max_hp -= 4; } else if(offhand === 'talisman_vortex') { max_hp += 2; speed_mult += 0.15; atk_speed_mult += 0.15; } else if(offhand === 'talisman_darkness') { armor_reduct += 0.05; max_hp += 1; } else if(offhand === 'talisman_demon') { dmg += 2; atk_speed_mult += 0.10; }
     return { hp: max_hp, max_hp: max_hp, dmg: dmg, armor: armor_reduct, wp: wp, ar: ar, wp_ench: wp_ench, ar_ench: ar_ench, speed_mult: speed_mult, atk_speed_mult: atk_speed_mult }; 
 }
 
@@ -987,50 +618,23 @@ function setup_dmg_listener() {
     if(!nickname) return;
     database.ref('world_players/' + nickname + '/dmg_queue').on('child_added', snap => { let data = snap.val(); snap.ref.remove(); process_incoming_damage(data); });
     database.ref('world_drops').on('value', snap => { world_drops = snap.val() || {}; });
-    
     database.ref('world_players').on('value', snap => { 
-        let data = snap.val() || {}; 
-        let localNow = Date.now();
+        let data = snap.val() || {}; let localNow = Date.now();
         for(let key in data) {
             if(key === nickname) continue;
-            if(!online_players[key]) {
-                online_players[key] = data[key];
-                online_players[key].target_x = data[key].x;
-                online_players[key].target_z = data[key].z;
-                online_players[key].local_last = localNow;
-            } else {
-                online_players[key].target_x = data[key].x;
-                online_players[key].target_z = data[key].z;
-                online_players[key].hp = data[key].hp;
-                online_players[key].max_hp = data[key].max_hp;
-                online_players[key].armor = data[key].armor;
-                online_players[key].wp = data[key].wp;
-                online_players[key].offhand = data[key].offhand;
-                if(online_players[key].last !== data[key].last) {
-                    online_players[key].local_last = localNow;
-                }
-                online_players[key].last = data[key].last;
-            }
+            if(!online_players[key]) { online_players[key] = data[key]; online_players[key].target_x = data[key].x; online_players[key].target_z = data[key].z; online_players[key].local_last = localNow; } 
+            else { online_players[key].target_x = data[key].x; online_players[key].target_z = data[key].z; online_players[key].hp = data[key].hp; online_players[key].max_hp = data[key].max_hp; online_players[key].armor = data[key].armor; online_players[key].wp = data[key].wp; online_players[key].offhand = data[key].offhand; if(online_players[key].last !== data[key].last) { online_players[key].local_last = localNow; } online_players[key].last = data[key].last; }
         }
-        for(let key in online_players) {
-            if(key !== nickname && !data[key]) delete online_players[key];
-        }
+        for(let key in online_players) { if(key !== nickname && !data[key]) delete online_players[key]; }
     });
-    
     database.ref('world_players/' + nickname).onDisconnect().remove();
 }
 
 window.map_attack = function() {
-    if(is_stunned) return;
-    if(Math.abs(loc_x) <= 100 && Math.abs(loc_z) <= 100) return;
-
+    if(is_stunned) return; if(Math.abs(loc_x) <= 100 && Math.abs(loc_z) <= 100) return;
     let closest = null; let min_d = 60;
     for (let key in online_players) {
-        if (key === nickname) continue;
-        let p = online_players[key]; 
-        if (Date.now() - (p.local_last || p.last) > 300000) continue; 
-        if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; 
-        let d = Math.hypot(p.x - loc_x, p.z - loc_z); if (d < min_d) { min_d = d; closest = key; }
+        if (key === nickname) continue; let p = online_players[key]; if (Date.now() - (p.local_last || p.last) > 300000) continue; if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; let d = Math.hypot(p.x - loc_x, p.z - loc_z); if (d < min_d) { min_d = d; closest = key; }
     }
     if(!closest) return; current_target = closest; trigger_attack_logic();
 }
@@ -1038,20 +642,12 @@ window.map_attack = function() {
 function trigger_attack_logic() {
     let now = Date.now(); let is_crit = false; let is_sweeping = false;
     let stats = get_pvp_stats(); if (stats.wp === 'none') return; 
-
-    // НОВАЯ ПРОВЕРКА СКОРОСТИ АТАКИ
-    let base_cd = 400; // Базовая задержка между ударами (милисекунды)
-    let actual_cd = base_cd / stats.atk_speed_mult; 
-    if (now - window.last_swing_time < actual_cd) return; // Если ударил слишком быстро - игнор
-    window.last_swing_time = now; // Фиксируем время удара
-
+    let base_cd = 400; let actual_cd = base_cd / stats.atk_speed_mult; 
+    if (now - window.last_swing_time < actual_cd) return; 
+    window.last_swing_time = now; 
     if (now - last_combat_hit_time <= 1200) combo_count++; else combo_count = 1;
 
-    if(Math.random() >= ((stats.wp_ench.unbreaking || 0) * 0.25)) {
-        weapon_dur -= 15;
-        if(weapon_dur <= 0) { inv[stats.wp]--; weapon_dur = 1000; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ОРУЖИЕ СЛОМАЛОСЬ!"); save_data(); render_inventory(); return; }
-    }
-
+    if(Math.random() >= ((stats.wp_ench.unbreaking || 0) * 0.25)) { weapon_dur -= 15; if(weapon_dur <= 0) { inv[stats.wp]--; weapon_dur = 1000; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ОРУЖИЕ СЛОМАЛОСЬ!"); save_data(); render_inventory(); return; } }
     if (stats.wp.includes('sword')) { sword_hits++; if (sword_hits >= 3) { is_sweeping = true; sword_hits = 0; combo_count = 0; } }
     if (!is_sweeping && Math.random() <= (inv['active_offhand'] === 'sphere_erida' ? 0.35 : 0.20)) is_crit = true;
 
@@ -1060,7 +656,6 @@ function trigger_attack_logic() {
     if (is_crit) final_dmg *= 1.5;
 
     last_combat_hit_time = now; update_combo_ui(is_sweeping); set_combat_log();
-
     database.ref('world_players/' + current_target + '/dmg_queue').push({ dmg: final_dmg, attacker: nickname, is_crit: is_crit, is_sweeping: is_sweeping, ts: now, ench: stats.wp_ench, wp: stats.wp });
     let btn = document.getElementById('map-btn-attack'); if(btn) { btn.style.transform = 'scale(0.8)'; setTimeout(() => btn.style.transform = 'scale(1)', 100); }
     if(navigator.vibrate) navigator.vibrate(20);
@@ -1068,10 +663,7 @@ function trigger_attack_logic() {
 
 function process_incoming_damage(data) {
     let stats = get_pvp_stats(); let armor = stats.armor; let atk_ench = data.ench || {};
-    if(stats.ar !== 'none' && Math.random() >= ((stats.ar_ench.unbreaking || 0) * 0.25)) {
-        armor_dur -= 20;
-        if(armor_dur <= 0) { inv[stats.ar]--; armor_dur = 1000; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "БРОНЯ СЛОМАЛАСЬ!"); save_data(); render_inventory(); }
-    }
+    if(stats.ar !== 'none' && Math.random() >= ((stats.ar_ench.unbreaking || 0) * 0.25)) { armor_dur -= 20; if(armor_dur <= 0) { inv[stats.ar]--; armor_dur = 1000; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "БРОНЯ СЛОМАЛАСЬ!"); save_data(); render_inventory(); } }
 
     if (data.is_sweeping) armor = Math.max(0, armor - 0.20);
     if (data.wp === 'mace') armor = Math.max(0, armor - ((atk_ench.breach||0) * 0.15)); 
@@ -1082,99 +674,38 @@ function process_incoming_damage(data) {
     let stun_time = 350 + ((atk_ench.knockback||0) * 150); is_stunned = true; setTimeout(() => { is_stunned = false; }, stun_time);
 
     if ((stats.ar_ench.thorns || 0) > 0 && Math.random() < 0.3 && !data.is_thorns) { database.ref('world_players/' + data.attacker + '/dmg_queue').push({ dmg: (stats.ar_ench.thorns || 0) * 1, attacker: nickname, is_thorns: true }); }
-
     set_combat_log(); combo_count = 0; update_combo_ui(false);
     let mapW = document.getElementById('map-wrapper'); if(mapW) { mapW.style.transform = 'translate(5px, 5px)'; setTimeout(() => mapW.style.transform = 'none', 100); }
 
-    if (my_cur_hp <= 0) {
-        if((inv['totem']||0) > 0) { inv['totem']--; my_cur_hp = 4; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТОТЕМ!"); save_data(); sync_my_pos(); } else { handle_death(data.attacker); }
-    } else { sync_my_pos(); }
+    if (my_cur_hp <= 0) { if((inv['totem']||0) > 0) { inv['totem']--; my_cur_hp = 4; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТОТЕМ!"); save_data(); sync_my_pos(); } else { handle_death(data.attacker); } } else { sync_my_pos(); }
 }
 
 function handle_death(killer) {
     end_combat_log(); alert(`☠️ ТЕБЯ УБИЛ ИГРОК ${killer}!\nВесь лут выпал на карту.`);
     let drop_id = "drop_" + Date.now() + "_" + Math.floor(Math.random()*1000);
     database.ref('world_drops/' + drop_id).set({ x: loc_x, z: loc_z, inv: JSON.stringify(inv), skrepki: skrepki, from: nickname });
-    my_cur_hp = get_pvp_stats().max_hp; loc_x = 0; loc_z = 0; inv = {}; skrepki = 0; weapon_dur = 1000; armor_dur = 1000;
-    save_data(); upd_ui(); render_inventory(); sync_my_pos();
+    my_cur_hp = get_pvp_stats().max_hp; loc_x = 0; loc_z = 0; inv = {}; skrepki = 0; weapon_dur = 1000; armor_dur = 1000; save_data(); upd_ui(); render_inventory(); sync_my_pos();
 }
 
 function set_combat_log() {
-    combat_timer = 30;
-    if (!in_combat) { in_combat = true; let bdg = document.getElementById('combat-log-badge'); if(bdg) bdg.style.display = 'block'; database.ref('players/' + nickname + '/died_offline').onDisconnect().set(true); }
-    if (combat_interval) clearInterval(combat_interval);
-    let lTm = document.getElementById('combat-log-timer'); if(lTm) lTm.innerText = combat_timer;
+    combat_timer = 30; if (!in_combat) { in_combat = true; let bdg = document.getElementById('combat-log-badge'); if(bdg) bdg.style.display = 'block'; database.ref('players/' + nickname + '/died_offline').onDisconnect().set(true); }
+    if (combat_interval) clearInterval(combat_interval); let lTm = document.getElementById('combat-log-timer'); if(lTm) lTm.innerText = combat_timer;
     combat_interval = setInterval(() => { combat_timer--; let tEl = document.getElementById('combat-log-timer'); if(tEl) tEl.innerText = combat_timer; if (combat_timer <= 0) end_combat_log(); }, 1000);
 }
 
 function end_combat_log() { in_combat = false; clearInterval(combat_interval); let bdg = document.getElementById('combat-log-badge'); if(bdg) bdg.style.display = 'none'; if(nickname) database.ref('players/' + nickname + '/died_offline').onDisconnect().cancel(); }
-
 function update_combo_ui(was_sweeping) {
     let badge = document.getElementById('combat-combo-badge'); if(!badge) return;
-    if (combo_count >= 3 && !was_sweeping) {
-        badge.style.display = 'block'; let boost = Math.min((combo_count - 2) * 20, 40);
-        let cbCount = document.getElementById('combat-combo-count'); if(cbCount) cbCount.innerText = combo_count;
-        let cbBoost = document.getElementById('combat-combo-boost'); if(cbBoost) cbBoost.innerText = `+${boost}%`;
-    } else if (was_sweeping) {
-        badge.style.display = 'block'; let cbCount = document.getElementById('combat-combo-count'); if(cbCount) cbCount.innerText = "КЛИНКОМ!";
-        let cbBoost = document.getElementById('combat-combo-boost'); if(cbBoost) cbBoost.innerText = "Броня пробита"; setTimeout(() => {if(combo_count<3) badge.style.display = 'none';}, 1000);
-    } else { badge.style.display = 'none'; }
+    if (combo_count >= 3 && !was_sweeping) { badge.style.display = 'block'; let boost = Math.min((combo_count - 2) * 20, 40); let cbCount = document.getElementById('combat-combo-count'); if(cbCount) cbCount.innerText = combo_count; let cbBoost = document.getElementById('combat-combo-boost'); if(cbBoost) cbBoost.innerText = `+${boost}%`; } else if (was_sweeping) { badge.style.display = 'block'; let cbCount = document.getElementById('combat-combo-count'); if(cbCount) cbCount.innerText = "КЛИНКОМ!"; let cbBoost = document.getElementById('combat-combo-boost'); if(cbBoost) cbBoost.innerText = "Броня пробита"; setTimeout(() => {if(combo_count<3) badge.style.display = 'none';}, 1000); } else { badge.style.display = 'none'; }
 }
-
 function update_target_hud() {
-    let hud = document.getElementById('target-hud');
-    if (!current_target || !online_players[current_target] || (Date.now() - (online_players[current_target].local_last || online_players[current_target].last) > 300000)) { if(hud) hud.style.display = 'none'; return; }
-    let p = online_players[current_target]; if(hud) hud.style.display = 'block'; 
-    let tn = document.getElementById('target-name'); if(tn) tn.innerText = current_target;
-    let hp = Math.max(0, p.hp || 20).toFixed(1); let mhp = p.max_hp || 20;
-    let ht = document.getElementById('target-hp-text'); if(ht) ht.innerText = `${hp}/${mhp} HP`;
-    let hf = document.getElementById('target-hp-fill'); if(hf) hf.style.width = `${Math.min(100, (hp/mhp)*100)}%`;
+    let hud = document.getElementById('target-hud'); if (!current_target || !online_players[current_target] || (Date.now() - (online_players[current_target].local_last || online_players[current_target].last) > 300000)) { if(hud) hud.style.display = 'none'; return; }
+    let p = online_players[current_target]; if(hud) hud.style.display = 'block'; let tn = document.getElementById('target-name'); if(tn) tn.innerText = current_target; let hp = Math.max(0, p.hp || 20).toFixed(1); let mhp = p.max_hp || 20; let ht = document.getElementById('target-hp-text'); if(ht) ht.innerText = `${hp}/${mhp} HP`; let hf = document.getElementById('target-hp-fill'); if(hf) hf.style.width = `${Math.min(100, (hp/mhp)*100)}%`;
 }
 
-window.map_heal = function() {
-    if((inv['gapple']||0) <= 0) return alert("Нет золотых яблок!");
-    let now = Date.now(); if(now - last_heal_time < 2000) return; 
-    last_heal_time = now; inv['gapple']--; 
-    let heal_amt = inv['active_offhand'] === 'sphere_hydra' ? 6 : 4; 
-    let max_hp = get_pvp_stats().max_hp; my_cur_hp = Math.min(max_hp, my_cur_hp + heal_amt);
-    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, `+${heal_amt} HP`); save_data(); sync_my_pos(); render_inventory();
-}
-
-window.map_pearl = function() {
-    if((inv['pearl']||0) <= 0) return alert("Нет эндер-пёрлов!");
-    let now = Date.now();
-    if(now - last_pearl_time < 5000) return alert("КД на пёрл! Подожди.");
-    
-    let dx = 0; let dy = 0; let dist = 150;
-    
-    if (joyX !== 0 || joyY !== 0) {
-        let mag = Math.sqrt(joyX*joyX + joyY*joyY);
-        dx = (joyX / mag) * dist; dy = (joyY / mag) * dist;
-    } else if (current_target && online_players[current_target]) {
-        let p = online_players[current_target];
-        let pdx = p.x - loc_x; let pdz = p.z - loc_z;
-        let pmag = Math.hypot(pdx, pdz);
-        if(pmag > 0) { dx = (pdx/pmag)*dist; dy = (pdz/pmag)*dist; }
-    } else {
-        return alert("Потяни джойстик в сторону броска!");
-    }
-
-    last_pearl_time = now;
-    inv['pearl']--;
-    loc_x += dx; loc_z += dy;
-    my_cur_hp -= 3;
-    if(my_cur_hp <= 0.5) my_cur_hp = 0.5;
-    
-    spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🔮 ПУУНЬЬ!");
-    save_data(); sync_my_pos(); render_inventory(); update_rtp_ui();
-}
-
-window.pvp_swap_offhand = function() {
-    let options = []; for(let key in inv) { if(inv[key] > 0 && (key.startsWith('sphere') || key.startsWith('talisman')) && key !== inv['active_offhand']) options.push(key); }
-    if(options.length === 0) return; 
-    inv['active_offhand'] = options[0]; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp);
-    save_data(); render_inventory(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "СВАП!");
-}
+window.map_heal = function() { if((inv['gapple']||0) <= 0) return alert("Нет золотых яблок!"); let now = Date.now(); if(now - last_heal_time < 2000) return; last_heal_time = now; inv['gapple']--; let heal_amt = inv['active_offhand'] === 'sphere_hydra' ? 6 : 4; let max_hp = get_pvp_stats().max_hp; my_cur_hp = Math.min(max_hp, my_cur_hp + heal_amt); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, `+${heal_amt} HP`); save_data(); sync_my_pos(); render_inventory(); }
+window.map_pearl = function() { if((inv['pearl']||0) <= 0) return alert("Нет эндер-пёрлов!"); let now = Date.now(); if(now - last_pearl_time < 5000) return alert("КД на пёрл! Подожди."); let dx = 0; let dy = 0; let dist = 150; if (joyX !== 0 || joyY !== 0) { let mag = Math.sqrt(joyX*joyX + joyY*joyY); dx = (joyX / mag) * dist; dy = (joyY / mag) * dist; } else if (current_target && online_players[current_target]) { let p = online_players[current_target]; let pdx = p.x - loc_x; let pdz = p.z - loc_z; let pmag = Math.hypot(pdx, pdz); if(pmag > 0) { dx = (pdx/pmag)*dist; dy = (pdz/pmag)*dist; } } else { return alert("Потяни джойстик в сторону броска!"); } last_pearl_time = now; inv['pearl']--; loc_x += dx; loc_z += dy; my_cur_hp -= 3; if(my_cur_hp <= 0.5) my_cur_hp = 0.5; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🔮 ПУУНЬЬ!"); save_data(); sync_my_pos(); render_inventory(); update_rtp_ui(); }
+window.pvp_swap_offhand = function() { let options = []; for(let key in inv) { if(inv[key] > 0 && (key.startsWith('sphere') || key.startsWith('talisman')) && key !== inv['active_offhand']) options.push(key); } if(options.length === 0) return; inv['active_offhand'] = options[0]; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); save_data(); render_inventory(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "СВАП!"); }
 
 function pickup_drop(id) {
     if(world_drops[id] && !world_drops[id].picking) {
@@ -1183,18 +714,9 @@ function pickup_drop(id) {
             let d = snap.val();
             if(d) {
                 database.ref('world_drops/'+id).remove();
-                
-                let stats = get_pvp_stats();
-                if((stats.wp_ench.mending || 0) > 0) { weapon_dur = Math.min(1000, weapon_dur + 150); armor_dur = Math.min(1000, armor_dur + 150); }
-                
-                let drop_skr = d.skrepki || 0;
-                if((stats.wp_ench.looting || 0) > 0 && d.from && Math.random() < ((stats.wp_ench.looting || 0) * 0.15)) { 
-                    drop_skr = Math.floor(drop_skr * 1.5); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ДОБЫЧА СРАБОТАЛА!"); 
-                }
-                
-                skrepki += drop_skr;
-                let l_inv = JSON.parse(d.inv||"{}"); for(let k in l_inv) inv[k] = (inv[k]||0) + l_inv[k];
-                save_data(); upd_ui(); render_inventory(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ВЗЯЛ ЛУТ!");
+                let stats = get_pvp_stats(); if((stats.wp_ench.mending || 0) > 0) { weapon_dur = Math.min(1000, weapon_dur + 150); armor_dur = Math.min(1000, armor_dur + 150); }
+                let drop_skr = d.skrepki || 0; if((stats.wp_ench.looting || 0) > 0 && d.from && Math.random() < ((stats.wp_ench.looting || 0) * 0.15)) { drop_skr = Math.floor(drop_skr * 1.5); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ДОБЫЧА СРАБОТАЛА!"); }
+                skrepki += drop_skr; let l_inv = JSON.parse(d.inv||"{}"); for(let k in l_inv) inv[k] = (inv[k]||0) + l_inv[k]; save_data(); upd_ui(); render_inventory(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ВЗЯЛ ЛУТ!");
             }
         });
     }
@@ -1211,6 +733,17 @@ window.switch_top = function(tab) { current_top_tab = tab; let btns = ['players'
 
 function render_leaderboard() { 
     let lb = document.getElementById('leaderboard-content'); if(!lb) return;
+    
+    // ВШИВАЕМ ТЕКУЩИЙ ЛОКАЛЬНЫЙ БАЛАНС В КЭШ ДЛЯ МГНОВЕННОГО ОТОБРАЖЕНИЯ!
+    if (nickname) {
+        if (!cached_players[nickname]) cached_players[nickname] = {};
+        cached_players[nickname].vrgk = vrgk;
+        cached_players[nickname].rank = player_rank;
+        cached_players[nickname].donate_rank = donate_rank;
+        cached_players[nickname].club = localStorage.getItem(PREFIX + 'club');
+        cached_players[nickname].stats = [profit, tap_power, max_energy, eng_regen, tap_price, tap_lvl, eng_price, eng_lvl, regen_price, c1_price, c2_price, c3_price, c4_price, c5_price, c6_price, c7_price, c1_lvl, c2_lvl, c3_lvl, c4_lvl, c5_lvl, c6_lvl, c7_lvl, max_rank, my_color, og_pro, c8_price, c9_price, c10_price, c11_price, c12_price, c13_price, c8_lvl, c9_lvl, c10_lvl, c11_lvl, c12_lvl, c13_lvl, total_taps, r_wins, r_loss, r_streak, my_title, streak_days, q_taps, q_wins, q_msgs, q_date, q_claimed ? 1 : 0, streak_last];
+    }
+
     if (Object.keys(cached_players).length === 0 && current_top_tab !== 'clubs') { lb.innerHTML = '<div style="text-align:center; color:#555;">загрузка...</div>'; return; } 
     let html = ''; 
     if (current_top_tab === 'players') { let sorted = Object.keys(cached_players).map(k => { return { name: k, vrgk: cached_players[k].vrgk || 0, club: cached_players[k].club, stats: cached_players[k].stats || [], drank: cached_players[k].donate_rank||0 }; }).sort((a, b) => b.vrgk - a.vrgk); sorted.forEach((p, i) => { let pos = i + 1; let c_cls = pos === 1 ? 'gold-pos' : pos === 2 ? 'silver-pos' : pos === 3 ? 'bronze-pos' : ''; let col = p.stats[24] || '#fff'; let og = p.stats[25] ? ' 🌟' : ''; let t_disp = p.stats[42] ? `[${p.stats[42]}] ` : ''; let d_badge = p.drank > 0 ? `<span style="font-size:10px; color:${RANKS_INFO[p.drank].color}; font-weight:bold; margin-right:4px;">[${RANKS_INFO[p.drank].name}]</span>` : ''; html += `<div class="upgrade-item" style="cursor:pointer;" onclick="open_profile('${p.name}')"><div class="rank-pos ${c_cls}">${pos}</div><div class="upgrade-info" style="flex: 1; margin-left: 10px;"><span class="upgrade-name" style="color:${col}">${d_badge}${t_disp}${p.name}${og}</span>${p.club ? `<span style="font-size: 10px; color: #888; margin-top: -3px;">${p.club}</span>` : ''}</div><div class="upgrade-price">${fmt(p.vrgk)}</div></div>`; }); } 
