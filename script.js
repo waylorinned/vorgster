@@ -37,10 +37,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-        uid = user.uid;
-        load_player_data();
+// ==========================================
+// ИСПРАВЛЕННАЯ АВТОРИЗАЦИЯ (ПРЯМО ИЗ БАЗЫ)
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    let saved_nick = localStorage.getItem('vorg_nick');
+    let saved_pin = localStorage.getItem('vorg_pin');
+    
+    if (saved_nick && saved_pin) {
+        document.getElementById('auth-nick').value = saved_nick;
+        document.getElementById('auth-pin').value = saved_pin;
+        auth_player(); // Пробуем авто-вход
     } else {
         document.getElementById('auth-modal').style.display = 'flex';
     }
@@ -51,17 +58,38 @@ function auth_player() {
     let pin = document.getElementById('auth-pin').value.trim();
     if(nick.length < 3 || pin.length !== 4) return alert("Ник от 3 букв, пин-код ровно 4 цифры!");
     
-    let email = nick.toLowerCase() + "@vorgster.com";
-    firebase.auth().signInWithEmailAndPassword(email, pin).catch(err => {
-        if(err.code === 'auth/user-not-found') {
-            firebase.auth().createUserWithEmailAndPassword(email, pin).then(cred => {
-                db.ref(DB_ROOT + 'users/' + cred.user.uid).set({
-                    nickname: nick, vrgk: 1000, skrepki: 0, exp: 0, inv: { iron: 0, diamond: 0, lapis: 0 }
-                });
+    // Лезем в твою старую базу данных напрямую
+    db.ref(DB_ROOT + 'users/' + nick).once('value', snap => {
+        let p = snap.val();
+        if (p) {
+            // Аккаунт существует, сверяем ПИН-КОД
+            if (p.pin === pin || p.pin == pin) {
+                uid = nick; // У тебя uid и ник совпадают
+                localStorage.setItem('vorg_nick', nick);
+                localStorage.setItem('vorg_pin', pin);
+                load_player_data();
+            } else {
+                alert("Неверный пин-код!");
+            }
+        } else {
+            // Регистрация нового аккаунта
+            db.ref(DB_ROOT + 'users/' + nick).set({
+                nickname: nick,
+                pin: pin,
+                vrgk: 1000, 
+                skrepki: 0, 
+                exp: 0, 
+                inv: { iron: 0, diamond: 0, lapis: 0 }
+            }).then(() => {
+                uid = nick;
+                localStorage.setItem('vorg_nick', nick);
+                localStorage.setItem('vorg_pin', pin);
+                load_player_data();
             });
-        } else alert("Неверный пин-код!");
+        }
     });
 }
+// ==========================================
 
 function load_player_data() {
     document.getElementById('auth-modal').style.display = 'none';
@@ -105,6 +133,7 @@ function load_player_data() {
 }
 
 function save_data() {
+    // Используем update, чтобы не затереть пароль (pin)
     db.ref(DB_ROOT + 'users/' + uid).update({
         vrgk: vrgk, skrepki: skrepki, exp: exp, inv: inv, 
         eq_sword: eq_sword, eq_armor: eq_armor, eq_offhand: eq_offhand
