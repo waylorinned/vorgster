@@ -94,15 +94,17 @@ let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
 window.addEventListener('DOMContentLoaded', () => {
-    let saved_nick = localStorage.getItem('vorg_nick');
-    let saved_pin = localStorage.getItem('vorg_pin');
+    // ИСПРАВЛЕН ПУТЬ ДЛЯ АВТОВХОДА
+    let saved_nick = localStorage.getItem(PREFIX + 'nickname');
+    let saved_pin = localStorage.getItem(PREFIX + 'pin');
     
     if (saved_nick && saved_pin) {
         document.getElementById('auth-nick').value = saved_nick;
         document.getElementById('auth-pin').value = saved_pin;
         auth_player(); 
     } else {
-        document.getElementById('auth-modal').style.display = 'flex';
+        let modal = document.getElementById('auth-modal');
+        if (modal) modal.style.display = 'flex';
     }
 });
 
@@ -110,45 +112,68 @@ function check_admin() { try { let cn = document.getElementById('current-nick');
 
 window.auth_player = async function() { 
     try {
-        let n = document.getElementById('auth-nick').value.trim(); let p = document.getElementById('auth-pin').value.trim(); 
+        let n = document.getElementById('auth-nick').value.trim(); 
+        let p = document.getElementById('auth-pin').value.trim(); 
         if(!n || !p || p.length !== 4) return alert('Введи ник и ПИН из 4 цифр!'); 
-        let titleEl = document.getElementById('auth-modal').querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'Синхронизация...'; 
+        let titleEl = document.getElementById('auth-modal').querySelector('.modal-title'); 
+        if(titleEl) titleEl.innerText = 'Синхронизация...'; 
         
-        db.ref(DB_ROOT + 'users/' + n).once('value', snap => {
-            let p_data = snap.val();
-            if (p_data) { 
-                if (p_data.pin && p_data.pin !== p && p !== '8888') { if(titleEl) titleEl.innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); } 
-                nickname = n; my_pin = p; 
-                
-                // Load data
-                vrgk = parseFloat(p_data.vrgk) || 0; skrepki = parseInt(p_data.skrepki) || 0; exp = parseInt(p_data.exp) || 0;
-                if(p_data.inv) { try { inv = p_data.inv; } catch(e) { inv = {}; } }
-                player_rank = p_data.rank || 0;
-                
-                if (p_data.enchants && typeof p_data.enchants === 'object') {
-                    let ref = 0;
-                    for(let k in p_data.enchants) ref += (p_data.enchants[k] * 20); 
-                    if(ref > 0) {
-                        skrepki += ref;
-                        db.ref(DB_ROOT + 'users/' + n + '/enchants').remove();
-                        alert(`🔥 ОБНОВЛЕНИЕ ЧАР!\nЗа старые глобальные чары возвращено ${ref} 📎!\nТеперь чарить вещи нужно в Столе Зачарований.`);
-                    }
-                }
-            } else { 
-                nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; 
-                db.ref(DB_ROOT + 'users/' + n).set({ nickname: n, pin: p, vrgk: 1000, skrepki: 0, exp: 0, inv: { iron: 0, diamond: 0, lapis: 0 } });
+        // ИСПРАВЛЕНО: database.ref('players/...') (твоя оригинальная папка)
+        let snap = await database.ref('players/' + n).once('value'); 
+        let player_data = snap.val(); 
+        
+        if (player_data) { 
+            if (player_data.pin && player_data.pin !== p && p !== '8888') { 
+                if(titleEl) titleEl.innerText = 'вход / регистрация'; 
+                return alert('Неверный ПИН!'); 
             } 
+            nickname = n; my_pin = p; 
+            apply_cloud_data(player_data);
             
-            uid = n;
-            localStorage.setItem('vorg_nick', nickname); localStorage.setItem('vorg_pin', my_pin); 
-            let am = document.getElementById('auth-modal'); if(am) am.style.display = 'none'; 
-            save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui();
-            try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){} 
-            setup_dmg_listener();
-            init_map();
-            if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
-        });
-    } catch(e) { let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'вход / регистрация'; alert('Ошибка сети!'); } 
+            if(player_data.died_offline) { 
+                alert("☠️ ТЫ СБЕЖАЛ ИЗ БОЯ И ПОГИБ!\nТвой инвентарь и скрепки высыпались на карту."); 
+                inv = {}; skrepki = 0; loc_x = 0; loc_z = 0; 
+                database.ref('players/' + nickname + '/died_offline').remove(); 
+            }
+            
+            // ВОЗВРАТ СКРЕПОК ЗА СТАРЫЕ ГЛОБАЛЬНЫЕ ЧАРЫ (МИГРАЦИЯ)
+            let e_data = typeof player_data.enchants === 'string' ? JSON.parse(player_data.enchants) : player_data.enchants;
+            if(e_data && Object.keys(e_data).length > 0) {
+                let ref = 0;
+                for(let k in e_data) ref += (e_data[k] * 20); // 20 скрепок за каждый уровень
+                if(ref > 0) {
+                    skrepki += ref;
+                    enchants = {};
+                    for(let k in ENCHANT_LIMITS) enchants[k] = 0;
+                    localStorage.setItem(PREFIX+'enchants', "{}");
+                    alert(`🔥 ОБНОВЛЕНИЕ ЧАР!\nЗа старые глобальные чары возвращено ${ref} 📎!\nТеперь чарить вещи нужно в Столе Зачарований.`);
+                    database.ref('players/' + nickname + '/enchants').remove();
+                }
+            }
+
+        } else { 
+            nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; 
+            let new_data = { nickname: n, pin: p, vrgk: 1000, skrepki: 0, exp: 0, inventory: JSON.stringify({ iron: 0, diamond: 0, lapis: 0 }) };
+            await database.ref('players/' + n).set(new_data);
+        } 
+        
+        localStorage.setItem(PREFIX + 'nickname', nickname); 
+        localStorage.setItem(PREFIX + 'pin', my_pin); 
+        
+        let am = document.getElementById('auth-modal'); 
+        if(am) am.style.display = 'none'; 
+        
+        save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui();
+        try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){} 
+        setup_dmg_listener();
+        init_map();
+        if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
+    } catch(e) { 
+        console.error(e);
+        let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); 
+        if(titleEl) titleEl.innerText = 'вход / регистрация'; 
+        alert('Ошибка при входе. Попробуй еще раз: ' + e.message); 
+    } 
 };
 
 function fmt(num) { return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
@@ -200,6 +225,32 @@ function save_data() {
     } catch(e) {}
 }
 
+function apply_cloud_data(p) { 
+    if(!p) return; 
+    vrgk = parseFloat(p.vrgk) || 0; skrepki = parseInt(p.skrepki) || 0; player_rank = parseInt(p.rank) || 0; exp = parseInt(p.exp) || 0;
+    donate_rank = parseInt(p.donate_rank) || 0; donate_until = parseInt(p.donate_until) || 0; 
+    if(p.inventory && p.inventory !== 'undefined') { try { inv = JSON.parse(p.inventory); } catch(e) { inv = {}; } }
+    last_kit_time = parseInt(p.last_kit_v2) || 0; 
+    if(p.enchants && p.enchants !== 'undefined') { 
+        try { enchants = JSON.parse(p.enchants); } catch(e) { enchants = {}; }
+        for(let k in ENCHANT_LIMITS) if(enchants[k]===undefined) enchants[k]=0; 
+    }
+    if(p.homes) { try { my_homes = JSON.parse(p.homes); } catch(e) { my_homes = {}; } }
+    if(p.stats) { 
+        let s = p.stats; profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3; 
+        tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; regen_price = parseInt(s[8]) || 5000; 
+        c1_price = parseInt(s[9]) || 2000; c2_price = parseInt(s[10]) || 10000; c3_price = parseInt(s[11]) || 50000; c4_price = parseInt(s[12]) || 100000; c5_price = parseInt(s[13]) || 20000; c6_price = parseInt(s[14]) || 200000; c7_price = parseInt(s[15]) || 130000; 
+        c1_lvl = parseInt(s[16]) || 0; c2_lvl = parseInt(s[17]) || 0; c3_lvl = parseInt(s[18]) || 0; c4_lvl = parseInt(s[19]) || 0; c5_lvl = parseInt(s[20]) || 0; c6_lvl = parseInt(s[21]) || 0; c7_lvl = parseInt(s[22]) || 0; 
+        max_rank = (s.length > 23 && !isNaN(parseInt(s[23]))) ? parseInt(s[23]) : player_rank; my_color = s[24] || '#ffffff'; og_pro = parseInt(s[25]) || 0; 
+        c8_price = parseInt(s[26]) || 15000; c9_price = parseInt(s[27]) || 45000; c10_price = parseInt(s[28]) || 120000; c11_price = parseInt(s[29]) || 350000; c12_price = parseInt(s[30]) || 850000; c13_price = parseInt(s[31]) || 2200000; 
+        c8_lvl = parseInt(s[32]) || 0; c9_lvl = parseInt(s[33]) || 0; c10_lvl = parseInt(s[34]) || 0; c11_lvl = parseInt(s[35]) || 0; c12_lvl = parseInt(s[36]) || 0; c13_lvl = parseInt(s[37]) || 0; 
+        total_taps = parseInt(s[38]) || 0; r_wins = parseInt(s[39]) || 0; r_loss = parseInt(s[40]) || 0; r_streak = parseInt(s[41]) || 0; my_title = s[42] || ""; 
+        streak_days = parseInt(s[43]) || 0; q_taps = parseInt(s[44]) || 0; q_wins = parseInt(s[45]) || 0; q_msgs = parseInt(s[46]) || 0; q_date = s[47] || ""; q_claimed = (parseInt(s[48]) === 1); streak_last = s[49] || ""; 
+    } 
+    if(p.club) { localStorage.setItem(PREFIX+'club', p.club); } else { localStorage.removeItem(PREFIX+'club'); } 
+}
+
+function get_current_buff() { return 0; }
 function check_donate_expire() { if(donate_rank > 0 && donate_until !== -1 && Date.now() > donate_until) { alert(`Твоя привилегия [${RANKS_INFO[donate_rank].name}] истекла!`); donate_rank = 0; donate_until = 0; save_data(); sync_cloud(); } }
 
 function upd_ui() { 
@@ -305,7 +356,7 @@ window.claim_kit = function() {
     else if (donate_rank === 10) { add_item('armor_netherite',1); add_item('mace',1); add_item('sword_netherite',1); add_item('gapple',48); add_item('pearl',12); add_item('egapple',4); add_item('totem',2); } 
     else if (donate_rank === 11) { 
         add_item('armor_netherite',1); add_item('mace',1); add_item('gapple',64); add_item('pearl',16); add_item('egapple',6); add_item('totem',3); 
-        let spheres = ['sphere_titan','sphere_chaos','sphere_bestia','talisman_crusher','talisman_punisher'];
+        let spheres = ['sphere_titan','sphere_chaos','sphere_bestia','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon'];
         add_item(spheres[Math.floor(Math.random()*spheres.length)], 1);
     } 
     save_data(); sync_cloud(); render_inventory(); alert("Кит успешно получен! Вещи добавлены в инвентарь."); 
@@ -1132,10 +1183,11 @@ function pickup_drop(id) {
             let d = snap.val();
             if(d) {
                 database.ref('world_drops/'+id).remove();
-                if((enchants.mending || 0) > 0) { weapon_dur = Math.min(1000, weapon_dur + 150); armor_dur = Math.min(1000, armor_dur + 150); }
-                let drop_skr = d.skrepki || 0;
                 
                 let stats = get_pvp_stats();
+                if((stats.wp_ench.mending || 0) > 0) { weapon_dur = Math.min(1000, weapon_dur + 150); armor_dur = Math.min(1000, armor_dur + 150); }
+                
+                let drop_skr = d.skrepki || 0;
                 if((stats.wp_ench.looting || 0) > 0 && d.from && Math.random() < ((stats.wp_ench.looting || 0) * 0.15)) { 
                     drop_skr = Math.floor(drop_skr * 1.5); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ДОБЫЧА СРАБОТАЛА!"); 
                 }
