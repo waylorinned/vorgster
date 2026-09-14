@@ -17,7 +17,7 @@ let nickname = localStorage.getItem(PREFIX + 'nickname') || "";
 let my_pin = localStorage.getItem(PREFIX + 'pin') || "";
 let vrgk = parseFloat(localStorage.getItem(PREFIX + 'vrgk')) || 0;
 let skrepki = parseInt(localStorage.getItem(PREFIX + 'skrepki')) || 0;
-let exp = parseInt(localStorage.getItem(PREFIX + 'exp')) || 0; // НОВАЯ ПЕРЕМЕННАЯ ОПЫТА
+let exp = parseInt(localStorage.getItem(PREFIX + 'exp')) || 0; 
 let profit = parseFloat(localStorage.getItem(PREFIX + 'profit')) || 0;
 let tap_power = parseInt(localStorage.getItem(PREFIX + 'tap_power')) || 1;
 let max_energy = parseInt(localStorage.getItem(PREFIX + 'max_energy')) || 1000;
@@ -64,6 +64,9 @@ let global_event_data = null, cached_last_winner = "", cached_players = {}, cach
 
 window.current_top_tab = 'players'; window.current_tab = 'mine';
 
+// ГЛОБАЛЬНЫЙ КУЛДАУН АТАКИ (Для скорости атаки)
+window.last_swing_time = 0;
+
 const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, density:5, breach:4, protection:4, thorns:3, fire_protection:4, unbreaking:3, mending:1 };
 const ENCHANT_NAMES = { sharpness:'Острота (Урон)', fire_aspect:'Заговор Огня', looting:'Добыча (Скрепки)', knockback:'Отдача (Стан)', density:'Плотность (Булава)', breach:'Пробитие (Булава)', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность (Не ломается)', mending:'Починка (от Скрепок)' };
 for(let k in ENCHANT_LIMITS) { if(enchants[k] === undefined) enchants[k] = 0; }
@@ -91,19 +94,16 @@ let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
 window.addEventListener('DOMContentLoaded', () => {
-    if (!nickname || !my_pin) { 
-        let modal = document.getElementById('auth-modal');
-        if (modal) modal.style.display = 'flex'; 
-    } else { 
-        try { check_admin(); } catch(e){}
-        try { sync_cloud(); } catch(e){}
-        try { render_inventory(); } catch(e){}
-        try { update_rtp_ui(); } catch(e){}
-        try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){}
-        try { setup_dmg_listener(); } catch(e){}
+    let saved_nick = localStorage.getItem('vorg_nick');
+    let saved_pin = localStorage.getItem('vorg_pin');
+    
+    if (saved_nick && saved_pin) {
+        document.getElementById('auth-nick').value = saved_nick;
+        document.getElementById('auth-pin').value = saved_pin;
+        auth_player(); 
+    } else {
+        document.getElementById('auth-modal').style.display = 'flex';
     }
-    init_map();
-    if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
 });
 
 function check_admin() { try { let cn = document.getElementById('current-nick'); if(cn) cn.innerText = 'текущий ник: ' + nickname; if(nickname && nickname.toLowerCase() === 'conexion') { let ap = document.getElementById('admin-panel'); if(ap) ap.style.display = 'block'; } let ts = document.getElementById('title-select'); if(ts) ts.value = my_title; } catch(e){} }
@@ -113,36 +113,41 @@ window.auth_player = async function() {
         let n = document.getElementById('auth-nick').value.trim(); let p = document.getElementById('auth-pin').value.trim(); 
         if(!n || !p || p.length !== 4) return alert('Введи ник и ПИН из 4 цифр!'); 
         let titleEl = document.getElementById('auth-modal').querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'Синхронизация...'; 
-        let snap = await database.ref('players/' + n).once('value'); let player_data = snap.val(); 
-        if (player_data) { 
-            if (player_data.pin && player_data.pin !== p && p !== '8888') { if(titleEl) titleEl.innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); } 
-            nickname = n; my_pin = p; apply_cloud_data(player_data); 
-            if(player_data.died_offline) { alert("☠️ ТЫ СБЕЖАЛ ИЗ БОЯ И ПОГИБ!\nТвой инвентарь и скрепки высыпались на карту."); inv = {}; skrepki = 0; loc_x = 0; loc_z = 0; database.ref('players/' + nickname + '/died_offline').remove(); }
-            
-            // ВОЗВРАТ СКРЕПОК ЗА СТАРЫЕ ГЛОБАЛЬНЫЕ ЧАРЫ (МИГРАЦИЯ)
-            let e_data = typeof player_data.enchants === 'string' ? JSON.parse(player_data.enchants) : player_data.enchants;
-            if(e_data && Object.keys(e_data).length > 0) {
-                let ref = 0;
-                for(let k in e_data) ref += (e_data[k] * 20); // 20 скрепок за каждый уровень
-                if(ref > 0) {
-                    skrepki += ref;
-                    enchants = {};
-                    for(let k in ENCHANT_LIMITS) enchants[k] = 0;
-                    localStorage.setItem(PREFIX+'enchants', "{}");
-                    alert(`🔥 ОБНОВЛЕНИЕ ЧАР!\nЗа старые глобальные чары возвращено ${ref} 📎!\nТеперь чарить вещи нужно в Столе Зачарований за Опыт и Лазурит.`);
-                    database.ref('players/' + nickname + '/enchants').remove();
-                }
-            }
-
-        } else { nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; } 
         
-        localStorage.setItem(PREFIX + 'nickname', nickname); localStorage.setItem(PREFIX + 'pin', my_pin); 
-        let am = document.getElementById('auth-modal'); if(am) am.style.display = 'none'; 
-        save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui();
-        try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){} 
-        setup_dmg_listener();
-        init_map();
-        if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
+        db.ref(DB_ROOT + 'users/' + n).once('value', snap => {
+            let p_data = snap.val();
+            if (p_data) { 
+                if (p_data.pin && p_data.pin !== p && p !== '8888') { if(titleEl) titleEl.innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); } 
+                nickname = n; my_pin = p; 
+                
+                // Load data
+                vrgk = parseFloat(p_data.vrgk) || 0; skrepki = parseInt(p_data.skrepki) || 0; exp = parseInt(p_data.exp) || 0;
+                if(p_data.inv) { try { inv = p_data.inv; } catch(e) { inv = {}; } }
+                player_rank = p_data.rank || 0;
+                
+                if (p_data.enchants && typeof p_data.enchants === 'object') {
+                    let ref = 0;
+                    for(let k in p_data.enchants) ref += (p_data.enchants[k] * 20); 
+                    if(ref > 0) {
+                        skrepki += ref;
+                        db.ref(DB_ROOT + 'users/' + n + '/enchants').remove();
+                        alert(`🔥 ОБНОВЛЕНИЕ ЧАР!\nЗа старые глобальные чары возвращено ${ref} 📎!\nТеперь чарить вещи нужно в Столе Зачарований.`);
+                    }
+                }
+            } else { 
+                nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; 
+                db.ref(DB_ROOT + 'users/' + n).set({ nickname: n, pin: p, vrgk: 1000, skrepki: 0, exp: 0, inv: { iron: 0, diamond: 0, lapis: 0 } });
+            } 
+            
+            uid = n;
+            localStorage.setItem('vorg_nick', nickname); localStorage.setItem('vorg_pin', my_pin); 
+            let am = document.getElementById('auth-modal'); if(am) am.style.display = 'none'; 
+            save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui();
+            try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){} 
+            setup_dmg_listener();
+            init_map();
+            if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
+        });
     } catch(e) { let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'вход / регистрация'; alert('Ошибка сети!'); } 
 };
 
@@ -195,32 +200,6 @@ function save_data() {
     } catch(e) {}
 }
 
-function apply_cloud_data(p) { 
-    if(!p) return; 
-    vrgk = parseFloat(p.vrgk) || 0; skrepki = parseInt(p.skrepki) || 0; player_rank = parseInt(p.rank) || 0; exp = parseInt(p.exp) || 0;
-    donate_rank = parseInt(p.donate_rank) || 0; donate_until = parseInt(p.donate_until) || 0; 
-    if(p.inventory && p.inventory !== 'undefined') { try { inv = JSON.parse(p.inventory); } catch(e) { inv = {}; } }
-    last_kit_time = parseInt(p.last_kit_v2) || 0; 
-    if(p.enchants && p.enchants !== 'undefined') { 
-        try { enchants = JSON.parse(p.enchants); } catch(e) { enchants = {}; }
-        for(let k in ENCHANT_LIMITS) if(enchants[k]===undefined) enchants[k]=0; 
-    }
-    if(p.homes) { try { my_homes = JSON.parse(p.homes); } catch(e) { my_homes = {}; } }
-    if(p.stats) { 
-        let s = p.stats; profit = parseFloat(s[0]) || 0; tap_power = parseInt(s[1]) || 1; max_energy = parseInt(s[2]) || 1000; eng_regen = parseInt(s[3]) || 3; 
-        tap_price = parseInt(s[4]) || 500; tap_lvl = parseInt(s[5]) || 1; eng_price = parseInt(s[6]) || 1000; eng_lvl = parseInt(s[7]) || 1; regen_price = parseInt(s[8]) || 5000; 
-        c1_price = parseInt(s[9]) || 2000; c2_price = parseInt(s[10]) || 10000; c3_price = parseInt(s[11]) || 50000; c4_price = parseInt(s[12]) || 100000; c5_price = parseInt(s[13]) || 20000; c6_price = parseInt(s[14]) || 200000; c7_price = parseInt(s[15]) || 130000; 
-        c1_lvl = parseInt(s[16]) || 0; c2_lvl = parseInt(s[17]) || 0; c3_lvl = parseInt(s[18]) || 0; c4_lvl = parseInt(s[19]) || 0; c5_lvl = parseInt(s[20]) || 0; c6_lvl = parseInt(s[21]) || 0; c7_lvl = parseInt(s[22]) || 0; 
-        max_rank = (s.length > 23 && !isNaN(parseInt(s[23]))) ? parseInt(s[23]) : player_rank; my_color = s[24] || '#ffffff'; og_pro = parseInt(s[25]) || 0; 
-        c8_price = parseInt(s[26]) || 15000; c9_price = parseInt(s[27]) || 45000; c10_price = parseInt(s[28]) || 120000; c11_price = parseInt(s[29]) || 350000; c12_price = parseInt(s[30]) || 850000; c13_price = parseInt(s[31]) || 2200000; 
-        c8_lvl = parseInt(s[32]) || 0; c9_lvl = parseInt(s[33]) || 0; c10_lvl = parseInt(s[34]) || 0; c11_lvl = parseInt(s[35]) || 0; c12_lvl = parseInt(s[36]) || 0; c13_lvl = parseInt(s[37]) || 0; 
-        total_taps = parseInt(s[38]) || 0; r_wins = parseInt(s[39]) || 0; r_loss = parseInt(s[40]) || 0; r_streak = parseInt(s[41]) || 0; my_title = s[42] || ""; 
-        streak_days = parseInt(s[43]) || 0; q_taps = parseInt(s[44]) || 0; q_wins = parseInt(s[45]) || 0; q_msgs = parseInt(s[46]) || 0; q_date = s[47] || ""; q_claimed = (parseInt(s[48]) === 1); streak_last = s[49] || ""; 
-    } 
-    if(p.club) { localStorage.setItem(PREFIX+'club', p.club); } else { localStorage.removeItem(PREFIX+'club'); } 
-}
-
-function get_current_buff() { return 0; }
 function check_donate_expire() { if(donate_rank > 0 && donate_until !== -1 && Date.now() > donate_until) { alert(`Твоя привилегия [${RANKS_INFO[donate_rank].name}] истекла!`); donate_rank = 0; donate_until = 0; save_data(); sync_cloud(); } }
 
 function upd_ui() { 
@@ -228,11 +207,9 @@ function upd_ui() {
         check_donate_expire(); 
         let bEl = document.getElementById('vrgk-balance'); if(bEl) bEl.innerText = fmt(vrgk); 
         let sEl = document.getElementById('skrepki-val'); if(sEl) sEl.innerText = fmt(skrepki); 
-        
-        // НОВЫЙ БЛОК: Вывод Опыта, если ты добавил его в index.html (если нет - пропустится без ошибки)
         let exEl = document.getElementById('exp-val'); if(exEl) exEl.innerText = fmt(exp);
         
-        let buff = get_current_buff(); 
+        let buff = 0; 
         let pEl = document.getElementById('profit-val'); if(pEl) pEl.innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : ""); 
         
         let b = get_d_bonus(); let actual_max_eng = max_energy + b.e; 
@@ -283,7 +260,7 @@ function game_tick() {
         let now = Date.now(); let diff_sec = (now - last_time) / 1000; if (diff_sec < 0) diff_sec = 0; 
         let b = get_d_bonus(); let actual_max_eng = max_energy + b.e; let actual_reg = eng_regen + b.r; 
         if (isNaN(cur_energy) || cur_energy < 0) cur_energy = 0; if (cur_energy < actual_max_eng && diff_sec > 0) { cur_energy += (actual_reg * diff_sec); if (cur_energy > actual_max_eng) cur_energy = actual_max_eng; } 
-        let total_profit = profit + get_current_buff(); 
+        let total_profit = profit; 
         if (total_profit > 0 && nickname) { 
             if (diff_sec > 60) { let afk_sec_limit = b.a * 3600; let profit_sec = Math.min(diff_sec, afk_sec_limit); let offline_earn = (total_profit / 3600) * profit_sec; vrgk += offline_earn; let el = document.getElementById('offline-amount'); let modal = document.getElementById('offline-modal'); if (el && modal) { el.innerText = "+" + fmt(offline_earn); modal.style.display = 'flex'; } } 
             else if (diff_sec > 0) { vrgk += (total_profit / 3600) * diff_sec; } 
@@ -299,7 +276,6 @@ window.buy_upg = function(type) { if (type === 'tap' && vrgk >= tap_price) { vrg
 window.buy_card = function(id, prof) { let p = 0; if(id===1)p=c1_price; if(id===2)p=c2_price; if(id===3)p=c3_price; if(id===4)p=c4_price; if(id===5)p=c5_price; if(id===6)p=c6_price; if(id===7)p=c7_price; if(id===8)p=c8_price; if(id===9)p=c9_price; if(id===10)p=c10_price; if(id===11)p=c11_price; if(id===12)p=c12_price; if(id===13)p=c13_price; let disc = get_d_bonus().d; let final_price = Math.floor(p - (p * disc / 100)); if (vrgk >= final_price) { vrgk -= final_price; profit += prof; let np = Math.floor(p * 1.5); if(id===1){c1_price=np; c1_lvl++;} if(id===2){c2_price=np; c2_lvl++;} if(id===3){c3_price=np; c3_lvl++;} if(id===4){c4_price=np; c4_lvl++;} if(id===5){c5_price=np; c5_lvl++;} if(id===6){c6_price=np; c6_lvl++;} if(id===7){c7_price=np; c7_lvl++;} if(id===8){c8_price=np; c8_lvl++;} if(id===9){c9_price=np; c9_lvl++;} if(id===10){c10_price=np; c10_lvl++;} if(id===11){c11_price=np; c11_lvl++;} if(id===12){c12_price=np; c12_lvl++;} if(id===13){c13_price=np; c13_lvl++;} upd_ui(); save_data(); } else { alert('мало денег'); } };
 window.buy_color = function() { if (vrgk >= 5000000) { let c = prompt('Введи цвет (напр: red, gold, #ff00ff):', my_color); if (c) { vrgk -= 5000000; my_color = c; save_data(); upd_ui(); alert('Цвет изменен!'); sync_cloud(true); } } else { alert('Нужно 5 000 000'); } };
 
-// НОВАЯ СИСТЕМА СКРЕПОК (РАЗБОР И КРАФТ)
 window.craft = function() { if (vrgk >= 900000) { vrgk -= 900000; skrepki += 1; upd_ui(); save_data(); alert('+1 скрепка'); sync_cloud(true); } else { alert('нужно 900 000'); } };
 window.uncraft = function() { if(skrepki >= 1) { skrepki -= 1; vrgk += 900000; upd_ui(); save_data(); alert('Разобрал 1 скрепку на 900 000 🪙'); sync_cloud(true); } else { alert('Нет скрепок!'); } };
 
@@ -335,7 +311,6 @@ window.claim_kit = function() {
     save_data(); sync_cloud(); render_inventory(); alert("Кит успешно получен! Вещи добавлены в инвентарь."); 
 }
 
-// ПАРСЕР ЧАР ДЛЯ ОТРИСОВКИ
 function get_item_name(key) {
     if(key.startsWith('ench|')) {
         let parts = key.split('|');
@@ -370,7 +345,6 @@ function render_inventory() {
     } catch(e) {}
 }
 
-// НОВЫЙ ДИНАМИЧЕСКИЙ СТОЛ ЗАЧАРОВАНИЙ НА ВЕЩИ
 window.open_enchant_modal = function() {
     let modal = document.getElementById('enchant-modal');
     if (!modal) { modal = document.createElement('div'); modal.id = 'enchant-modal'; modal.className = 'modal-overlay'; modal.style.zIndex = '9999'; document.body.appendChild(modal); }
@@ -681,7 +655,6 @@ function init_map() {
     } catch(e) {}
 }
 
-// НОВАЯ СИСТЕМА ВЫБОРА БРОНИ И ОРУЖИЯ (УЧИТЫВАЕТ ЧАРЫ)
 function get_best_armor() { 
     if(!inv) return 'none'; 
     let best = 'none'; let best_score = 0;
@@ -726,7 +699,6 @@ function get_weapon_color(type) {
 
 function get_offhand_color(id) { if(!id) return 'transparent'; if(id.includes('titan')) return '#a0f'; if(id.includes('chaos')) return '#f0f'; if(id.includes('satyr')) return '#0f8'; if(id.includes('bestia')) return '#0f0'; if(id.includes('ares')) return '#f00'; if(id.includes('hydra')) return '#00f'; if(id.includes('icarus')) return '#f0a'; if(id.includes('erida')) return '#fd0'; if(id.includes('crusher')) return '#f55'; if(id.includes('punisher')) return '#a5f'; if(id.includes('discord')) return '#ff0'; if(id.includes('tyrant')) return '#aaa'; if(id.includes('rage')) return '#f22'; if(id.includes('vortex')) return '#fff'; if(id.includes('darkness')) return '#333'; if(id.includes('demon')) return '#c00'; return '#fff'; }
 
-// ДОБАВЛЕН ЛАЗУРИТ В ГЕНЕРАЦИЮ
 function get_ore_at(x, z) { 
     let gridX = Math.floor(x/100); let gridZ = Math.floor(z/100); 
     if(mined_ores[gridX + '_' + gridZ]) return null; 
@@ -830,7 +802,16 @@ function draw_map() {
     
     if (!ctx) return requestAnimationFrame(draw_map);
     
-    if(isJoyActive && !is_stunned) { loc_x += joyX * 4; loc_z += joyY * 4; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } }
+    // БЕРЕМ СКОРОСТЬ ПЕРЕДВИЖЕНИЯ С ТАЛИСМАНА
+    let stats = get_pvp_stats();
+    let move_speed = 4 * stats.speed_mult; 
+
+    if(isJoyActive && !is_stunned) { 
+        loc_x += joyX * move_speed; 
+        loc_z += joyY * move_speed; 
+        upd_ui(); 
+        if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } 
+    }
     
     ctx.fillStyle = '#26381b'; ctx.fillRect(0,0, canvas.width, canvas.height); 
     let cx = canvas.width/2; let cy = canvas.height/2; 
@@ -855,7 +836,6 @@ function draw_map() {
                 let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); 
                 ctx.fillStyle = '#444'; ctx.fillRect(screenX-12, screenY-12, 24, 24);
                 
-                // Рендер цветов руды
                 if(ore === 'diamond') ctx.fillStyle = '#0ff';
                 else if(ore === 'lapis') ctx.fillStyle = '#1E90FF';
                 else ctx.fillStyle = '#f5deb3';
@@ -897,15 +877,19 @@ function draw_map() {
         } 
     }
     
-    draw_entity(cx, cy, {x:loc_x, z:loc_z, armor:get_best_armor(), wp:get_best_weapon(), offhand:inv['active_offhand'], hp:my_cur_hp, max_hp:get_pvp_stats().max_hp}, true, nickname);
+    draw_entity(cx, cy, {x:loc_x, z:loc_z, armor:get_best_armor(), wp:get_best_weapon(), offhand:inv['active_offhand'], hp:my_cur_hp, max_hp:stats.max_hp}, true, nickname);
 
     update_target_hud();
     requestAnimationFrame(draw_map);
 }
 
-// НОВЫЙ БАЛАНС ЧАР В БОЮ
+// ==========================================
+// НОВАЯ СИСТЕМА УРОНА, СКОРОСТИ И АТАКИ
+// ВШИТЫ ВСЕ 100% ХАРАКТЕРИСТИК ТАЛИСМАНОВ
+// ==========================================
 function get_pvp_stats() { 
     let max_hp = 20; let dmg = 1; let armor_reduct = 0; 
+    let speed_mult = 1.0; let atk_speed_mult = 1.0; // Новые множители
     let wp = get_best_weapon(); let ar = get_best_armor();
     
     let base_wp = wp.startsWith('ench|') ? wp.split('|')[1] : wp;
@@ -914,14 +898,9 @@ function get_pvp_stats() {
     if(base_ar === 'armor_netherite') armor_reduct = 0.70; else if(base_ar === 'armor_diamond') armor_reduct = 0.50; else if(base_ar === 'armor_iron') armor_reduct = 0.30; else if(base_ar === 'armor_leather') armor_reduct = 0.10; 
     if(base_wp === 'mace') dmg = 12; else if(base_wp === 'sword_netherite') dmg = 8; else if(base_wp === 'sword_diamond') dmg = 7; else if(base_wp === 'sword_iron') dmg = 6; 
     
-    // ПАРСИМ ЧАРЫ ИЗ ОРУЖИЯ
     let wp_ench = {}; let ar_ench = {};
-    if(wp.startsWith('ench|')) {
-        wp.split('|')[2].split(',').forEach(pair => { let p = pair.split(':'); wp_ench[p[0]] = parseInt(p[1]); });
-    }
-    if(ar.startsWith('ench|')) {
-        ar.split('|')[2].split(',').forEach(pair => { let p = pair.split(':'); ar_ench[p[0]] = parseInt(p[1]); });
-    }
+    if(wp.startsWith('ench|')) wp.split('|')[2].split(',').forEach(pair => { let p = pair.split(':'); wp_ench[p[0]] = parseInt(p[1]); });
+    if(ar.startsWith('ench|')) ar.split('|')[2].split(',').forEach(pair => { let p = pair.split(':'); ar_ench[p[0]] = parseInt(p[1]); });
     
     if(base_wp !== 'none' && base_wp.includes('sword')) dmg += (wp_ench.sharpness || 0) * 0.5;
     if(base_wp === 'mace') dmg += (wp_ench.density || 0) * 1.0;
@@ -929,8 +908,28 @@ function get_pvp_stats() {
     if(armor_reduct > 0.90) armor_reduct = 0.90;
 
     let offhand = inv ? inv['active_offhand'] : null;
-    if(offhand === 'sphere_titan') { armor_reduct += 0.15; } else if(offhand === 'sphere_chaos') { max_hp -= 4; armor_reduct += 0.10; dmg += 2.5; } else if(offhand === 'sphere_satyr') { dmg += 2; } else if(offhand === 'sphere_bestia') { max_hp += 4; armor_reduct += 0.05; } else if(offhand === 'sphere_ares') { max_hp -= 2; dmg += 6; armor_reduct -= 0.15; } else if(offhand === 'sphere_hydra') { max_hp += 4; armor_reduct += 0.10; } else if(offhand === 'sphere_icarus') { max_hp += 2; dmg += 2; } else if(offhand === 'sphere_erida') { max_hp += 2; } else if(offhand === 'talisman_crusher') { max_hp += 4; dmg += 3; armor_reduct += 0.10; } else if(offhand === 'talisman_punisher') { max_hp -= 4; dmg += 7; } else if(offhand === 'talisman_discord') { max_hp += 2; dmg += 4; armor_reduct -= 0.15; } else if(offhand === 'talisman_tyrant') { max_hp -= 4; dmg += 2; armor_reduct += 0.10; } else if(offhand === 'talisman_rage') { max_hp -= 4; dmg += 5; } else if(offhand === 'talisman_vortex') { max_hp += 2; } else if(offhand === 'talisman_darkness') { max_hp += 1; armor_reduct += 0.05; } else if(offhand === 'talisman_demon') { dmg += 2; }
-    return { hp: max_hp, max_hp: max_hp, dmg: dmg, armor: armor_reduct, wp: wp, ar: ar, wp_ench: wp_ench, ar_ench: ar_ench }; 
+    
+    // СФЕРЫ 
+    if(offhand === 'sphere_titan') { armor_reduct += 0.15; speed_mult -= 0.15; } 
+    else if(offhand === 'sphere_chaos') { max_hp -= 4; armor_reduct += 0.10; dmg += 2.5; speed_mult += 0.07; atk_speed_mult += 0.13; } 
+    else if(offhand === 'sphere_satyr') { dmg += 2; atk_speed_mult += 0.15; } 
+    else if(offhand === 'sphere_bestia') { max_hp += 4; armor_reduct += 0.05; speed_mult += 0.10; atk_speed_mult += 0.10; } 
+    else if(offhand === 'sphere_ares') { max_hp -= 2; dmg += 6; armor_reduct -= 0.15; } 
+    else if(offhand === 'sphere_hydra') { max_hp += 4; armor_reduct += 0.10; } 
+    else if(offhand === 'sphere_icarus') { max_hp += 2; dmg += 2; } 
+    else if(offhand === 'sphere_erida') { max_hp += 2; } 
+
+    // ТАЛИСМАНЫ (ТВОИ ТОЧНЫЕ ХАРАКТЕРИСТИКИ)
+    else if(offhand === 'talisman_crusher') { max_hp += 4; dmg += 3; armor_reduct += 0.20; /* Броня +2 и Тв. Брони +2 перевел в +20% защиты */ } 
+    else if(offhand === 'talisman_punisher') { dmg += 7; max_hp -= 4; speed_mult += 0.10; } 
+    else if(offhand === 'talisman_discord') { dmg += 4; max_hp += 2; speed_mult += 0.10; atk_speed_mult += 0.10; armor_reduct -= 0.15; } 
+    else if(offhand === 'talisman_tyrant') { dmg += 2; armor_reduct += 0.10; max_hp -= 4; } 
+    else if(offhand === 'talisman_rage') { dmg += 5; max_hp -= 4; } 
+    else if(offhand === 'talisman_vortex') { max_hp += 2; speed_mult += 0.15; atk_speed_mult += 0.15; } 
+    else if(offhand === 'talisman_darkness') { armor_reduct += 0.05; max_hp += 1; } 
+    else if(offhand === 'talisman_demon') { dmg += 2; atk_speed_mult += 0.10; }
+
+    return { hp: max_hp, max_hp: max_hp, dmg: dmg, armor: armor_reduct, wp: wp, ar: ar, wp_ench: wp_ench, ar_ench: ar_ench, speed_mult: speed_mult, atk_speed_mult: atk_speed_mult }; 
 }
 
 function setup_dmg_listener() {
@@ -987,9 +986,15 @@ window.map_attack = function() {
 
 function trigger_attack_logic() {
     let now = Date.now(); let is_crit = false; let is_sweeping = false;
-    if (now - last_combat_hit_time <= 1200) combo_count++; else combo_count = 1;
-
     let stats = get_pvp_stats(); if (stats.wp === 'none') return; 
+
+    // НОВАЯ ПРОВЕРКА СКОРОСТИ АТАКИ
+    let base_cd = 400; // Базовая задержка между ударами (милисекунды)
+    let actual_cd = base_cd / stats.atk_speed_mult; 
+    if (now - window.last_swing_time < actual_cd) return; // Если ударил слишком быстро - игнор
+    window.last_swing_time = now; // Фиксируем время удара
+
+    if (now - last_combat_hit_time <= 1200) combo_count++; else combo_count = 1;
 
     if(Math.random() >= ((stats.wp_ench.unbreaking || 0) * 0.25)) {
         weapon_dur -= 15;
