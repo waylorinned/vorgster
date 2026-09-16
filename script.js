@@ -65,8 +65,14 @@ let global_event_data = null, cached_last_winner = "", cached_players = {}, cach
 window.current_top_tab = 'players'; window.current_tab = 'mine';
 window.last_swing_time = 0;
 
-// АНТИ-ДЮП ТАЙНИКОВ
+// АНТИ-ДЮП И НОВЫЕ ПЕРЕМЕННЫЕ
 window.is_transferring = false;
+let is_nether = localStorage.getItem(PREFIX + 'is_nether') === '1';
+
+// КЭШ КАРТИНОК АРТЕФАКТОВ
+const ART_IMGS = {};
+const ART_NAMES = ['sphere_titan', 'sphere_chaos', 'sphere_satyr', 'sphere_bestia', 'sphere_ares', 'sphere_hydra', 'sphere_icarus', 'sphere_erida', 'talisman_crusher', 'talisman_punisher', 'talisman_discord', 'talisman_tyrant', 'talisman_rage', 'talisman_vortex', 'talisman_darkness', 'talisman_demon'];
+ART_NAMES.forEach(n => { let img = new Image(); img.src = n + '.png'; ART_IMGS[n] = img; });
 
 const ENCHANT_LIMITS = { sharpness:5, fire_aspect:2, looting:3, knockback:2, density:5, breach:4, protection:4, thorns:3, fire_protection:4, unbreaking:3, mending:1 };
 const ENCHANT_NAMES = { sharpness:'Острота', fire_aspect:'Огонь', looting:'Добыча', knockback:'Отдача', density:'Плотность', breach:'Пробитие', protection:'Защита', thorns:'Шипы', fire_protection:'Огнеупорность', unbreaking:'Прочность', mending:'Починка' };
@@ -76,7 +82,7 @@ const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Сер�
 const RANK_COLORS = ['#cd7f32', '#c0c0c0', '#ffd700', '#00ffff', '#8a2be2', '#ff00ff', '#ff4500', '#ff0000'];
 const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'mythic.mp3', 'legendary.mp3', 'masters.mp3', 'pro.mp3'];
 const RANKS_INFO = [{name: "Нет", color: "#fff"}, {name: "Барон", color: "#aaa"}, {name: "Страж", color: "#aaddaa"}, {name: "Герой", color: "#55ccff"}, {name: "Аспид", color: "#00ff00"}, {name: "Сквид", color: "#00ffff"}, {name: "Глава", color: "#ffa500"}, {name: "Элита", color: "#a020f0"}, {name: "Титан", color: "#ff4500"}, {name: "Принц", color: "#ffd700"}, {name: "Князь", color: "#ff00ff"}, {name: "ГЕРЦОГ", color: "#fff"} ];
-const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_diamond": "Алмаз 💎", "lapis": "Лазурит 🔷", "ingot_iron": "Слиток железа 🪙", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈" };
+const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_gold": "Золотая руда 🟡", "ore_diamond": "Алмаз 💎", "lapis": "Лазурит 🔷", "ingot_iron": "Слиток железа 🪙", "ingot_gold": "Слиток золота 🌟", "nugget_gold": "Кусочек золота 🧀", "quartz": "Кварц 🤍", "debris": "Незер лом 🟤", "ingot_netherite": "Незер слиток 🖤", "upgrade_template": "Шаблон кузни 🌀", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈" };
 
 let canvas = null; let ctx = null; let online_players = {}, joyX = 0, joyY = 0, isJoyActive = false;
 let is_on_ore = null, current_stash_id = null, world_drops = {};
@@ -190,6 +196,7 @@ function save_data() {
         localStorage.setItem(PREFIX+'c1_price', c1_price); localStorage.setItem(PREFIX+'c1_lvl', c1_lvl); localStorage.setItem(PREFIX+'c2_price', c2_price); localStorage.setItem(PREFIX+'c2_lvl', c2_lvl); localStorage.setItem(PREFIX+'c3_price', c3_price); localStorage.setItem(PREFIX+'c3_lvl', c3_lvl); localStorage.setItem(PREFIX+'c4_price', c4_price); localStorage.setItem(PREFIX+'c4_lvl', c4_lvl); localStorage.setItem(PREFIX+'c5_price', c5_price); localStorage.setItem(PREFIX+'c5_lvl', c5_lvl); localStorage.setItem(PREFIX+'c6_price', c6_price); localStorage.setItem(PREFIX+'c6_lvl', c6_lvl); localStorage.setItem(PREFIX+'c7_price', c7_price); localStorage.setItem(PREFIX+'c7_lvl', c7_lvl); localStorage.setItem(PREFIX+'c8_price', c8_price); localStorage.setItem(PREFIX+'c8_lvl', c8_lvl); localStorage.setItem(PREFIX+'c9_price', c9_price); localStorage.setItem(PREFIX+'c9_lvl', c9_lvl); localStorage.setItem(PREFIX+'c10_price', c10_price); localStorage.setItem(PREFIX+'c10_lvl', c10_lvl); localStorage.setItem(PREFIX+'c11_price', c11_price); localStorage.setItem(PREFIX+'c11_lvl', c11_lvl); localStorage.setItem(PREFIX+'c12_price', c12_price); localStorage.setItem(PREFIX+'c12_lvl', c12_lvl); localStorage.setItem(PREFIX+'c13_price', c13_price); localStorage.setItem(PREFIX+'c13_lvl', c13_lvl); 
         localStorage.setItem(PREFIX+'tot_taps', total_taps); localStorage.setItem(PREFIX+'r_wins', r_wins); localStorage.setItem(PREFIX+'r_loss', r_loss); localStorage.setItem(PREFIX+'r_streak', r_streak); localStorage.setItem(PREFIX+'title', my_title); 
         localStorage.setItem(PREFIX+'homes', JSON.stringify(my_homes || {}));
+        localStorage.setItem(PREFIX+'is_nether', is_nether ? '1' : '0');
     } catch(e) {}
 }
 
@@ -225,7 +232,15 @@ function upd_ui() {
     try {
         check_donate_expire(); 
         
-        // ФИКС МГНОВЕННОГО РЕЙТИНГА: Перезаписываем баланс в кэше локально
+        let wrap = document.getElementById('map-wrapper'); let portalBtn = document.getElementById('btn-portal');
+        if (is_nether) {
+            if(wrap && !wrap.classList.contains('nether-mode')) wrap.classList.add('nether-mode');
+            if(portalBtn) { portalBtn.innerText = "ВЕРНУТЬСЯ В ОБЫЧНЫЙ МИР 🌍"; portalBtn.style.background = "#222"; portalBtn.style.borderColor = "#555"; }
+        } else {
+            if(wrap && wrap.classList.contains('nether-mode')) wrap.classList.remove('nether-mode');
+            if(portalBtn) { portalBtn.innerText = "ПОРТАЛ В АД 🌋"; portalBtn.style.background = "#400"; portalBtn.style.borderColor = "#f00"; }
+        }
+
         if (nickname) {
             if (!cached_players[nickname]) cached_players[nickname] = {};
             cached_players[nickname].vrgk = vrgk;
@@ -536,22 +551,95 @@ window.roll_enchant = function(tier) {
 
 function inject_enchant_button() { let wrap = document.getElementById('map-wrapper'); if(wrap && !document.getElementById('enchant-btn')) { let btn = document.createElement('button'); btn.id = 'enchant-btn'; btn.className = 'buy-btn purple craft-overlay-btn'; btn.style.cssText = 'position:absolute; top:40px; right:10px; z-index:20; padding:5px 10px; font-size:10px;'; btn.innerText = 'ЧАРЫ 🔮'; btn.onclick = open_enchant_modal; wrap.appendChild(btn); } }
 
-window.open_craft_modal = function() { let u1=document.getElementById('ui-ore-iron'); if(u1)u1.innerText = inv['ore_iron'] || 0; let u2=document.getElementById('ui-ingot-iron'); if(u2)u2.innerText = inv['ingot_iron'] || 0; let u3=document.getElementById('ui-gem-diamond'); if(u3)u3.innerText = inv['ore_diamond'] || 0; let cm=document.getElementById('craft-modal'); if(cm)cm.style.display = 'flex'; }
-window.mine_ore = function() { if(is_on_ore) { if(navigator.vibrate) navigator.vibrate(50); if(is_on_ore === 'lapis') { inv['lapis'] = (inv['lapis']||0)+1; exp+=30; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Лазурит"); } if(is_on_ore === 'diamond') { inv['ore_diamond'] = (inv['ore_diamond']||0)+1; exp+=50; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Алмаз"); } if(is_on_ore === 'iron') { inv['ore_iron'] = (inv['ore_iron']||0)+1; exp+=10; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Железная руда"); } mined_ores[window.cur_ore_x + '_' + window.cur_ore_z] = true; is_on_ore = null; let mb = document.getElementById('mine-btn'); if(mb) mb.style.display = 'none'; save_data(); render_inventory(); } }
-window.smelt = function(type) { if(type === 'iron') { if((inv['ore_iron']||0) >= 1) { inv['ore_iron']--; inv['ingot_iron'] = (inv['ingot_iron']||0)+1; save_data(); open_craft_modal(); sync_cloud(true); } else alert("Нет железной руды!"); } }
+// НОВЫЙ КРАФТ (ПЕЧЬ, ВЕРСТАК, КУЗНЯ)
+window.open_craft_modal = function() { 
+    let setT = (id, k) => { let e = document.getElementById(id); if(e) e.innerText = inv[k]||0; };
+    setT('ui-ore-iron', 'ore_iron'); setT('ui-ingot-iron', 'ingot_iron'); 
+    setT('ui-ore-gold', 'ore_gold'); setT('ui-ingot-gold', 'ingot_gold'); setT('ui-nugget-gold', 'nugget_gold');
+    setT('ui-gem-diamond', 'ore_diamond'); 
+    setT('ui-debris', 'debris'); setT('ui-ingot-netherite', 'ingot_netherite'); setT('ui-upgrade', 'upgrade_template');
+    
+    let cm=document.getElementById('craft-modal'); if(cm)cm.style.display = 'flex'; 
+}
+
+window.mine_ore = function() { 
+    if(is_on_ore) { 
+        if(navigator.vibrate) navigator.vibrate(50); 
+        
+        if(is_on_ore === 'lapis') { inv['lapis'] = (inv['lapis']||0)+1; exp+=30; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Лазурит"); } 
+        if(is_on_ore === 'diamond') { inv['ore_diamond'] = (inv['ore_diamond']||0)+1; exp+=50; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Алмаз"); } 
+        if(is_on_ore === 'gold') { inv['ore_gold'] = (inv['ore_gold']||0)+1; exp+=15; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Золотая руда"); } 
+        if(is_on_ore === 'iron') { inv['ore_iron'] = (inv['ore_iron']||0)+1; exp+=10; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Железная руда"); } 
+        
+        if(is_on_ore === 'quartz') { inv['quartz'] = (inv['quartz']||0)+1; exp+=20; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Кварц"); }
+        if(is_on_ore === 'nugget_gold') { let drop = Math.floor(Math.random()*3 + 1); inv['nugget_gold'] = (inv['nugget_gold']||0)+drop; exp+=15; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, `+${drop} Кусочек золота`); }
+        if(is_on_ore === 'debris') { inv['debris'] = (inv['debris']||0)+1; exp+=100; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Незер лом"); }
+        if(is_on_ore === 'upgrade') { inv['upgrade_template'] = (inv['upgrade_template']||0)+1; exp+=200; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "+1 Кузнечный шаблон!"); }
+
+        let dimPrefix = is_nether ? 'N_' : 'O_';
+        mined_ores[dimPrefix + window.cur_ore_x + '_' + window.cur_ore_z] = true; 
+        is_on_ore = null; let mb = document.getElementById('mine-btn'); if(mb) mb.style.display = 'none'; 
+        save_data(); render_inventory(); 
+    } 
+}
+
+window.smelt = function(type) { 
+    let oreKey = 'ore_' + type; let ingotKey = 'ingot_' + type;
+    if((inv[oreKey]||0) >= 1) { inv[oreKey]--; inv[ingotKey] = (inv[ingotKey]||0)+1; save_data(); open_craft_modal(); sync_cloud(true); } 
+    else alert("Нет руды!"); 
+}
+
+window.craft_gold_from_nuggets = function() {
+    if((inv['nugget_gold']||0) >= 9) { inv['nugget_gold']-=9; inv['ingot_gold']=(inv['ingot_gold']||0)+1; save_data(); open_craft_modal(); sync_cloud(true); }
+    else alert("Нужно 9 кусочков золота!");
+}
+
+window.craft_netherite_ingot = function() {
+    if((inv['debris']||0) >= 4 && (inv['ingot_gold']||0) >= 4) {
+        inv['debris']-=4; inv['ingot_gold']-=4; inv['ingot_netherite']=(inv['ingot_netherite']||0)+1;
+        save_data(); open_craft_modal(); sync_cloud(true); alert("Скрафчен Незеритовый слиток!");
+    } else alert("Нужно 4 лома и 4 золотых слитка!");
+}
+
+window.upgrade_gear = function(type) {
+    if(type === 'sword') {
+        if((inv['sword_diamond']||0) >= 1 && (inv['ingot_netherite']||0) >= 1 && (inv['upgrade_template']||0) >= 1) {
+            inv['sword_diamond']--; inv['ingot_netherite']--; inv['upgrade_template']--; inv['sword_netherite']=(inv['sword_netherite']||0)+1;
+            save_data(); open_craft_modal(); sync_cloud(true); alert("Меч улучшен до незеритового!");
+        } else alert("Не хватает ресурсов! Нужен алм. меч, нез. слиток и шаблон.");
+    } else if(type === 'armor') {
+        if((inv['armor_diamond']||0) >= 1 && (inv['ingot_netherite']||0) >= 4 && (inv['upgrade_template']||0) >= 4) {
+            inv['armor_diamond']--; inv['ingot_netherite']-=4; inv['upgrade_template']-=4; inv['armor_netherite']=(inv['armor_netherite']||0)+1;
+            save_data(); open_craft_modal(); sync_cloud(true); alert("Броня улучшена до незеритовой!");
+        } else alert("Не хватает ресурсов! Нужен алм. сет, 4 нез. слитка и 4 шаблона.");
+    }
+}
+
 window.craft_item = function(res_item, cost) { let is_diamond = res_item.includes('diamond'); let req_mat = is_diamond ? 'ore_diamond' : 'ingot_iron'; if((inv[req_mat]||0) >= cost) { inv[req_mat] -= cost; inv[res_item] = (inv[res_item]||0)+1; save_data(); open_craft_modal(); sync_cloud(true); alert("Успешный крафт!"); } else alert(`Нужно ${cost} ${is_diamond ? 'Алмазов' : 'Слитков железа'}!`); }
 
 function update_rtp_ui() { let cx = document.getElementById('map-x'); if(cx) cx.innerText = Math.floor(loc_x); let cz = document.getElementById('map-z'); if(cz) cz.innerText = Math.floor(loc_z); check_local_stashes(); }
-window.do_rtp = function() { if (in_combat) return alert("В бою нельзя использовать RTP!"); loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; save_data(); update_rtp_ui(); sync_my_pos(); }
+window.do_rtp = function() { if (in_combat) return alert("В бою нельзя использовать RTP!"); loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТЕЛЕПОРТАЦИЯ"); }
 window.tp_spawn = function() { if (in_combat) return alert("В бою нельзя телепортироваться на спавн!"); loc_x = 0; loc_z = 0; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП НА СПАВН"); }
+
+// ПОРТАЛ В АД
+window.toggle_dimension = function() {
+    if (in_combat) return alert("Нельзя менять измерение во время боя!");
+    is_nether = !is_nether;
+    localStorage.setItem(PREFIX + 'is_nether', is_nether ? '1' : '0');
+    loc_x = 0; loc_z = 0;
+    save_data(); update_rtp_ui(); sync_my_pos(); upd_ui();
+    
+    if (is_nether) spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🌋 АД");
+    else spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🌍 ПОВЕРХНОСТЬ");
+};
 
 window.open_homes_modal = function() { let max_homes = 1 + donate_rank; let hl = document.getElementById('homes-limit'); if(hl) hl.innerText = Object.keys(my_homes).length + " / " + max_homes; let list = document.getElementById('homes-list'); if(list) { let html = ''; for(let k in my_homes) { let h = my_homes[k]; html += `<div class="upgrade-item" style="flex-direction:row; align-items:center;"><div class="upgrade-info" style="flex:1;"><span class="upgrade-name">${h.name}</span><span class="upgrade-desc" style="font-size:10px;">X: ${Math.floor(h.x)} Z: ${Math.floor(h.z)}</span></div><button class="buy-btn blue" style="padding:5px 10px; margin-right:5px; font-size:10px;" onclick="tp_home('${k}')">ТП</button><button class="buy-btn red" style="padding:5px 10px; font-size:10px;" onclick="delete_home('${k}')">УДАЛИТЬ</button></div>`; } if(html === '') html = '<div style="text-align:center; color:#555; font-size:12px; padding:10px;">У тебя пока нет домов</div>'; list.innerHTML = html; } document.getElementById('homes-modal').style.display = 'flex'; }
 window.set_home = function() { let max_homes = 1 + donate_rank; if(Object.keys(my_homes).length >= max_homes) return alert("Достигнут лимит сетхомов! Удали старый или повысь донат."); let id = 'home_' + Date.now(); let def_name = "Дом " + (Object.keys(my_homes).length + 1); let name = prompt("Название дома:", def_name); if(name === null) return; if(name.trim() === '') name = def_name; my_homes[id] = { name: name, x: loc_x, z: loc_z }; save_data(); sync_cloud(); open_homes_modal(); }
 window.tp_home = function(id) { if(in_combat) return alert("В бою нельзя телепортироваться домой!"); let h = my_homes[id]; if(!h) return; loc_x = h.x; loc_z = h.z; save_data(); update_rtp_ui(); sync_my_pos(); document.getElementById('homes-modal').style.display = 'none'; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП ДОМОЙ"); }
 window.delete_home = function(id) { if(confirm("Точно удалить этот сетхом?")) { delete my_homes[id]; save_data(); sync_cloud(); open_homes_modal(); } }
 
-window.place_stash = async function() { if(vrgk < 100000) return alert("Нужно 100 000 воргиков для создания стэша!"); let s_id = nickname + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); if(snap.exists()) return alert("Тут уже есть тайник!"); vrgk -= 100000; upd_ui(); save_data(); await database.ref('stashes/' + s_id).set({ owner: nickname, x: loc_x, z: loc_z, inv: "{}", skrepki: 0 }); alert("Тайник установлен!"); check_local_stashes(); }
-async function check_local_stashes() { let s_id = nickname + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); let cont = document.getElementById('local-stashes'); if(cont) { if(snap.exists()) { cont.innerHTML = `<button class="buy-btn green" style="width:100%;" onclick="open_stash('${s_id}')">ОТКРЫТЬ СВОЙ ТАЙНИК</button>`; } else { cont.innerHTML = ``; } } }
+window.place_stash = async function() { if(vrgk < 100000) return alert("Нужно 100 000 воргиков для создания стэша!"); let s_id = nickname + "_" + (is_nether?"N":"O") + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); if(snap.exists()) return alert("Тут уже есть тайник!"); vrgk -= 100000; upd_ui(); save_data(); await database.ref('stashes/' + s_id).set({ owner: nickname, x: loc_x, z: loc_z, dim: is_nether?1:0, inv: "{}", skrepki: 0 }); alert("Тайник установлен!"); check_local_stashes(); }
+async function check_local_stashes() { let s_id = nickname + "_" + (is_nether?"N":"O") + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); let cont = document.getElementById('local-stashes'); if(cont) { if(snap.exists()) { cont.innerHTML = `<button class="buy-btn green" style="width:100%;" onclick="open_stash('${s_id}')">ОТКРЫТЬ СВОЙ ТАЙНИК</button>`; } else { cont.innerHTML = ``; } } }
 window.open_stash = async function(s_id) { if(in_combat) return alert("Нельзя открыть стэш во время боя!"); current_stash_id = s_id; let sm = document.getElementById('stash-modal'); if(sm) sm.style.display = 'flex'; refresh_stash_ui(); }
 window.refresh_stash_ui = async function() { if(!current_stash_id) return; let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); let sm = document.getElementById('stash-modal'); if(!data) { if(sm) sm.style.display = 'none'; return; } let sinv = JSON.parse(data.inv || "{}"); let s_html = ''; if((data.skrepki||0) > 0) s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('skrepki', ${data.skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${data.skrepki}</div></div>`; for(let k in sinv) { if(sinv[k]>0) { let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('${k}', ${sinv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${iname}</div><div class="inv-count">x${sinv[k]}</div></div>`; } } if(s_html === '') s_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Тайник пуст</div>'; let sg = document.getElementById('stash-items-grid'); if(sg) sg.innerHTML = s_html; let p_html = ''; if(skrepki > 0) p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('skrepki', ${skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${skrepki}</div></div>`; for(let k in inv) { if(inv[k]>0 && k !== 'active_offhand') { let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; let eq = (k === inv['active_offhand']) ? '<span style="color:#0f0; font-weight:bold;">[E]</span> ' : ''; p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('${k}', ${inv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${eq}${iname}</div><div class="inv-count">x${inv[k]}</div></div>`; } } if(p_html === '') p_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Рюкзак пуст</div>'; let pg = document.getElementById('stash-player-grid'); if(pg) pg.innerHTML = p_html; };
 window.move_to_stash_prompt = function(item, max_count) { let amt = 1; if (max_count > 1) { let res = prompt(`Сколько положить? (Макс: ${max_count})`, max_count); if(res === null) return; amt = parseInt(res); if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!"); } move_to_stash(item, amt); };
@@ -594,34 +682,13 @@ window.move_from_stash = async function(item, amt=1) {
     } finally { window.is_transferring = false; }
 };
 
-window.hide_all_armor = async function() { 
-    if(window.is_transferring) return; window.is_transferring = true;
-    try {
-        let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; 
-        let sinv = JSON.parse(data.inv||"{}"); let moved = 0; 
-        const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; 
-        gear.forEach(g => { if(inv[g]>0) { if(g === inv['active_offhand']) { inv['active_offhand'] = ''; my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); sync_my_pos(); } sinv[g] = (sinv[g]||0)+inv[g]; moved+=inv[g]; inv[g]=0; } }); 
-        if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); sync_cloud(true); alert(`Спрятано вещей: ${moved}`); } else alert("Нет вещей в рюкзаке!"); 
-    } finally { window.is_transferring = false; }
-}
-
-window.take_all_armor = async function() { 
-    if(window.is_transferring) return; window.is_transferring = true;
-    try {
-        let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); if(!data) return; 
-        let sinv = JSON.parse(data.inv||"{}"); let moved = 0; 
-        const gear = ['sword_iron','sword_diamond','sword_netherite','mace','armor_leather','armor_iron','armor_diamond','armor_netherite','totem','sphere_titan','sphere_chaos','sphere_satyr','sphere_ares','sphere_bestia','sphere_hydra','sphere_icarus','sphere_erida','talisman_crusher','talisman_punisher','talisman_discord','talisman_tyrant','talisman_rage','talisman_vortex','talisman_darkness','talisman_demon']; 
-        gear.forEach(g => { if(sinv[g]>0) { inv[g] = (inv[g]||0)+sinv[g]; moved+=sinv[g]; sinv[g]=0; } }); 
-        if(moved>0) { data.inv = JSON.stringify(sinv); await database.ref('stashes/' + current_stash_id).set(data); save_data(); upd_ui(); refresh_stash_ui(); sync_cloud(true); alert(`Взято вещей: ${moved}`); } else alert("Нет вещей в стэше!"); 
-    } finally { window.is_transferring = false; }
-}
-
 window.use_locator = async function() { 
     if(window.is_transferring) return; window.is_transferring = true;
     try {
         if(vrgk < 50000) return alert("Локатор стоит 50 000 воргиков!"); vrgk -= 50000; upd_ui(); save_data(); 
         let snap = await database.ref('stashes').once('value'); let all_st = snap.val(); let found = null; 
-        for(let id in all_st) { let s = all_st[id]; if(s.owner !== nickname && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } 
+        let myDim = is_nether ? 1 : 0;
+        for(let id in all_st) { let s = all_st[id]; if(s.owner !== nickname && (s.dim || 0) === myDim && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } 
         if(found) { 
             if(confirm("ЛОКАТОР НАШЁЛ ЧУЖОЙ ТАЙНИК РЯДОМ!\nВзломать его и забрать все вещи?")) { 
                 let s_data = all_st[found]; let sinv = JSON.parse(s_data.inv||"{}"); 
@@ -650,8 +717,9 @@ function init_map() {
             canvas.addEventListener('touchstart', e => {
                 e.preventDefault(); let rect = canvas.getBoundingClientRect(); let tx = e.touches[0].clientX - rect.left; let ty = e.touches[0].clientY - rect.top;
                 let clicked_nick = null; let cx = canvas.width/2; let cy = canvas.height/2;
+                let myDim = is_nether ? 1 : 0;
                 for(let p in online_players) { 
-                    if(p === nickname || Date.now() - (online_players[p].local_last || online_players[p].last) > 300000) continue; 
+                    if(p === nickname || (online_players[p].dim||0) !== myDim || Date.now() - (online_players[p].local_last || online_players[p].last) > 300000) continue; 
                     let pdx = online_players[p].x - loc_x; let pdz = online_players[p].z - loc_z; let screenX = cx + pdx; let screenY = cy + pdz; 
                     if(Math.abs(tx - screenX) < 40 && Math.abs(ty - screenY) < 40) { clicked_nick = p; break; } 
                 }
@@ -690,13 +758,25 @@ function get_offhand_color(id) { if(!id) return 'transparent'; if(id.includes('t
 
 function get_ore_at(x, z) { 
     let gridX = Math.floor(x/100); let gridZ = Math.floor(z/100); 
-    if(mined_ores[gridX + '_' + gridZ]) return null; 
+    let dimPrefix = is_nether ? 'N_' : 'O_';
+    if(mined_ores[dimPrefix + gridX + '_' + gridZ]) return null; 
     let noise = Math.sin(gridX * 12.9898 + gridZ * 78.233) * 43758.5453; noise = noise - Math.floor(noise); 
-    if(noise > 0.98) return 'lapis'; if(noise > 0.95) return 'diamond'; if(noise > 0.80) return 'iron'; 
+    
+    if (is_nether) {
+        if(noise > 0.99) return 'upgrade';
+        if(noise > 0.96) return 'debris';
+        if(noise > 0.90) return 'nugget_gold';
+        if(noise > 0.75) return 'quartz';
+    } else {
+        if(noise > 0.98) return 'lapis';
+        if(noise > 0.95) return 'diamond';
+        if(noise > 0.90) return 'gold';
+        if(noise > 0.75) return 'iron';
+    }
     return null; 
 }
 
-function sync_my_pos() { if(!nickname) return; database.ref('world_players/' + nickname).set({ x: loc_x, z: loc_z, armor: get_best_armor(), wp: get_best_weapon(), offhand: (inv['active_offhand']||''), hp: my_cur_hp, max_hp: get_pvp_stats().max_hp, last: Date.now(), enchants: enchants }); }
+function sync_my_pos() { if(!nickname) return; database.ref('world_players/' + nickname).set({ x: loc_x, z: loc_z, dim: is_nether?1:0, armor: get_best_armor(), wp: get_best_weapon(), offhand: (inv['active_offhand']||''), hp: my_cur_hp, max_hp: get_pvp_stats().max_hp, last: Date.now(), enchants: enchants }); }
 
 function draw_entity(px, py, d, is_me, n) {
     let is_safe = Math.abs(d.x) <= 100 && Math.abs(d.z) <= 100;
@@ -711,7 +791,7 @@ function draw_entity(px, py, d, is_me, n) {
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.strokeRect(px - tw/2 - 4, py - 28, tw + 8, 14);
     ctx.fillStyle = '#000'; ctx.fillText(n, px, py - 17);
 
-    if(is_safe) { ctx.fillStyle = 'rgba(0,255,0,0.1)'; ctx.beginPath(); ctx.arc(px, py+5, 20, 0, Math.PI*2); ctx.fill(); }
+    if(is_safe) { ctx.fillStyle = is_nether ? 'rgba(255,0,0,0.1)' : 'rgba(0,255,0,0.1)'; ctx.beginPath(); ctx.arc(px, py+5, 20, 0, Math.PI*2); ctx.fill(); }
 
     ctx.fillStyle = arm; ctx.fillRect(px - 8, py + 10, 16, 12);
     ctx.fillStyle = '#f5c6a5'; ctx.fillRect(px - 10, py - 10, 20, 20);
@@ -730,7 +810,15 @@ function draw_entity(px, py, d, is_me, n) {
         else { ctx.fillStyle='#522'; ctx.fillRect(-1, -4, 2, 6); ctx.fillStyle='#555'; ctx.fillRect(-4, -6, 8, 2); ctx.fillStyle=w.c; ctx.fillRect(-2, -6 - w.l, 4, w.l); }
         ctx.restore();
     }
-    if (d.offhand) { ctx.fillStyle = get_offhand_color(d.offhand); ctx.beginPath(); ctx.arc(px - 14, py + 12, 5, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke(); }
+    
+    // ОТРИСОВКА ИКОНОК АРТЕФАКТОВ НА КАРТЕ
+    if (d.offhand) { 
+        if(ART_IMGS[d.offhand] && ART_IMGS[d.offhand].complete) {
+            ctx.drawImage(ART_IMGS[d.offhand], px - 22, py + 2, 16, 16);
+        } else {
+            ctx.fillStyle = get_offhand_color(d.offhand); ctx.beginPath(); ctx.arc(px - 14, py + 12, 5, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke(); 
+        }
+    }
 }
 
 function draw_map() {
@@ -742,23 +830,41 @@ function draw_map() {
     let stats = get_pvp_stats(); let move_speed = 4 * stats.speed_mult; 
     if(isJoyActive && !is_stunned) { loc_x += joyX * move_speed; loc_z += joyY * move_speed; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } }
     
-    ctx.fillStyle = '#26381b'; ctx.fillRect(0,0, canvas.width, canvas.height); 
+    // ЦВЕТА ИЗМЕРЕНИЯ
+    ctx.fillStyle = is_nether ? '#2e0e0e' : '#26381b'; 
+    ctx.fillRect(0,0, canvas.width, canvas.height); 
+    
     let cx = canvas.width/2; let cy = canvas.height/2; let found_ore = null; let found_gx = 0; let found_gz = 0; let myGridX = Math.floor(loc_x/100); let myGridZ = Math.floor(loc_z/100);
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = is_nether ? 'rgba(255,50,50,0.15)' : 'rgba(0,0,0,0.15)'; 
+    ctx.lineWidth = 1; ctx.beginPath();
     let offX = (cx - loc_x) % 50; let offZ = (cy - loc_z) % 50;
     for(let i=-50; i<canvas.width+50; i+=50) { ctx.moveTo(i+offX, 0); ctx.lineTo(i+offX, canvas.height); }
     for(let i=-50; i<canvas.height+50; i+=50) { ctx.moveTo(0, i+offZ); ctx.lineTo(canvas.width, i+offZ); }
     ctx.stroke();
 
-    let sx = cx - loc_x - 100; let sy = cy - loc_z - 100; ctx.fillStyle = 'rgba(0, 255, 0, 0.08)'; ctx.fillRect(sx, sy, 200, 200); ctx.strokeStyle = '#0f0'; ctx.strokeRect(sx, sy, 200, 200);
+    let sx = cx - loc_x - 100; let sy = cy - loc_z - 100; 
+    ctx.fillStyle = is_nether ? 'rgba(255, 0, 0, 0.08)' : 'rgba(0, 255, 0, 0.08)'; 
+    ctx.fillRect(sx, sy, 200, 200); 
+    ctx.strokeStyle = is_nether ? '#f00' : '#0f0'; 
+    ctx.strokeRect(sx, sy, 200, 200);
 
     for(let i = -6; i <= 6; i++) { 
         for(let j = -6; j <= 6; j++) { 
             let gx = myGridX + i; let gz = myGridZ + j; let ore = get_ore_at(gx*100, gz*100); 
             if(ore) { 
-                let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); ctx.fillStyle = '#444'; ctx.fillRect(screenX-12, screenY-12, 24, 24);
-                if(ore === 'diamond') ctx.fillStyle = '#0ff'; else if(ore === 'lapis') ctx.fillStyle = '#1E90FF'; else ctx.fillStyle = '#f5deb3';
+                let screenX = cx + (gx*100 - loc_x); let screenY = cy + (gz*100 - loc_z); 
+                ctx.fillStyle = is_nether ? '#522' : '#444'; 
+                ctx.fillRect(screenX-12, screenY-12, 24, 24);
+                
+                if(ore === 'diamond') ctx.fillStyle = '#0ff'; 
+                else if(ore === 'lapis') ctx.fillStyle = '#1E90FF'; 
+                else if(ore === 'gold' || ore === 'nugget_gold') ctx.fillStyle = '#fd0';
+                else if(ore === 'quartz') ctx.fillStyle = '#eee';
+                else if(ore === 'debris') ctx.fillStyle = '#a52';
+                else if(ore === 'upgrade') ctx.fillStyle = '#0af';
+                else ctx.fillStyle = '#f5deb3';
+                
                 ctx.fillRect(screenX-8, screenY-8, 6, 6); ctx.fillRect(screenX+4, screenY-4, 4, 4); ctx.fillRect(screenX-4, screenY+4, 6, 6);
                 if(Math.abs(gx*100 - loc_x) < 20 && Math.abs(gz*100 - loc_z) < 20) { found_ore = ore; found_gx = gx; found_gz = gz; } 
             } 
@@ -767,8 +873,11 @@ function draw_map() {
     is_on_ore = found_ore; window.cur_ore_x = found_gx; window.cur_ore_z = found_gz;
     let btn = document.getElementById('mine-btn'); if(btn) { if(is_on_ore) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; } }
     
+    let myDim = is_nether ? 1 : 0;
     for(let d_id in world_drops) {
-        let drop = world_drops[d_id]; let dx = drop.x - loc_x, dz = drop.z - loc_z;
+        let drop = world_drops[d_id];
+        if((drop.dim||0) !== myDim) continue;
+        let dx = drop.x - loc_x, dz = drop.z - loc_z;
         if(Math.abs(dx) < canvas.width/2 && Math.abs(dz) < canvas.height/2) {
             ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.ellipse(cx+dx, cy+dz+6, 8, 4, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#ff0'; ctx.fillRect(cx+dx-5, cy+dz-5 + Math.sin(Date.now()/200)*3, 10, 10);
@@ -778,7 +887,8 @@ function draw_map() {
     }
 
     for(let p in online_players) { 
-        if(p === nickname) continue; let pl = online_players[p]; if(Date.now() - (pl.local_last || pl.last) > 300000) continue; 
+        if(p === nickname) continue; let pl = online_players[p]; 
+        if((pl.dim||0) !== myDim || Date.now() - (pl.local_last || pl.last) > 300000) continue; 
         if(pl.target_x !== undefined) pl.x += (pl.target_x - pl.x) * 0.15; if(pl.target_z !== undefined) pl.z += (pl.target_z - pl.z) * 0.15;
         let dx = pl.x - loc_x; let dz = pl.z - loc_z; if(Math.abs(dx) < canvas.width/2 + 20 && Math.abs(dz) < canvas.height/2 + 20) draw_entity(cx+dx, cy+dz, pl, false, p);
     }
@@ -819,7 +929,7 @@ function setup_dmg_listener() {
         for(let key in data) {
             if(key === nickname) continue;
             if(!online_players[key]) { online_players[key] = data[key]; online_players[key].target_x = data[key].x; online_players[key].target_z = data[key].z; online_players[key].local_last = localNow; } 
-            else { online_players[key].target_x = data[key].x; online_players[key].target_z = data[key].z; online_players[key].hp = data[key].hp; online_players[key].max_hp = data[key].max_hp; online_players[key].armor = data[key].armor; online_players[key].wp = data[key].wp; online_players[key].offhand = data[key].offhand; if(online_players[key].last !== data[key].last) { online_players[key].local_last = localNow; } online_players[key].last = data[key].last; }
+            else { online_players[key].target_x = data[key].x; online_players[key].target_z = data[key].z; online_players[key].hp = data[key].hp; online_players[key].max_hp = data[key].max_hp; online_players[key].armor = data[key].armor; online_players[key].wp = data[key].wp; online_players[key].offhand = data[key].offhand; online_players[key].dim = data[key].dim; if(online_players[key].last !== data[key].last) { online_players[key].local_last = localNow; } online_players[key].last = data[key].last; }
         }
         for(let key in online_players) { if(key !== nickname && !data[key]) delete online_players[key]; }
     });
@@ -828,9 +938,9 @@ function setup_dmg_listener() {
 
 window.map_attack = function() {
     if(is_stunned) return; if(Math.abs(loc_x) <= 100 && Math.abs(loc_z) <= 100) return;
-    let closest = null; let min_d = 60;
+    let closest = null; let min_d = 60; let myDim = is_nether ? 1 : 0;
     for (let key in online_players) {
-        if (key === nickname) continue; let p = online_players[key]; if (Date.now() - (p.local_last || p.last) > 300000) continue; if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; let d = Math.hypot(p.x - loc_x, p.z - loc_z); if (d < min_d) { min_d = d; closest = key; }
+        if (key === nickname) continue; let p = online_players[key]; if ((p.dim||0) !== myDim || Date.now() - (p.local_last || p.last) > 300000) continue; if (Math.abs(p.x) <= 100 && Math.abs(p.z) <= 100) continue; let d = Math.hypot(p.x - loc_x, p.z - loc_z); if (d < min_d) { min_d = d; closest = key; }
     }
     if(!closest) return; current_target = closest; trigger_attack_logic();
 }
@@ -879,7 +989,7 @@ function process_incoming_damage(data) {
 function handle_death(killer) {
     end_combat_log(); alert(`☠️ ТЕБЯ УБИЛ ИГРОК ${killer}!\nВесь лут выпал на карту.`);
     let drop_id = "drop_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-    database.ref('world_drops/' + drop_id).set({ x: loc_x, z: loc_z, inv: JSON.stringify(inv), skrepki: skrepki, from: nickname });
+    database.ref('world_drops/' + drop_id).set({ x: loc_x, z: loc_z, dim: is_nether?1:0, inv: JSON.stringify(inv), skrepki: skrepki, from: nickname });
     my_cur_hp = get_pvp_stats().max_hp; loc_x = 0; loc_z = 0; inv = {}; skrepki = 0; weapon_dur = 1000; armor_dur = 1000; save_data(); upd_ui(); render_inventory(); sync_my_pos(); sync_cloud(true);
 }
 
@@ -1014,7 +1124,6 @@ async function sync_cloud(is_bg = false) {
 
 window.toggle_event = async function() { let snap = await database.ref('global_event').once('value'); let ev = snap.val() || {active:false}; if (!ev.active) { let name = prompt("Название ивента:"); if (!name) return; await database.ref('global_event').set({ active: true, name: name, start: Date.now() }); let cSnap = await database.ref('clubs').once('value'); let clubs = cSnap.val() || {}; for (let c in clubs) clubs[c].event_pts = 0; await database.ref('clubs').set(clubs); alert("Запущено!"); } else { if (confirm("Завершить?")) { let cSnap = await database.ref('clubs').once('value'); let clubs = cSnap.val() || {}; let pSnap = await database.ref('players').once('value'); let players = pSnap.val() || {}; let sorted = Object.keys(clubs).sort((a,b) => (clubs[b].event_pts||0) - (clubs[a].event_pts||0)); let day3 = Date.now() + (3 * 24 * 3600 * 1000); if (sorted[0]) { await database.ref('last_winner').set(sorted[0]); clubs[sorted[0]].members.forEach(m => { if(!players[m]) players[m]={}; players[m].event_buff = {amt: 5000, exp: day3}; }); } if (sorted[1]) { clubs[sorted[1]].members.forEach(m => { if(!players[m]) players[m]={}; players[m].event_buff = {amt: 3000, exp: day3}; }); } if (sorted[2]) { clubs[sorted[2]].members.forEach(m => { if(!players[m]) players[m]={}; players[m].event_buff = {amt: 1000, exp: day3}; }); } await database.ref('global_event/active').set(false); await database.ref('players').set(players); alert("Ивент завершен!"); } } sync_cloud(true); };
 
-// ОБНОВЛЁННАЯ ГЕНЕРАЦИЯ ПРОМОКОДОВ
 window.create_promo = async function() { 
     let amtInput = document.getElementById('admin-promo-amt');
     let typeInput = document.getElementById('admin-promo-type');
@@ -1032,7 +1141,6 @@ window.create_promo = async function() {
     prompt("Промокод успешно создан! Скопируй его:", code); 
 };
 
-// ОБНОВЛЁННОЕ ИСПОЛЬЗОВАНИЕ ПРОМОКОДОВ
 window.use_promo = async function() { 
     let pIn = document.getElementById('promo-input'); if(!pIn) return; 
     let code = pIn.value.trim().toUpperCase(); if (!code) return alert("Введите код!"); 
