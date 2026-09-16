@@ -325,7 +325,6 @@ window.buy_artifact = function(id, cost) { if(vrgk >= cost) { vrgk -= cost; if(!
 window.equip_offhand = function(id) { inv['active_offhand'] = id; try { my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); } catch(e){} save_data(); render_inventory(); alert(`В левую руку экипирован: ${ITEM_NAMES[id]}`); sync_my_pos(); sync_cloud(true); }
 window.unequip_offhand = function() { inv['active_offhand'] = ''; try { my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); } catch(e){} save_data(); render_inventory(); sync_my_pos(); sync_cloud(true); }
 
-// НОВЫЕ ШАНСЫ И ЛОГИКА ТАЙНИКОВ
 const CASE_LOOT = [
     { r: 1, d: 14, w: 18.0 }, { r: 1, d: 30, w: 6.0 }, { r: 1, d: -1, w: 2.0 },
     { r: 2, d: 14, w: 15.0 }, { r: 2, d: 30, w: 5.0 }, { r: 2, d: -1, w: 1.5 },
@@ -1014,24 +1013,49 @@ async function sync_cloud(is_bg = false) {
 }
 
 window.toggle_event = async function() { let snap = await database.ref('global_event').once('value'); let ev = snap.val() || {active:false}; if (!ev.active) { let name = prompt("Название ивента:"); if (!name) return; await database.ref('global_event').set({ active: true, name: name, start: Date.now() }); let cSnap = await database.ref('clubs').once('value'); let clubs = cSnap.val() || {}; for (let c in clubs) clubs[c].event_pts = 0; await database.ref('clubs').set(clubs); alert("Запущено!"); } else { if (confirm("Завершить?")) { let cSnap = await database.ref('clubs').once('value'); let clubs = cSnap.val() || {}; let pSnap = await database.ref('players').once('value'); let players = pSnap.val() || {}; let sorted = Object.keys(clubs).sort((a,b) => (clubs[b].event_pts||0) - (clubs[a].event_pts||0)); let day3 = Date.now() + (3 * 24 * 3600 * 1000); if (sorted[0]) { await database.ref('last_winner').set(sorted[0]); clubs[sorted[0]].members.forEach(m => { if(!players[m]) players[m]={}; players[m].event_buff = {amt: 5000, exp: day3}; }); } if (sorted[1]) { clubs[sorted[1]].members.forEach(m => { if(!players[m]) players[m]={}; players[m].event_buff = {amt: 3000, exp: day3}; }); } if (sorted[2]) { clubs[sorted[2]].members.forEach(m => { if(!players[m]) players[m]={}; players[m].event_buff = {amt: 1000, exp: day3}; }); } await database.ref('global_event/active').set(false); await database.ref('players').set(players); alert("Ивент завершен!"); } } sync_cloud(true); };
-window.create_promo = async function() { let amt = parseInt(prompt("Сколько воргиков дать за код?")); if (!amt || amt <= 0) return; let code = 'BUG-' + Math.random().toString(36).substr(2, 5).toUpperCase(); await database.ref('promocodes/' + code).set({ reward: amt, active: true }); prompt("Промокод успешно создан!", code); };
 
+// ОБНОВЛЁННАЯ ГЕНЕРАЦИЯ ПРОМОКОДОВ
+window.create_promo = async function() { 
+    let amtInput = document.getElementById('admin-promo-amt');
+    let typeInput = document.getElementById('admin-promo-type');
+    if(!amtInput || !typeInput) return;
+    
+    let amt = parseInt(amtInput.value);
+    let type = typeInput.value;
+    
+    if (!amt || amt <= 0) return alert("Введите корректную сумму!"); 
+    
+    let code = 'VORG-' + Math.random().toString(36).substr(2, 5).toUpperCase(); 
+    await database.ref('promocodes/' + code).set({ reward: amt, type: type, active: true }); 
+    
+    amtInput.value = '';
+    prompt("Промокод успешно создан! Скопируй его:", code); 
+};
+
+// ОБНОВЛЁННОЕ ИСПОЛЬЗОВАНИЕ ПРОМОКОДОВ
 window.use_promo = async function() { 
     let pIn = document.getElementById('promo-input'); if(!pIn) return; 
     let code = pIn.value.trim().toUpperCase(); if (!code) return alert("Введите код!"); 
+    
     let snap = await database.ref('promocodes/' + code).once('value'); 
     let promo = snap.val(); 
     if (!promo || !promo.active) { return alert("Промокод недействителен или уже использован!"); } 
     
-    vrgk += parseInt(promo.reward) || 0; 
+    if (promo.type === 'skrepki') {
+        skrepki += parseInt(promo.reward) || 0;
+        alert("✅ Успешно! Ты получил " + fmt(promo.reward) + " скрепок 📎!");
+    } else {
+        vrgk += parseInt(promo.reward) || 0;
+        alert("✅ Успешно! Ты получил " + fmt(promo.reward) + " воргиков 🪙!");
+    }
+    
     await database.ref('promocodes/' + code + '/active').set(false); 
     pIn.value = ''; 
     save_data(); 
     upd_ui(); 
     
-    if(nickname) await database.ref('players/' + nickname).update({ vrgk: Math.floor(vrgk) });
+    if(nickname) await database.ref('players/' + nickname).update({ vrgk: Math.floor(vrgk), skrepki: skrepki });
     
-    alert("✅ Успешно! Ты получил " + fmt(promo.reward) + " воргиков!"); 
     sync_cloud(true); 
 };
 
