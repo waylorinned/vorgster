@@ -276,7 +276,7 @@
             <img src="talisman_tyrant.png" class="artifact-img" alt="tyrant">
             <div>
               <span class="upgrade-name" style="color:#aaa;">Талисман Тирана</span>
-              <span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +2, Броня +10%, Макс ХП -4<br><i style="color:#777;">«Подавляет слабых. Дает защиту и силу, взаимая кровавый налог.»</i></span>
+              <span class="upgrade-desc" style="font-size:11px; color:#aaa;">Урон +2, Броня +10%, Макс ХП -4<br><i style="color:#777;">«Подавляет слабых. Дает защиту и силу, взимая кровавый налог.»</i></span>
             </div>
           </div>
           <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
@@ -357,6 +357,10 @@
           </div>
         </div>
         <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333; margin-top: 10px;">
+          
+          <!-- КНОПКА ПОРТАЛА -->
+          <button class="buy-btn" id="btn-portal" style="width:100%; margin-bottom:10px; background:#400; border: 1px solid #f00;" onclick="toggle_dimension()">ПОРТАЛ В АД 🌋</button>
+          
           <button class="buy-btn" id="btn-rtp" style="width:100%; margin-bottom:10px;" onclick="do_rtp()">СЛУЧАЙНЫЙ ТЕЛЕПОРТ</button>
           <div style="display:flex; gap:5px; margin-bottom:10px;">
             <button class="buy-btn gold" style="flex:1;" onclick="open_craft_modal()">ВЕРСТАК ⚒️</button>
@@ -441,7 +445,6 @@
           <div style="color:#d4af37; font-weight:bold; margin-bottom:5px;">панель админа</div>
           <button class="buy-btn gold" style="width:100%; margin-bottom:5px;" onclick="toggle_event()">ивент</button>
           
-          <!-- ОБНОВЛЕННЫЙ БЛОК ПРОМОКОДОВ ДЛЯ АДМИНА -->
           <div style="background:#111; padding:8px; border-radius:5px; margin-bottom:5px; border: 1px solid #444; text-align:left;">
             <div style="font-size:10px; color:#aaa; margin-bottom:3px;">Создать промокод:</div>
             <input type="number" id="admin-promo-amt" placeholder="Сумма" style="padding:8px; font-size:12px; margin-bottom:5px;">
@@ -462,18 +465,40 @@
       </div>
     </div>
 
+    <!-- ОБНОВЛЕННЫЙ КРАФТ С НОВЫМИ РЕСУРСАМИ -->
     <div id="craft-modal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-title">ПЕЧЬ И ВЕРСТАК ⚒️</div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:12px; background:#000; padding:10px; border-radius:8px;">
-          <div>Руда: <b id="ui-ore-iron">0</b></div><div>Слитки: <b id="ui-ingot-iron" style="color:#aaa;">0</b></div><div>Алмазы: <b id="ui-gem-diamond" style="color:#0ff;">0</b></div>
+      <div class="modal-content" style="max-width:400px; width:95%;">
+        <div class="modal-title">ПЕЧЬ, ВЕРСТАК И КУЗНЯ ⚒️</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px; font-size:11px; background:#000; padding:10px; border-radius:8px; text-align: left;">
+          <div>Жел. руда: <b id="ui-ore-iron">0</b></div>
+          <div>Жел. слитки: <b id="ui-ingot-iron" style="color:#aaa;">0</b></div>
+          <div>Зол. руда: <b id="ui-ore-gold" style="color:#fd0;">0</b></div>
+          <div>Зол. слитки: <b id="ui-ingot-gold" style="color:#fd0;">0</b></div>
+          <div>Зол. кусочки: <b id="ui-nugget-gold" style="color:#dd0;">0</b></div>
+          <div>Алмазы: <b id="ui-gem-diamond" style="color:#0ff;">0</b></div>
+          <div>Незер ломы: <b id="ui-debris" style="color:#a52;">0</b></div>
+          <div>Незер слитки: <b id="ui-ingot-netherite" style="color:#555;">0</b></div>
+          <div>Шаблоны: <b id="ui-upgrade" style="color:#0af;">0</b></div>
         </div>
-        <button class="buy-btn blue" style="margin-bottom:5px;" onclick="smelt('iron')">Переплавить (1 к 1)</button>
-        <button class="buy-btn" style="margin-bottom:5px;" onclick="craft_item('sword_iron', 2)">Жел. меч (2)</button>
-        <button class="buy-btn" style="margin-bottom:5px;" onclick="craft_item('armor_iron', 24)">Жел. сет (24)</button>
-        <button class="buy-btn" style="margin-bottom:5px; background:#055;" onclick="craft_item('sword_diamond', 2)">Алм. меч (2)</button>
-        <button class="buy-btn" style="margin-bottom:5px; background:#055;" onclick="craft_item('armor_diamond', 24)">Алм. сет (24)</button>
-        <button class="buy-btn red" style="margin-top:15px;" onclick="document.getElementById('craft-modal').style.display='none'; render_inventory();">Закрыть</button>
+        
+        <div style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;">
+            <div class="section-title" style="font-size:12px;">ПЛАВКА</div>
+            <button class="buy-btn blue" onclick="smelt('iron')">Плавить железо (1 к 1)</button>
+            <button class="buy-btn blue" onclick="smelt('gold')">Плавить золото (1 к 1)</button>
+            <button class="buy-btn blue" onclick="craft_gold_from_nuggets()">Слиток из кусочков (9 шт)</button>
+            
+            <div class="section-title" style="font-size:12px;">КРАФТ</div>
+            <button class="buy-btn" onclick="craft_item('sword_iron', 2)">Жел. меч (2 жел.)</button>
+            <button class="buy-btn" onclick="craft_item('armor_iron', 24)">Жел. сет (24 жел.)</button>
+            <button class="buy-btn" style="background:#055;" onclick="craft_item('sword_diamond', 2)">Алм. меч (2 алм.)</button>
+            <button class="buy-btn" style="background:#055;" onclick="craft_item('armor_diamond', 24)">Алм. сет (24 алм.)</button>
+            <button class="buy-btn" style="background:#422; border-color:#f00;" onclick="craft_netherite_ingot()">Незеритовый слиток (4 лома + 4 зол. слитка)</button>
+            
+            <div class="section-title" style="font-size:12px; color:#a0f;">КУЗНЯ (УЛУЧШЕНИЕ)</div>
+            <button class="buy-btn" style="background:#222; border-color:#555;" onclick="upgrade_gear('sword')">Незеритовый меч (Алм. меч + 1 нез. слиток + 1 шаблон)</button>
+            <button class="buy-btn" style="background:#222; border-color:#555;" onclick="upgrade_gear('armor')">Незеритовый сет (Алм. сет + 4 нез. слитка + 4 шаблона)</button>
+        </div>
+        <button class="buy-btn red" style="margin-top:10px;" onclick="document.getElementById('craft-modal').style.display='none'; render_inventory();">Закрыть</button>
       </div>
     </div>
 
