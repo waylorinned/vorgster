@@ -292,7 +292,19 @@ function game_tick() {
         if (isNaN(cur_energy) || cur_energy < 0) cur_energy = 0; if (cur_energy < actual_max_eng && diff_sec > 0) { cur_energy += (actual_reg * diff_sec); if (cur_energy > actual_max_eng) cur_energy = actual_max_eng; } 
         let total_profit = profit; 
         if (total_profit > 0 && nickname) { 
-            if (diff_sec > 60) { let afk_sec_limit = b.a * 3600; let profit_sec = Math.min(diff_sec, afk_sec_limit); let offline_earn = (total_profit / 3600) * profit_sec; vrgk += offline_earn; let el = document.getElementById('offline-amount'); let modal = document.getElementById('offline-modal'); if (el && modal) { el.innerText = "+" + fmt(offline_earn); modal.style.display = 'flex'; } } 
+            if (diff_sec > 60) { 
+                let afk_sec_limit = b.a * 3600; 
+                let profit_sec = Math.min(diff_sec, afk_sec_limit); 
+                let offline_earn = (total_profit / 3600) * profit_sec; 
+                vrgk += offline_earn; 
+                let el = document.getElementById('offline-amount'); 
+                let modal = document.getElementById('offline-modal'); 
+                if (el && modal) { 
+                    el.innerText = "+" + fmt(offline_earn); 
+                    modal.style.display = 'flex'; 
+                    sync_cloud(true); // СОХРАНЕНИЕ ПРИ ВЫДАЧЕ ОФЛАЙН-ПРИБЫЛИ
+                } 
+            } 
             else if (diff_sec > 0) { vrgk += (total_profit / 3600) * diff_sec; } 
         } 
         last_time = now; upd_ui(); save_data(); check_streak(); check_quests(false); 
@@ -943,3 +955,11 @@ window.open_profile = function(user) {
 };
 
 window.delete_acc = async function() { if(!confirm('удалить аккаунт?')) return; await database.ref('players/' + nickname).remove(); let my_c = localStorage.getItem(PREFIX + 'club'); if(my_c) { let snap = await database.ref('clubs/' + my_c).once('value'); let club = snap.val(); if(club) { club.members = club.members.filter(m => m !== nickname); if(club.owner === nickname) { if (club.members.length > 0) club.owner = club.members[0]; else club = null; } if (club) await database.ref('clubs/' + my_c).set(club); else await database.ref('clubs/' + my_c).remove(); } } localStorage.clear(); location.reload(); };
+
+// АВАРИЙНОЕ СОХРАНЕНИЕ ПРИ ЗАКРЫТИИ ОКНА
+window.addEventListener('beforeunload', () => {
+    if (nickname) {
+        save_data();
+        sync_cloud(true);
+    }
+});
