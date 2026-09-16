@@ -65,7 +65,8 @@ input, select, textarea { width: 100%; background: #0a0a0a; border: 1px solid #4
 .pvp-hp-bar { width: 100%; height: 15px; background: #333; border-radius: 8px; overflow: hidden; border: 1px solid #000; }
 .pvp-hp-fill { height: 100%; background: #0f0; width: 100%; transition: width 0.2s; }
 .log-box { background: #000; border: 1px solid #333; height: 80px; overflow-y: auto; font-size: 11px; padding: 5px; text-align: left; color: #aaa; border-radius: 5px; margin-bottom: 10px; }
-.map-wrapper { position: relative; width: 100%; height: 350px; background: #111; border: 2px solid #333; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+.map-wrapper { position: relative; width: 100%; height: 350px; background: #111; border: 2px solid #333; border-radius: 8px; overflow: hidden; margin-bottom: 10px; transition: border-color 0.5s, box-shadow 0.5s; }
+.map-wrapper.nether-mode { border-color: #a00; box-shadow: 0 0 20px rgba(200,0,0,0.5); }
 #rtp-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .joystick-zone { position: absolute; bottom: 15px; left: 15px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; touch-action: none; z-index: 10; border: 1px solid rgba(255,255,255,0.3); }
 .joystick-knob { position: absolute; top: 30px; left: 30px; width: 40px; height: 40px; background: rgba(212, 175, 55, 0.7); border-radius: 50%; pointer-events: none; transition: transform 0.05s; }
