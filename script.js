@@ -302,7 +302,7 @@ function game_tick() {
                 if (el && modal) { 
                     el.innerText = "+" + fmt(offline_earn); 
                     modal.style.display = 'flex'; 
-                    sync_cloud(true); // СОХРАНЕНИЕ ПРИ ВЫДАЧЕ ОФЛАЙН-ПРИБЫЛИ
+                    sync_cloud(true);
                 } 
             } 
             else if (diff_sec > 0) { vrgk += (total_profit / 3600) * diff_sec; } 
@@ -325,8 +325,115 @@ window.buy_artifact = function(id, cost) { if(vrgk >= cost) { vrgk -= cost; if(!
 window.equip_offhand = function(id) { inv['active_offhand'] = id; try { my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); } catch(e){} save_data(); render_inventory(); alert(`В левую руку экипирован: ${ITEM_NAMES[id]}`); sync_my_pos(); sync_cloud(true); }
 window.unequip_offhand = function() { inv['active_offhand'] = ''; try { my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); } catch(e){} save_data(); render_inventory(); sync_my_pos(); sync_cloud(true); }
 
-const CASE_LOOT = [ { r: 1, d: 14, w: 25.0 }, { r: 1, d: 30, w: 5.0 }, { r: 1, d: -1, w: 1.5 }, { r: 2, d: 14, w: 20.0 }, { r: 2, d: 30, w: 4.5 }, { r: 2, d: -1, w: 1.2 }, { r: 3, d: 14, w: 15.0 }, { r: 3, d: 30, w: 3.5 }, { r: 3, d: -1, w: 1.0 }, { r: 4, d: 14, w: 12.0 }, { r: 4, d: 30, w: 3.0 }, { r: 4, d: -1, w: 0.8 }, { r: 5, d: 14, w: 8.0 }, { r: 5, d: 30, w: 2.0 }, { r: 5, d: -1, w: 0.5 }, { r: 6, d: 14, w: 5.0 }, { r: 6, d: 30, w: 1.2 }, { r: 6, d: -1, w: 0.3 }, { r: 7, d: 14, w: 3.0 }, { r: 7, d: 30, w: 0.8 }, { r: 7, d: -1, w: 0.15}, { r: 8, d: 14, w: 1.5 }, { r: 8, d: 30, w: 0.4 }, { r: 8, d: -1, w: 0.08}, { r: 9, d: 14, w: 0.8 }, { r: 9, d: 30, w: 0.15}, { r: 9, d: -1, w: 0.04}, { r: 10,d: 14, w: 0.2 }, { r: 10,d: 30, w: 0.05}, { r: 10,d: -1, w: 0.02} ];
-window.open_case = function() { if (skrepki < 50) return alert("Не хватает скрепок! Нужно 50."); skrepki -= 50; upd_ui(); save_data(); let anim = document.getElementById('case-roll-anim'); if(anim) anim.style.display = 'block'; setTimeout(() => { if(anim) anim.style.display = 'none'; let total = CASE_LOOT.reduce((s, i) => s + i.w, 0); let rand = Math.random() * total; let picked = null; for(let item of CASE_LOOT) { if(rand < item.w) { picked = item; break; } rand -= item.w; } if (picked.r < donate_rank) { alert(`Из кейса выпал [${RANKS_INFO[picked.r].name}], но у тебя уже ранг выше! Защита от понижения спасла тебя.`); } else if (picked.r === donate_rank) { if (donate_until === -1) alert(`Выпал тот же ранг, но он у тебя уже НАВСЕГДА!`); else { if (picked.d === -1) donate_until = -1; else donate_until += picked.d * 86400 * 1000; alert(`Выпал тот же ранг! Время продлено.`); } } else { donate_rank = picked.r; donate_until = picked.d === -1 ? -1 : Date.now() + (picked.d * 86400 * 1000); alert(`🔥 ДЖЕКПОТ! Тебе выпал донат: [${RANKS_INFO[picked.r].name}] на ${picked.d === -1 ? 'НАВСЕГДА' : picked.d + ' дн.'}!`); } save_data(); upd_ui(); sync_cloud(); }, 1500); };
+// НОВЫЕ ШАНСЫ И ЛОГИКА ТАЙНИКОВ
+const CASE_LOOT = [
+    { r: 1, d: 14, w: 18.0 }, { r: 1, d: 30, w: 6.0 }, { r: 1, d: -1, w: 2.0 },
+    { r: 2, d: 14, w: 15.0 }, { r: 2, d: 30, w: 5.0 }, { r: 2, d: -1, w: 1.5 },
+    { r: 3, d: 14, w: 13.0 }, { r: 3, d: 30, w: 4.0 }, { r: 3, d: -1, w: 1.2 },
+    { r: 4, d: 14, w: 10.0 }, { r: 4, d: 30, w: 3.5 }, { r: 4, d: -1, w: 1.0 },
+    { r: 5, d: 14, w: 8.0 },  { r: 5, d: 30, w: 3.0 }, { r: 5, d: -1, w: 0.8 },
+    { r: 6, d: 14, w: 6.0 },  { r: 6, d: 30, w: 2.5 }, { r: 6, d: -1, w: 0.6 },
+    { r: 7, d: 14, w: 5.0 },  { r: 7, d: 30, w: 2.0 }, { r: 7, d: -1, w: 0.5 },
+    { r: 8, d: 14, w: 3.5 },  { r: 8, d: 30, w: 1.5 }, { r: 8, d: -1, w: 0.4 },
+    { r: 9, d: 14, w: 2.0 },  { r: 9, d: 30, w: 0.8 }, { r: 9, d: -1, w: 0.3 },
+    { r: 10, d: 14, w: 1.5 }, { r: 10, d: 30, w: 0.7 }, { r: 10, d: -1, w: 0.3 }
+];
+
+function roll_single_prize() {
+    let total = CASE_LOOT.reduce((s, i) => s + i.w, 0);
+    let rand = Math.random() * total;
+    for (let item of CASE_LOOT) {
+        if (rand < item.w) return item;
+        rand -= item.w;
+    }
+    return CASE_LOOT[0];
+}
+
+window.open_case = function() {
+    if (skrepki < 50) return alert("Не хватает скрепок! Нужно 50 📎.");
+    skrepki -= 50;
+    upd_ui();
+    save_data();
+
+    let modal = document.getElementById('case-pick-modal');
+    let chestRow = document.getElementById('case-chests-row');
+    let title = document.getElementById('case-pick-title');
+    let resBox = document.getElementById('case-result-box');
+
+    title.innerText = "ВЫБЕРИ 1 ИЗ 3 ТАЙНИКОВ";
+    resBox.style.display = "none";
+    chestRow.innerHTML = "";
+
+    let prizes = [roll_single_prize(), roll_single_prize(), roll_single_prize()];
+
+    for (let i = 0; i < 3; i++) {
+        let box = document.createElement('div');
+        box.className = 'stash-pick-box';
+        box.id = `stash-box-${i}`;
+        box.innerHTML = `<div class="stash-icon">🧰</div><div class="stash-label">ТАЙНИК ${i + 1}</div>`;
+        box.onclick = () => pick_stash(i, prizes);
+        chestRow.appendChild(box);
+    }
+
+    modal.style.display = 'flex';
+};
+
+window.pick_stash = function(pickedIndex, prizes) {
+    for (let i = 0; i < 3; i++) {
+        let b = document.getElementById(`stash-box-${i}`);
+        if (b) b.onclick = null;
+    }
+
+    let chosenBox = document.getElementById(`stash-box-${pickedIndex}`);
+    if (chosenBox) chosenBox.classList.add('stash-opening');
+
+    setTimeout(() => {
+        let prize = prizes[pickedIndex];
+        let d_name = RANKS_INFO[prize.r].name;
+        let d_time = prize.d === -1 ? "НАВСЕГДА" : `${prize.d} дн.`;
+
+        for (let i = 0; i < 3; i++) {
+            let b = document.getElementById(`stash-box-${i}`);
+            let p = prizes[i];
+            let pName = RANKS_INFO[p.r].name;
+            let pTime = p.d === -1 ? "НАВСЕГДА" : `${p.d}д`;
+            if (i === pickedIndex) {
+                b.className = 'stash-pick-box picked-win';
+                b.innerHTML = `<div class="stash-icon">✨</div><div style="color:${RANKS_INFO[p.r].color}; font-weight:bold; font-size:12px;">[${pName}]</div><div style="font-size:10px; color:#fff;">${pTime}</div>`;
+            } else {
+                b.className = 'stash-pick-box missed';
+                b.innerHTML = `<div class="stash-icon">💨</div><div style="color:#777; font-size:11px;">[${pName}]</div><div style="font-size:9px; color:#555;">${pTime}</div>`;
+            }
+        }
+
+        let statusTxt = "";
+        if (prize.r < donate_rank) {
+            statusTxt = `Выпал [${d_name}], но у тебя ранг выше! Защита от понижения сохранила твой ранг.`;
+        } else if (prize.r === donate_rank) {
+            if (donate_until === -1) {
+                statusTxt = `Выпал тот же ранг [${d_name}], но он у тебя уже навсегда.`;
+            } else {
+                if (prize.d === -1) donate_until = -1;
+                else donate_until += prize.d * 86400 * 1000;
+                statusTxt = `Выпал [${d_name}]! Срок продлен на ${d_time}.`;
+            }
+        } else {
+            donate_rank = prize.r;
+            donate_until = prize.d === -1 ? -1 : Date.now() + (prize.d * 86400 * 1000);
+            statusTxt = `🔥 ДЖЕКПОТ! Твой новый ранг: [${d_name}] на ${d_time}!`;
+        }
+
+        save_data();
+        upd_ui();
+        sync_cloud(true);
+
+        let resBox = document.getElementById('case-result-box');
+        let resDesc = document.getElementById('case-result-desc');
+        if (resDesc) resDesc.innerText = statusTxt;
+        if (resBox) resBox.style.display = 'block';
+    }, 1200);
+};
+
 window.buy_duke = function(days, cost) { if (donate_rank === 11 && donate_until === -1) return alert("У тебя уже есть Герцог навсегда!"); if (skrepki < cost) return alert("Не хватает скрепок!"); skrepki -= cost; donate_rank = 11; if (days === -1) donate_until = -1; else { if(donate_until !== -1 && donate_rank === 11) donate_until += days * 86400 * 1000; else donate_until = Date.now() + days * 86400 * 1000; } save_data(); upd_ui(); sync_cloud(); alert("💎 ПОЗДРАВЛЯЕМ! ТЫ ТЕПЕРЬ [ГЕРЦОГ]!"); };
 
 function add_item(id, amt) { if(!inv) inv={}; inv[id] = (inv[id]||0) + amt; }
@@ -922,7 +1029,6 @@ window.use_promo = async function() {
     save_data(); 
     upd_ui(); 
     
-    // ПРИНУДИТЕЛЬНО ВБИВАЕМ В ОБЛАКО
     if(nickname) await database.ref('players/' + nickname).update({ vrgk: Math.floor(vrgk) });
     
     alert("✅ Успешно! Ты получил " + fmt(promo.reward) + " воргиков!"); 
@@ -956,7 +1062,6 @@ window.open_profile = function(user) {
 
 window.delete_acc = async function() { if(!confirm('удалить аккаунт?')) return; await database.ref('players/' + nickname).remove(); let my_c = localStorage.getItem(PREFIX + 'club'); if(my_c) { let snap = await database.ref('clubs/' + my_c).once('value'); let club = snap.val(); if(club) { club.members = club.members.filter(m => m !== nickname); if(club.owner === nickname) { if (club.members.length > 0) club.owner = club.members[0]; else club = null; } if (club) await database.ref('clubs/' + my_c).set(club); else await database.ref('clubs/' + my_c).remove(); } } localStorage.clear(); location.reload(); };
 
-// АВАРИЙНОЕ СОХРАНЕНИЕ ПРИ ЗАКРЫТИИ ОКНА
 window.addEventListener('beforeunload', () => {
     if (nickname) {
         save_data();
