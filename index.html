@@ -7,13 +7,16 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>vorgster kombat</title>
-  <link rel="stylesheet" href="style.css?v=1.1">
+  
+  <!-- ЖЕЛЕЗОБЕТОННЫЙ СБРОС КЭША -->
+  <link rel="stylesheet" href="style.css?v=v5">
   
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   
-  <script src="script.js" defer></script>
+  <!-- ЖЕЛЕЗОБЕТОННЫЙ СБРОС КЭША ДЛЯ СКРИПТА -->
+  <script src="script.js?v=v5" defer></script>
 </head>
 <body>
   <div id="rankup-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:10000; justify-content:center; align-items:center; pointer-events:none;">
@@ -109,7 +112,6 @@
     <div id="tab-inventory" class="tab-content">
       <div class="upgrade-list">
         
-        <!-- НОВАЯ ПОДВКЛАДКА ОПЫТА -->
         <div class="section-title">ОПЫТ В ПУЗЫРЬКИ 🧪</div>
         <div style="background:#111; border:1px solid #333; padding:10px; border-radius:8px; margin-bottom:15px;">
           <div style="font-size:12px; color:#aaa; margin-bottom:10px; display:flex; justify-content:space-between;">
@@ -143,7 +145,6 @@
         
         <div class="section-title" style="margin-top:20px; color:#f0f;">ШОП АРТЕФАКТОВ</div>
         
-        <!-- СФЕРЫ -->
         <div class="upgrade-item" style="flex-direction:column; align-items:flex-start;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
             <img src="sphere_titan.png" class="artifact-img" alt="titan">
@@ -248,7 +249,6 @@
           </div>
         </div>
         
-        <!-- ТАЛИСМАНЫ -->
         <div class="section-title" style="margin-top:15px;">ТАЛИСМАНЫ</div>
         
         <div class="upgrade-item" style="flex-direction:column; align-items:flex-start;">
@@ -376,10 +376,7 @@
           </div>
         </div>
         <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333; margin-top: 10px;">
-          
-          <!-- КНОПКА ПОРТАЛА -->
           <button class="buy-btn" id="btn-portal" style="width:100%; margin-bottom:10px; background:#400; border: 1px solid #f00;" onclick="toggle_dimension()">ПОРТАЛ В АД 🌋</button>
-          
           <button class="buy-btn" id="btn-rtp" style="width:100%; margin-bottom:10px;" onclick="do_rtp()">СЛУЧАЙНЫЙ ТЕЛЕПОРТ</button>
           <div style="display:flex; gap:5px; margin-bottom:10px;">
             <button class="buy-btn gold" style="flex:1;" onclick="open_craft_modal()">ВЕРСТАК ⚒️</button>
@@ -397,7 +394,6 @@
     <div id="tab-auction" class="tab-content">
       <div class="upgrade-list">
         <div class="section-title">АУКЦИОН (/AH)</div>
-        
         <div style="background:#111; padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div style="font-size:12px; color:#aaa;">Ожидаемая прибыль: <b id="ah-profit-display" style="color:#d4af37;">0</b></div>
@@ -405,12 +401,10 @@
           </div>
           <button class="buy-btn blue" style="width:100%; margin-top:10px;" onclick="open_ah_create()">+ ВЫСТАВИТЬ ПРЕДМЕТ</button>
         </div>
-
         <div style="display:flex; gap:5px; margin-bottom:10px;">
           <button class="buy-btn gold" style="flex:1;" id="btn-ah-market" onclick="switch_ah_tab('market')">РЫНОК</button>
           <button class="buy-btn" style="flex:1; background:#222;" id="btn-ah-my" onclick="switch_ah_tab('my')">МОИ ЛОТЫ</button>
         </div>
-
         <div id="ah-market-content" style="display:flex; flex-direction:column; gap:8px;"></div>
         <div id="ah-my-content" style="display:none; flex-direction:column; gap:8px;"></div>
       </div>
@@ -482,7 +476,6 @@
           <div style="color:#d4af37; font-weight:bold; margin-bottom:5px;">панель админа</div>
           <button class="buy-btn gold" style="width:100%; margin-bottom:5px;" onclick="toggle_event()">ивент</button>
           
-          <!-- ОБНОВЛЕННЫЙ БЛОК ПРОМОКОДОВ ДЛЯ АДМИНА -->
           <div style="background:#111; padding:8px; border-radius:5px; margin-bottom:5px; border: 1px solid #444; text-align:left;">
             <div style="font-size:10px; color:#aaa; margin-bottom:3px;">Создать промокод:</div>
             <input type="number" id="admin-promo-amt" placeholder="Сумма" style="padding:8px; font-size:12px; margin-bottom:5px;">
@@ -503,7 +496,6 @@
       </div>
     </div>
 
-    <!-- ОБНОВЛЕННЫЙ КРАФТ С НОВЫМИ РЕСУРСАМИ -->
     <div id="craft-modal" class="modal-overlay">
       <div class="modal-content" style="max-width:400px; width:95%;">
         <div class="modal-title">ПЕЧЬ, ВЕРСТАК И КУЗНЯ ⚒️</div>
@@ -648,7 +640,6 @@
       </div>
     </div>
 
-    <!-- МОДАЛКА АУКЦИОНА: ВЫСТАВИТЬ ЛОТ -->
     <div id="ah-create-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">ВЫСТАВИТЬ НА АУКЦИОН</div>
@@ -668,7 +659,6 @@
       </div>
     </div>
 
-    <!-- МОДАЛКА АУКЦИОНА: КУПИТЬ ЛОТ -->
     <div id="ah-buy-modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-title">ПОКУПКА ПРЕДМЕТА</div>
