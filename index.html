@@ -108,6 +108,25 @@
 
     <div id="tab-inventory" class="tab-content">
       <div class="upgrade-list">
+        
+        <!-- НОВАЯ ПОДВКЛАДКА ОПЫТА -->
+        <div class="section-title">ОПЫТ В ПУЗЫРЬКИ 🧪</div>
+        <div style="background:#111; border:1px solid #333; padding:10px; border-radius:8px; margin-bottom:15px;">
+          <div style="font-size:12px; color:#aaa; margin-bottom:10px; display:flex; justify-content:space-between;">
+            <span>Упаковать опыт (тара бесплатна)</span>
+            <span style="color:#0f0; font-weight:bold;" id="inv-exp-display">0 XP</span>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+            <button class="buy-btn blue" onclick="bottle_exp(1000)">1000 XP</button>
+            <button class="buy-btn blue" onclick="bottle_exp(500)">500 XP</button>
+            <button class="buy-btn blue" onclick="bottle_exp(300)">300 XP</button>
+            <button class="buy-btn blue" onclick="bottle_exp(100)">100 XP</button>
+            <button class="buy-btn" style="background:#222;" onclick="bottle_exp(10)">10 XP (ост.)</button>
+            <button class="buy-btn" style="background:#222;" onclick="bottle_exp(1)">1 XP (ост.)</button>
+          </div>
+          <div style="font-size:10px; color:#777; margin-top:5px; text-align:center;">Кликай по пузырьку в рюкзаке, чтобы выпить и вернуть опыт!</div>
+        </div>
+
         <div class="section-title">МОИ ВЕЩИ И РЕСУРСЫ</div>
         <div class="inv-grid" id="inv-container"></div>
         <div style="background:#111; border:1px solid #333; padding:10px; border-radius:8px; margin-top:10px; text-align:center;">
@@ -358,6 +377,7 @@
         </div>
         <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333; margin-top: 10px;">
           
+          <!-- КНОПКА ПОРТАЛА -->
           <button class="buy-btn" id="btn-portal" style="width:100%; margin-bottom:10px; background:#400; border: 1px solid #f00;" onclick="toggle_dimension()">ПОРТАЛ В АД 🌋</button>
           
           <button class="buy-btn" id="btn-rtp" style="width:100%; margin-bottom:10px;" onclick="do_rtp()">СЛУЧАЙНЫЙ ТЕЛЕПОРТ</button>
@@ -462,6 +482,7 @@
           <div style="color:#d4af37; font-weight:bold; margin-bottom:5px;">панель админа</div>
           <button class="buy-btn gold" style="width:100%; margin-bottom:5px;" onclick="toggle_event()">ивент</button>
           
+          <!-- ОБНОВЛЕННЫЙ БЛОК ПРОМОКОДОВ ДЛЯ АДМИНА -->
           <div style="background:#111; padding:8px; border-radius:5px; margin-bottom:5px; border: 1px solid #444; text-align:left;">
             <div style="font-size:10px; color:#aaa; margin-bottom:3px;">Создать промокод:</div>
             <input type="number" id="admin-promo-amt" placeholder="Сумма" style="padding:8px; font-size:12px; margin-bottom:5px;">
@@ -482,6 +503,7 @@
       </div>
     </div>
 
+    <!-- ОБНОВЛЕННЫЙ КРАФТ С НОВЫМИ РЕСУРСАМИ -->
     <div id="craft-modal" class="modal-overlay">
       <div class="modal-content" style="max-width:400px; width:95%;">
         <div class="modal-title">ПЕЧЬ, ВЕРСТАК И КУЗНЯ ⚒️</div>
