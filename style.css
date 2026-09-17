@@ -1,6 +1,16 @@
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 html, body { height: 100%; margin: 0; padding: 0; background: #000; color: #fff; font-family: 'segoe ui', sans-serif; overflow: hidden; user-select: none; }
-.container { display: flex; flex-direction: column; height: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); }
+
+.container { 
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
+    height: 100dvh; 
+    max-width: 500px; 
+    margin: 0 auto; 
+    background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); 
+}
+
 .header { padding: 10px 15px; flex-shrink: 0; position: relative; }
 .top-nav { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; text-decoration: underline; text-transform: lowercase; margin-bottom: 10px; }
 .top-nav span { cursor: pointer; }
@@ -37,7 +47,21 @@ html, body { height: 100%; margin: 0; padding: 0; background: #000; color: #fff;
 .buy-btn.purple { background: #60c; color: #fff; border: 1px solid #a0f; box-shadow: 0 0 10px rgba(170,0,255,0.5); }
 .floating-text { position: absolute; font-size: 32px; font-weight: 900; color: #fff; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20; }
 @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
-.bottom-nav { background: #0a0a0a; display: flex; padding: 10px 2px calc(15px + env(safe-area-inset-bottom)) 2px; border-top: 1px solid #222; flex-shrink: 0; justify-content: flex-start; overflow-x: auto; gap: 5px; scrollbar-width: none; }
+
+.bottom-nav { 
+    background: #0a0a0a; 
+    display: flex; 
+    padding: 10px 2px calc(15px + env(safe-area-inset-bottom)) 2px; 
+    border-top: 1px solid #222; 
+    flex-shrink: 0; 
+    justify-content: flex-start; 
+    overflow-x: auto; 
+    gap: 5px; 
+    scrollbar-width: none; 
+    position: relative; 
+    z-index: 9999; 
+}
+
 .bottom-nav::-webkit-scrollbar { display: none; }
 .nav-item { flex: 0 0 auto; min-width: 70px; text-align: center; color: #555; font-size: 11px; font-weight: bold; padding: 12px 5px; cursor: pointer; text-transform: lowercase; }
 .nav-item.active { color: #d4af37; background: #1a1508; border-radius: 8px; }
