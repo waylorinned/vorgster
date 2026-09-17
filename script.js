@@ -68,6 +68,10 @@ window.last_swing_time = 0;
 window.is_transferring = false;
 let is_nether = localStorage.getItem(PREFIX + 'is_nether') === '1';
 
+// АУКЦИОН И СТЭШИ (ГЛОБАЛЬНЫЙ КЭШ)
+let ah_data = {}; let my_ah_profit = 0; let global_stashes = {};
+window.ah_current_buy_id = null; window.ah_current_buy_item = null; window.ah_current_buy_max = 0; window.ah_current_buy_price_per = 0;
+
 // КЭШ КАРТИНОК АРТЕФАКТОВ
 const ART_IMGS = {};
 const ART_NAMES = ['sphere_titan', 'sphere_chaos', 'sphere_satyr', 'sphere_bestia', 'sphere_ares', 'sphere_hydra', 'sphere_icarus', 'sphere_erida', 'talisman_crusher', 'talisman_punisher', 'talisman_discord', 'talisman_tyrant', 'talisman_rage', 'talisman_vortex', 'talisman_darkness', 'talisman_demon'];
@@ -81,21 +85,7 @@ const RANKS = ["Бронза I", "Бронза II", "Бронза III", "Сер�
 const RANK_COLORS = ['#cd7f32', '#c0c0c0', '#ffd700', '#00ffff', '#8a2be2', '#ff00ff', '#ff4500', '#ff0000'];
 const RANK_SOUNDS = ['bronze.mp3', 'silver.mp3', 'gold.mp3', 'diamond.mp3', 'mythic.mp3', 'legendary.mp3', 'masters.mp3', 'pro.mp3'];
 const RANKS_INFO = [{name: "Нет", color: "#fff"}, {name: "Барон", color: "#aaa"}, {name: "Страж", color: "#aaddaa"}, {name: "Герой", color: "#55ccff"}, {name: "Аспид", color: "#00ff00"}, {name: "Сквид", color: "#00ffff"}, {name: "Глава", color: "#ffa500"}, {name: "Элита", color: "#a020f0"}, {name: "Титан", color: "#ff4500"}, {name: "Принц", color: "#ffd700"}, {name: "Князь", color: "#ff00ff"}, {name: "ГЕРЦОГ", color: "#fff"} ];
-const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_gold": "Золотая руда 🟡", "ore_diamond": "Алмаз 💎", "lapis": "Лазурит 🔷", "ingot_iron": "Слиток железа 🪙", "ingot_gold": "Слиток золота 🌟", "nugget_gold": "Кусочек золота 🧀", "quartz": "Кварц 🤍", "debris": "Незер лом 🟤", "ingot_netherite": "Незер слиток 🖤", "upgrade_template": "Шаблон кузни 🌀", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈" };
-
-let canvas = null; let ctx = null; let online_players = {}, joyX = 0, joyY = 0, isJoyActive = false;
-let is_on_ore = null, current_stash_id = null, world_drops = {};
-let my_cur_hp = 20, in_combat = false, combat_timer = 0, combat_interval = null;
-let combo_count = 0, last_combat_hit_time = 0, sword_hits = 0; let is_stunned = false, current_target = null, last_heal_time = 0;
-
-let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_target_max = 100, arena_mode = 1; 
-let arena_dots_left = 3, click_times = [], arena_locked_until = 0, last_hit_time = 0; 
-let is_game_over = false, tug_score = 50, swipe_dir = '', startX=0, startY=0; 
-let arena_modes_names = {1:"Спам (50т)", 2:"Реакция (30т)", 3:"Мины", 4:"Канат", 5:"Свайп"}; let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
-
-// АУКЦИОН
-let ah_data = {}; let my_ah_profit = 0;
-window.ah_current_buy_id = null; window.ah_current_buy_item = null; window.ah_current_buy_max = 0; window.ah_current_buy_price_per = 0;
+const ITEM_NAMES = { "ore_iron": "Железная руда 🪨", "ore_gold": "Золотая руда 🟡", "ore_diamond": "Алмаз 💎", "lapis": "Лазурит 🔷", "ingot_iron": "Слиток железа 🪙", "ingot_gold": "Слиток золота 🌟", "nugget_gold": "Кусочек золота 🧀", "quartz": "Кварц 🤍", "debris": "Незер лом 🟤", "ingot_netherite": "Незер слиток 🖤", "upgrade_template": "Шаблон кузни 🌀", "sword_iron": "Железный меч 🗡️", "sword_diamond": "Алмазный меч ⚔️", "sword_netherite": "Незеритовый меч 🖤", "mace": "Булава 🔨", "armor_leather": "Кожанка 🟫", "armor_iron": "Железная броня 🛡️", "armor_diamond": "Алмазная броня 💎", "armor_netherite": "Незеритка 🖤🛡️", "gapple": "Золотое яблоко 🍎", "egapple": "Чар. Яблоко 🍏", "pearl": "Эндер-пёрл 🔮", "totem": "Тотем 🗿", "sphere_titan": "Сфера Титана 🟪", "sphere_chaos": "Сфера Хаоса 🌌", "sphere_satyr": "Сфера Сатира 🌿", "sphere_ares": "Сфера Ареса 🌋", "sphere_bestia": "Сфера Бестии 🦠", "sphere_hydra": "Сфера Гидры 🌊", "sphere_icarus": "Сфера Икара 🍒", "sphere_erida": "Сфера Эриды 🌕", "talisman_crusher": "Талисман Крушителя 🩸", "talisman_punisher": "Талисман Карателя 👾", "talisman_discord": "Талисман Раздора ☯️", "talisman_tyrant": "Талисман Тирана 💀", "talisman_rage": "Талисман Ярости 👹", "talisman_vortex": "Талисман Вихря 🌪️", "talisman_darkness": "Талисман Мрака 🌑", "talisman_demon": "Талисман Демона 😈", "exp_bottle_1000": "Опыт (1000) 🧪", "exp_bottle_500": "Опыт (500) 🧪", "exp_bottle_300": "Опыт (300) 🧪", "exp_bottle_100": "Опыт (100) 🧪", "exp_bottle_10": "Опыт (10) 🧪", "exp_bottle_1": "Опыт (1) 🧪" };
 
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
@@ -246,6 +236,7 @@ function upd_ui() {
         let bEl = document.getElementById('vrgk-balance'); if(bEl) bEl.innerText = fmt(vrgk); 
         let sEl = document.getElementById('skrepki-val'); if(sEl) sEl.innerText = fmt(skrepki); 
         let exEl = document.getElementById('exp-val'); if(exEl) exEl.innerText = fmt(exp);
+        let expInv = document.getElementById('inv-exp-display'); if (expInv) expInv.innerText = fmt(exp) + " XP";
         
         let buff = 0; 
         let pEl = document.getElementById('profit-val'); if(pEl) pEl.innerText = "+" + fmt(profit + buff) + (buff > 0 ? " ⚡" : ""); 
@@ -332,6 +323,35 @@ window.uncraft = function() { if(skrepki >= 1) { skrepki -= 1; vrgk += 900000; u
 window.buy_artifact = function(id, cost) { if(vrgk >= cost) { vrgk -= cost; if(!inv) inv={}; inv[id] = (inv[id]||0) + 1; save_data(); upd_ui(); render_inventory(); alert(`Успешно куплен артефакт: ${ITEM_NAMES[id]}`); sync_cloud(true); } else { alert("Не хватает воргиков!"); } }
 window.equip_offhand = function(id) { inv['active_offhand'] = id; try { my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); } catch(e){} save_data(); render_inventory(); alert(`В левую руку экипирован: ${ITEM_NAMES[id]}`); sync_my_pos(); sync_cloud(true); }
 window.unequip_offhand = function() { inv['active_offhand'] = ''; try { my_cur_hp = Math.min(my_cur_hp, get_pvp_stats().max_hp); } catch(e){} save_data(); render_inventory(); sync_my_pos(); sync_cloud(true); }
+
+// ОПЫТ: УПАКОВКА В ПУЗЫРЬКИ
+window.bottle_exp = function(amount) {
+    if (exp >= amount) {
+        exp -= amount;
+        let key = 'exp_bottle_' + amount;
+        inv[key] = (inv[key] || 0) + 1;
+        save_data();
+        upd_ui();
+        render_inventory();
+        sync_cloud(true);
+        alert(`Успешно! Ты упаковал ${amount} XP в пузырек 🧪.`);
+    } else {
+        alert("Не хватает опыта!");
+    }
+}
+
+window.drink_exp = function(key, amount) {
+    if (inv[key] > 0) {
+        inv[key]--;
+        exp += amount;
+        save_data();
+        upd_ui();
+        render_inventory();
+        sync_cloud(true);
+        if(navigator.vibrate) navigator.vibrate(10);
+        spawn_txt(canvas ? canvas.width/2 : 100, canvas ? canvas.height/2 : 100, `+${amount} XP`);
+    }
+}
 
 const CASE_LOOT = [
     { r: 1, d: 14, w: 18.0 }, { r: 1, d: 30, w: 6.0 }, { r: 1, d: -1, w: 2.0 },
@@ -485,7 +505,15 @@ function render_inventory() {
                 let baseKey = key.startsWith('ench|') ? key.split('|')[1] : key;
                 let iname = get_item_name(key);
                 let iicon = ITEM_NAMES[baseKey] ? ITEM_NAMES[baseKey].split(' ')[1] : '📦'; 
-                let onclick_attr = key.startsWith('sphere') || key.startsWith('talisman') ? `onclick="equip_offhand('${key}')"` : '';
+                
+                let onclick_attr = '';
+                if(key.startsWith('sphere') || key.startsWith('talisman')) {
+                    onclick_attr = `onclick="equip_offhand('${key}')"`;
+                } else if(key.startsWith('exp_bottle_')) {
+                    let val = parseInt(key.split('_')[2]);
+                    onclick_attr = `onclick="drink_exp('${key}', ${val})"`;
+                }
+
                 html += `<div class="inv-slot" ${onclick_attr}><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:${key.startsWith('ench|')?'#0f0':'#aaa'};">${iname}</div><div class="inv-count">x${inv[key]}</div></div>`; 
             } 
         } 
@@ -609,7 +637,7 @@ window.upgrade_gear = function(type) {
 
 window.craft_item = function(res_item, cost) { let is_diamond = res_item.includes('diamond'); let req_mat = is_diamond ? 'ore_diamond' : 'ingot_iron'; if((inv[req_mat]||0) >= cost) { inv[req_mat] -= cost; inv[res_item] = (inv[res_item]||0)+1; save_data(); open_craft_modal(); sync_cloud(true); alert("Успешный крафт!"); } else alert(`Нужно ${cost} ${is_diamond ? 'Алмазов' : 'Слитков железа'}!`); }
 
-function update_rtp_ui() { let cx = document.getElementById('map-x'); if(cx) cx.innerText = Math.floor(loc_x); let cz = document.getElementById('map-z'); if(cz) cz.innerText = Math.floor(loc_z); check_local_stashes(); }
+function update_rtp_ui() { let cx = document.getElementById('map-x'); if(cx) cx.innerText = Math.floor(loc_x); let cz = document.getElementById('map-z'); if(cz) cz.innerText = Math.floor(loc_z); window.check_local_stashes(); }
 window.do_rtp = function() { if (in_combat) return alert("В бою нельзя использовать RTP!"); loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТЕЛЕПОРТАЦИЯ"); }
 window.tp_spawn = function() { if (in_combat) return alert("В бою нельзя телепортироваться на спавн!"); loc_x = 0; loc_z = 0; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП НА СПАВН"); }
 
@@ -628,8 +656,36 @@ window.set_home = function() { let max_homes = 1 + donate_rank; if(Object.keys(m
 window.tp_home = function(id) { if(in_combat) return alert("В бою нельзя телепортироваться домой!"); let h = my_homes[id]; if(!h) return; loc_x = h.x; loc_z = h.z; save_data(); update_rtp_ui(); sync_my_pos(); document.getElementById('homes-modal').style.display = 'none'; spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП ДОМОЙ"); }
 window.delete_home = function(id) { if(confirm("Точно удалить этот сетхом?")) { delete my_homes[id]; save_data(); sync_cloud(); open_homes_modal(); } }
 
-window.place_stash = async function() { if(vrgk < 100000) return alert("Нужно 100 000 воргиков для создания стэша!"); let s_id = nickname + "_" + (is_nether?"N":"O") + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); if(snap.exists()) return alert("Тут уже есть тайник!"); vrgk -= 100000; upd_ui(); save_data(); await database.ref('stashes/' + s_id).set({ owner: nickname, x: loc_x, z: loc_z, dim: is_nether?1:0, inv: "{}", skrepki: 0 }); alert("Тайник установлен!"); check_local_stashes(); }
-async function check_local_stashes() { let s_id = nickname + "_" + (is_nether?"N":"O") + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); let snap = await database.ref('stashes/' + s_id).once('value'); let cont = document.getElementById('local-stashes'); if(cont) { if(snap.exists()) { cont.innerHTML = `<button class="buy-btn green" style="width:100%;" onclick="open_stash('${s_id}')">ОТКРЫТЬ СВОЙ ТАЙНИК</button>`; } else { cont.innerHTML = ``; } } }
+window.place_stash = async function() { 
+    if(vrgk < 100000) return alert("Нужно 100 000 воргиков для создания стэша!"); 
+    let s_id = nickname + "_" + (is_nether?"N":"O") + "_" + Math.floor(loc_x/50) + "_" + Math.floor(loc_z/50); 
+    if(global_stashes[s_id]) return alert("Тут уже есть тайник!"); 
+    vrgk -= 100000; upd_ui(); save_data(); 
+    await database.ref('stashes/' + s_id).set({ owner: nickname, x: loc_x, z: loc_z, dim: is_nether?1:0, inv: "{}", skrepki: 0 }); 
+    alert("Тайник установлен!"); 
+}
+
+window.check_local_stashes = function() { 
+    let cont = document.getElementById('local-stashes'); 
+    if(!cont) return;
+    let found = null;
+    let myDim = is_nether ? 1 : 0;
+    
+    for(let id in global_stashes) {
+        let s = global_stashes[id];
+        if(s.owner === nickname && (s.dim||0) === myDim) {
+            let dist = Math.hypot(s.x - loc_x, s.z - loc_z);
+            if(dist <= 150) { found = id; break; }
+        }
+    }
+    
+    if(found) { 
+        cont.innerHTML = `<button class="buy-btn green" style="width:100%;" onclick="open_stash('${found}')">ОТКРЫТЬ СВОЙ ТАЙНИК</button>`; 
+    } else { 
+        cont.innerHTML = ``; 
+    } 
+}
+
 window.open_stash = async function(s_id) { if(in_combat) return alert("Нельзя открыть стэш во время боя!"); current_stash_id = s_id; let sm = document.getElementById('stash-modal'); if(sm) sm.style.display = 'flex'; refresh_stash_ui(); }
 window.refresh_stash_ui = async function() { if(!current_stash_id) return; let snap = await database.ref('stashes/' + current_stash_id).once('value'); let data = snap.val(); let sm = document.getElementById('stash-modal'); if(!data) { if(sm) sm.style.display = 'none'; return; } let sinv = JSON.parse(data.inv || "{}"); let s_html = ''; if((data.skrepki||0) > 0) s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('skrepki', ${data.skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${data.skrepki}</div></div>`; for(let k in sinv) { if(sinv[k]>0) { let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; s_html += `<div class="inv-slot" onclick="move_from_stash_prompt('${k}', ${sinv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${iname}</div><div class="inv-count">x${sinv[k]}</div></div>`; } } if(s_html === '') s_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Тайник пуст</div>'; let sg = document.getElementById('stash-items-grid'); if(sg) sg.innerHTML = s_html; let p_html = ''; if(skrepki > 0) p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('skrepki', ${skrepki})"><div class="inv-icon">📎</div><div style="font-size:10px; color:#aaa;">Скрепки</div><div class="inv-count">x${skrepki}</div></div>`; for(let k in inv) { if(inv[k]>0 && k !== 'active_offhand') { let iname = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[0] : k; let iicon = ITEM_NAMES[k] ? ITEM_NAMES[k].split(' ')[1] : '📦'; let eq = (k === inv['active_offhand']) ? '<span style="color:#0f0; font-weight:bold;">[E]</span> ' : ''; p_html += `<div class="inv-slot" onclick="move_to_stash_prompt('${k}', ${inv[k]})"><div class="inv-icon">${iicon}</div><div style="font-size:10px; color:#aaa;">${eq}${iname}</div><div class="inv-count">x${inv[k]}</div></div>`; } } if(p_html === '') p_html = '<div style="grid-column: span 4; text-align:center; color:#555; font-size:11px; padding:10px;">Рюкзак пуст</div>'; let pg = document.getElementById('stash-player-grid'); if(pg) pg.innerHTML = p_html; };
 window.move_to_stash_prompt = function(item, max_count) { let amt = 1; if (max_count > 1) { let res = prompt(`Сколько положить? (Макс: ${max_count})`, max_count); if(res === null) return; amt = parseInt(res); if(isNaN(amt) || amt <= 0 || amt > max_count) return alert("Неверное количество!"); } move_to_stash(item, amt); };
@@ -676,12 +732,12 @@ window.use_locator = async function() {
     if(window.is_transferring) return; window.is_transferring = true;
     try {
         if(vrgk < 50000) return alert("Локатор стоит 50 000 воргиков!"); vrgk -= 50000; upd_ui(); save_data(); 
-        let snap = await database.ref('stashes').once('value'); let all_st = snap.val(); let found = null; 
+        let found = null; 
         let myDim = is_nether ? 1 : 0;
-        for(let id in all_st) { let s = all_st[id]; if(s.owner !== nickname && (s.dim || 0) === myDim && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } 
+        for(let id in global_stashes) { let s = global_stashes[id]; if(s.owner !== nickname && (s.dim || 0) === myDim && Math.abs(s.x - loc_x) < 500 && Math.abs(s.z - loc_z) < 500) { found = id; break; } } 
         if(found) { 
             if(confirm("ЛОКАТОР НАШЁЛ ЧУЖОЙ ТАЙНИК РЯДОМ!\nВзломать его и забрать все вещи?")) { 
-                let s_data = all_st[found]; let sinv = JSON.parse(s_data.inv||"{}"); 
+                let s_data = global_stashes[found]; let sinv = JSON.parse(s_data.inv||"{}"); 
                 if(s_data.skrepki > 0) { skrepki += s_data.skrepki; } 
                 for(let k in sinv) { inv[k] = (inv[k]||0) + sinv[k]; } 
                 await database.ref('stashes/' + found).remove(); 
@@ -817,7 +873,7 @@ function draw_map() {
     if (!ctx) return requestAnimationFrame(draw_map);
     
     let stats = get_pvp_stats(); let move_speed = 4 * stats.speed_mult; 
-    if(isJoyActive && !is_stunned) { loc_x += joyX * move_speed; loc_z += joyY * move_speed; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } }
+    if(isJoyActive && !is_stunned) { loc_x += joyX * move_speed; loc_z += joyY * move_speed; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); window.check_local_stashes(); last_stash_check = Date.now(); } }
     
     ctx.fillStyle = is_nether ? '#2e0e0e' : '#26381b'; 
     ctx.fillRect(0,0, canvas.width, canvas.height); 
@@ -924,7 +980,6 @@ function setup_dmg_listener() {
     database.ref('world_players/' + nickname).onDisconnect().remove();
 }
 
-// АУКЦИОН: ЛОГИКА
 function setup_ah_listener() {
     if(!nickname) return;
     database.ref('players/' + nickname + '/ah_profit').on('value', snap => {
@@ -936,6 +991,11 @@ function setup_ah_listener() {
     database.ref('auction').on('value', snap => {
         ah_data = snap.val() || {};
         render_ah();
+    });
+    
+    database.ref('stashes').on('value', snap => {
+        global_stashes = snap.val() || {};
+        window.check_local_stashes();
     });
 }
 
