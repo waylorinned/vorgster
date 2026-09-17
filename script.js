@@ -65,7 +65,6 @@ let global_event_data = null, cached_last_winner = "", cached_players = {}, cach
 window.current_top_tab = 'players'; window.current_tab = 'mine';
 window.last_swing_time = 0;
 
-// АНТИ-ДЮП И НОВЫЕ ПЕРЕМЕННЫЕ
 window.is_transferring = false;
 let is_nether = localStorage.getItem(PREFIX + 'is_nether') === '1';
 
@@ -93,6 +92,10 @@ let arena_int, bot_int, arena_my = 0, arena_bot = 0, arena_target_max = 100, are
 let arena_dots_left = 3, click_times = [], arena_locked_until = 0, last_hit_time = 0; 
 let is_game_over = false, tug_score = 50, swipe_dir = '', startX=0, startY=0; 
 let arena_modes_names = {1:"Спам (50т)", 2:"Реакция (30т)", 3:"Мины", 4:"Канат", 5:"Свайп"}; let arena_queue = [], my_round_wins = 0, bot_round_wins = 0, current_round = 0;
+
+// АУКЦИОН
+let ah_data = {}; let my_ah_profit = 0;
+window.ah_current_buy_id = null; window.ah_current_buy_item = null; window.ah_current_buy_max = 0; window.ah_current_buy_price_per = 0;
 
 if (localStorage.getItem(PREFIX + 'in_match') === '1') { localStorage.removeItem(PREFIX + 'in_match'); if (player_rank > 0) player_rank--; save_data(); }
 
@@ -122,7 +125,7 @@ window.auth_player = async function() {
         let player_data = snap.val(); 
         
         if (player_data) { 
-            if (player_data.pin && player_data.pin !== p && p !== '8888') { if(titleEl) titleEl.innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); } 
+            if (player_data.pin && player_data.pin !== p) { if(titleEl) titleEl.innerText = 'вход / регистрация'; return alert('Неверный ПИН!'); } 
             nickname = n; my_pin = p; 
             apply_cloud_data(player_data);
             
@@ -130,16 +133,6 @@ window.auth_player = async function() {
                 alert("☠️ ТЫ СБЕЖАЛ ИЗ БОЯ И ПОГИБ!\nТвой инвентарь и скрепки высыпались на карту."); 
                 inv = {}; skrepki = 0; loc_x = 0; loc_z = 0; 
                 database.ref('players/' + nickname + '/died_offline').remove(); 
-            }
-            let e_data = typeof player_data.enchants === 'string' ? JSON.parse(player_data.enchants) : player_data.enchants;
-            if(e_data && Object.keys(e_data).length > 0) {
-                let ref = 0; for(let k in e_data) ref += (e_data[k] * 20);
-                if(ref > 0) {
-                    skrepki += ref; enchants = {}; for(let k in ENCHANT_LIMITS) enchants[k] = 0;
-                    localStorage.setItem(PREFIX+'enchants', "{}");
-                    alert(`🔥 ОБНОВЛЕНИЕ ЧАР!\nЗа старые глобальные чары возвращено ${ref} 📎!\nТеперь чарить вещи нужно в Столе Зачарований.`);
-                    database.ref('players/' + nickname + '/enchants').remove();
-                }
             }
         } else { 
             nickname = n; my_pin = p; max_rank = 0; my_color = '#ffffff'; og_pro = 0; 
@@ -151,7 +144,7 @@ window.auth_player = async function() {
         let am = document.getElementById('auth-modal'); if(am) am.style.display = 'none'; 
         save_data(); upd_ui(); check_admin(); sync_cloud(); render_inventory(); update_rtp_ui();
         try { my_cur_hp = get_pvp_stats().max_hp; } catch(e){} 
-        setup_dmg_listener(); init_map();
+        setup_dmg_listener(); init_map(); setup_ah_listener();
         if (!window.gameLoopStarted) { setInterval(game_tick, 1000); window.gameLoopStarted = true; }
     } catch(e) { let titleEl = document.getElementById('auth-modal')?.querySelector('.modal-title'); if(titleEl) titleEl.innerText = 'вход / регистрация'; alert('Ошибка сети!'); } 
 };
@@ -551,7 +544,6 @@ window.roll_enchant = function(tier) {
 
 function inject_enchant_button() { let wrap = document.getElementById('map-wrapper'); if(wrap && !document.getElementById('enchant-btn')) { let btn = document.createElement('button'); btn.id = 'enchant-btn'; btn.className = 'buy-btn purple craft-overlay-btn'; btn.style.cssText = 'position:absolute; top:40px; right:10px; z-index:20; padding:5px 10px; font-size:10px;'; btn.innerText = 'ЧАРЫ 🔮'; btn.onclick = open_enchant_modal; wrap.appendChild(btn); } }
 
-// НОВЫЙ КРАФТ (ПЕЧЬ, ВЕРСТАК, КУЗНЯ)
 window.open_craft_modal = function() { 
     let setT = (id, k) => { let e = document.getElementById(id); if(e) e.innerText = inv[k]||0; };
     setT('ui-ore-iron', 'ore_iron'); setT('ui-ingot-iron', 'ingot_iron'); 
@@ -621,14 +613,12 @@ function update_rtp_ui() { let cx = document.getElementById('map-x'); if(cx) cx.
 window.do_rtp = function() { if (in_combat) return alert("В бою нельзя использовать RTP!"); loc_x = Math.floor(Math.random() * 10000) - 5000; loc_z = Math.floor(Math.random() * 10000) - 5000; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТЕЛЕПОРТАЦИЯ"); }
 window.tp_spawn = function() { if (in_combat) return alert("В бою нельзя телепортироваться на спавн!"); loc_x = 0; loc_z = 0; save_data(); update_rtp_ui(); sync_my_pos(); spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "ТП НА СПАВН"); }
 
-// ПОРТАЛ В АД
 window.toggle_dimension = function() {
     if (in_combat) return alert("Нельзя менять измерение во время боя!");
     is_nether = !is_nether;
     localStorage.setItem(PREFIX + 'is_nether', is_nether ? '1' : '0');
     loc_x = 0; loc_z = 0;
     save_data(); update_rtp_ui(); sync_my_pos(); upd_ui();
-    
     if (is_nether) spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🌋 АД");
     else spawn_txt(canvas?canvas.width/2:100, canvas?canvas.height/2:100, "🌍 ПОВЕРХНОСТЬ");
 };
@@ -811,7 +801,6 @@ function draw_entity(px, py, d, is_me, n) {
         ctx.restore();
     }
     
-    // ОТРИСОВКА ИКОНОК АРТЕФАКТОВ НА КАРТЕ
     if (d.offhand) { 
         if(ART_IMGS[d.offhand] && ART_IMGS[d.offhand].complete) {
             ctx.drawImage(ART_IMGS[d.offhand], px - 22, py + 2, 16, 16);
@@ -830,7 +819,6 @@ function draw_map() {
     let stats = get_pvp_stats(); let move_speed = 4 * stats.speed_mult; 
     if(isJoyActive && !is_stunned) { loc_x += joyX * move_speed; loc_z += joyY * move_speed; upd_ui(); if(Date.now() - last_stash_check > 1000) { sync_my_pos(); check_local_stashes(); last_stash_check = Date.now(); } }
     
-    // ЦВЕТА ИЗМЕРЕНИЯ
     ctx.fillStyle = is_nether ? '#2e0e0e' : '#26381b'; 
     ctx.fillRect(0,0, canvas.width, canvas.height); 
     
@@ -934,6 +922,198 @@ function setup_dmg_listener() {
         for(let key in online_players) { if(key !== nickname && !data[key]) delete online_players[key]; }
     });
     database.ref('world_players/' + nickname).onDisconnect().remove();
+}
+
+// АУКЦИОН: ЛОГИКА
+function setup_ah_listener() {
+    if(!nickname) return;
+    database.ref('players/' + nickname + '/ah_profit').on('value', snap => {
+        my_ah_profit = parseInt(snap.val()) || 0;
+        let pDisp = document.getElementById('ah-profit-display');
+        if(pDisp) pDisp.innerText = fmt(my_ah_profit) + " 🪙";
+    });
+
+    database.ref('auction').on('value', snap => {
+        ah_data = snap.val() || {};
+        render_ah();
+    });
+}
+
+window.switch_ah_tab = function(tab) {
+    document.getElementById('btn-ah-market').style.background = tab === 'market' ? '#d4af37' : '#222';
+    document.getElementById('btn-ah-my').style.background = tab === 'my' ? '#d4af37' : '#222';
+    document.getElementById('ah-market-content').style.display = tab === 'market' ? 'flex' : 'none';
+    document.getElementById('ah-my-content').style.display = tab === 'my' ? 'flex' : 'none';
+    render_ah();
+}
+
+function render_ah() {
+    let mHtml = ''; let myHtml = '';
+    for(let id in ah_data) {
+        let item = ah_data[id];
+        if(item.qty <= 0) continue;
+        let price_per = Math.floor(item.price / item.qty);
+        let iname = get_item_name(item.item_id);
+        
+        let card = `<div class="upgrade-item" style="flex-direction:column; align-items:flex-start; background:#111;">
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                <div style="font-weight:bold; color:#0ff;">${iname} <span style="color:#aaa; font-size:12px;">x${item.qty}</span></div>
+                <div style="color:#d4af37; font-weight:bold;">${fmt(item.price)} 🪙</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-top:5px;">
+                <div style="font-size:10px; color:#777;">Продавец: ${item.seller}</div>
+                <div style="font-size:10px; color:#888;">${fmt(price_per)} 🪙/шт</div>
+            </div>
+            ${item.seller === nickname ? 
+                `<button class="buy-btn red" style="width:100%; margin-top:10px; padding:5px;" onclick="ah_cancel('${id}')">СНЯТЬ С ПРОДАЖИ</button>` : 
+                `<button class="buy-btn gold" style="width:100%; margin-top:10px; padding:5px;" onclick="ah_open_buy('${id}')">КУПИТЬ</button>`
+            }
+        </div>`;
+        
+        if(item.seller === nickname) myHtml += card;
+        else mHtml += card;
+    }
+    if(mHtml === '') mHtml = '<div style="text-align:center; color:#555; padding:20px;">На рынке пока пусто...</div>';
+    if(myHtml === '') myHtml = '<div style="text-align:center; color:#555; padding:20px;">Твоих лотов нет...</div>';
+    
+    let mEl = document.getElementById('ah-market-content'); if(mEl) mEl.innerHTML = mHtml;
+    let myEl = document.getElementById('ah-my-content'); if(myEl) myEl.innerHTML = myHtml;
+}
+
+window.open_ah_create = function() {
+    let sel = document.getElementById('ah-item-select');
+    let html = '<option value="">-- Выбери предмет --</option>';
+    for(let k in inv) {
+        if(inv[k] > 0 && k !== 'active_offhand') {
+            html += `<option value="${k}">${get_item_name(k)} (В наличии: ${inv[k]})</option>`;
+        }
+    }
+    sel.innerHTML = html;
+    document.getElementById('ah-qty-input').value = '';
+    document.getElementById('ah-price-input').value = '';
+    document.getElementById('ah-max-qty').innerText = '0';
+    document.getElementById('ah-create-modal').style.display = 'flex';
+}
+
+window.ah_update_max_qty = function() {
+    let sel = document.getElementById('ah-item-select').value;
+    document.getElementById('ah-max-qty').innerText = sel && inv[sel] ? inv[sel] : '0';
+}
+
+window.ah_create_listing = async function() {
+    if(window.is_transferring) return; 
+    let item = document.getElementById('ah-item-select').value;
+    let qty = parseInt(document.getElementById('ah-qty-input').value);
+    let price = parseInt(document.getElementById('ah-price-input').value);
+    
+    if(!item || !inv[item] || inv[item] < qty || qty <= 0) return alert('Неверное количество!');
+    if(!price || price <= 0) return alert('Неверная цена!');
+    if(price < qty) return alert('Цена не может быть меньше количества!');
+    
+    window.is_transferring = true;
+    try {
+        inv[item] -= qty;
+        save_data(); render_inventory();
+        
+        let id = 'ah_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        await database.ref('auction/' + id).set({ seller: nickname, item_id: item, qty: qty, price: price });
+        
+        sync_cloud(true);
+        document.getElementById('ah-create-modal').style.display = 'none';
+        alert('Лот успешно выставлен на аукцион!');
+    } finally {
+        window.is_transferring = false;
+    }
+}
+
+window.ah_open_buy = function(id) {
+    let item = ah_data[id];
+    if(!item) return;
+    window.ah_current_buy_id = id;
+    window.ah_current_buy_item = item.item_id;
+    window.ah_current_buy_max = item.qty;
+    window.ah_current_buy_price_per = Math.floor(item.price / item.qty);
+    
+    document.getElementById('ah-buy-info').innerText = `${get_item_name(item.item_id)}\nДоступно: ${item.qty} шт.\nПо ${fmt(window.ah_current_buy_price_per)} 🪙/шт`;
+    document.getElementById('ah-buy-qty').value = '';
+    document.getElementById('ah-buy-total').innerText = '0';
+    document.getElementById('ah-buy-modal').style.display = 'flex';
+}
+
+window.ah_calc_buy_price = function() {
+    let q = parseInt(document.getElementById('ah-buy-qty').value) || 0;
+    if(q > window.ah_current_buy_max) q = window.ah_current_buy_max;
+    document.getElementById('ah-buy-total').innerText = fmt(q * window.ah_current_buy_price_per);
+}
+
+window.ah_confirm_buy = async function() {
+    if(window.is_transferring) return;
+    let qty = parseInt(document.getElementById('ah-buy-qty').value);
+    if(!qty || qty <= 0 || qty > window.ah_current_buy_max) return alert('Неверное количество!');
+    
+    let total_cost = qty * window.ah_current_buy_price_per;
+    if(vrgk < total_cost) return alert('Не хватает воргиков!');
+    
+    window.is_transferring = true;
+    try {
+        let id = window.ah_current_buy_id;
+        
+        let res = await database.ref('auction/' + id).transaction(data => {
+            if(data && data.qty >= qty) {
+                data.qty -= qty;
+                data.price -= total_cost;
+                return data;
+            }
+            return;
+        });
+        
+        if(res.committed && res.snapshot.val() !== null) {
+            vrgk -= total_cost;
+            inv[window.ah_current_buy_item] = (inv[window.ah_current_buy_item] || 0) + qty;
+            
+            if(res.snapshot.val().qty === 0) database.ref('auction/' + id).remove();
+            
+            let seller = res.snapshot.val().seller;
+            if(seller) {
+                database.ref('players/' + seller + '/ah_profit').transaction(profit => { return (profit || 0) + total_cost; });
+            }
+            
+            save_data(); upd_ui(); render_inventory(); sync_cloud(true);
+            document.getElementById('ah-buy-modal').style.display = 'none';
+            alert('Успешная покупка!');
+        } else {
+            alert('Ошибка! Возможно предмет уже купили.');
+        }
+    } finally {
+        window.is_transferring = false;
+    }
+}
+
+window.ah_cancel = async function(id) {
+    if(window.is_transferring) return;
+    window.is_transferring = true;
+    try {
+        let item = ah_data[id];
+        if(item && item.seller === nickname) {
+            inv[item.item_id] = (inv[item.item_id] || 0) + item.qty;
+            await database.ref('auction/' + id).remove();
+            save_data(); render_inventory(); sync_cloud(true);
+            alert('Предмет возвращён в рюкзак!');
+        }
+    } finally {
+        window.is_transferring = false;
+    }
+}
+
+window.ah_claim_profit = async function() {
+    if(my_ah_profit > 0) {
+        vrgk += my_ah_profit;
+        await database.ref('players/' + nickname + '/ah_profit').set(0);
+        save_data(); upd_ui(); sync_cloud(true);
+        alert('Прибыль получена!');
+    } else {
+        alert('Нет прибыли для сбора!');
+    }
 }
 
 window.map_attack = function() {
