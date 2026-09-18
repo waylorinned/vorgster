@@ -1,9 +1,62 @@
+// ==========================================
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ ФАЙРБЕЙСА
+// ==========================================
 const firebaseConfig = { apiKey: "AIzaSyDBQuKaUkor9AiiP5QsqHsrJMGebh8EUK0", authDomain: "vorgster-kombat-a1100.firebaseapp.com", databaseURL: "https://vorgster-kombat-a1100-default-rtdb.europe-west1.firebasedatabase.app", projectId: "vorgster-kombat-a1100", storageBucket: "vorgster-kombat-a1100.firebasestorage.app", messagingSenderId: "1070503708882", appId: "1:1070503708882:web:66bfab9dbab363f2ee050b" };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const PREFIX = 'v4_';
 
 window.onerror = function(msg, url, line) { return false; };
+
+// ==========================================
+// ФИКС КРАШЕЙ: ЯВНОЕ ОБЪЯВЛЕНИЕ ВСЕХ ПЕРЕМЕННЫХ
+// ==========================================
+let in_combat = false;
+let combat_timer = 0;
+let combat_interval = null;
+let is_stunned = false;
+let combo_count = 0;
+let sword_hits = 0;
+let last_combat_hit_time = 0;
+let last_heal_time = 0;
+let is_on_ore = null;
+let current_stash_id = null;
+let my_cur_hp = 20;
+let current_target = null;
+let world_drops = {};
+let online_players = {};
+let canvas = null;
+let ctx = null;
+let isJoyActive = false;
+let joyX = 0;
+let joyY = 0;
+
+const arena_modes_names = {
+    1: "Ловкость (Кружки)",
+    2: "Прочность (Цифры)",
+    3: "Минное поле",
+    4: "Перетягивание каната",
+    5: "Свайпы"
+};
+let arena_queue = [];
+let arena_mode = 0;
+let arena_my = 0;
+let arena_bot = 0;
+let bot_int = null;
+let my_round_wins = 0;
+let bot_round_wins = 0;
+let current_round = 0;
+let arena_dots_left = 3;
+let arena_target_max = 50;
+let arena_locked_until = 0;
+let is_game_over = false;
+let tug_score = 50;
+let swipe_dir = '';
+let startX = 0, startY = 0;
+let last_hit_time = 0;
+let click_times = [];
+window.cur_ore_x = 0;
+window.cur_ore_z = 0;
 
 function safeParse(key, def) {
     try {
@@ -99,6 +152,13 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
         let modal = document.getElementById('auth-modal');
         if (modal) modal.style.display = 'flex';
+    }
+
+    // ФИКС КНОПКИ ТАПОВ (теперь мы точно ждем загрузки элемента)
+    let btn_coin = document.getElementById('vorg-coin');
+    if (btn_coin) {
+        btn_coin.addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false}); 
+        btn_coin.addEventListener('mousedown', (e) => { if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); });
     }
 });
 
@@ -260,11 +320,6 @@ function upd_ui() {
     } catch(e) {}
 }
 
-let btn_coin = document.getElementById('vorg-coin');
-if (btn_coin) {
-    btn_coin.addEventListener('touchstart', (e) => { e.preventDefault(); do_tap(e.changedTouches); }, {passive: false}); 
-    btn_coin.addEventListener('mousedown', (e) => { if (e.button === 0) do_tap([{clientX: e.clientX, clientY: e.clientY}]); });
-}
 
 function do_tap(touches) { 
     let b = get_d_bonus(); let actual_tap = tap_power + b.t; 
