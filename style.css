@@ -1,22 +1,26 @@
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
-/* УБРАЛИ КРИВОЙ POSITION: FIXED С BODY, ИЗ-ЗА НЕГО НЕ РАБОТАЛИ КЛИКИ НА МОБИЛАХ */
+/* УБИТ СИСТЕМНЫЙ СКРОЛЛ. Теперь экран игры стоит намертво */
 html, body { 
-    height: 100dvh; /* Правильная высота под мобилки с адресной строкой */
-    width: 100vw;
-    margin: 0; padding: 0; 
-    background: #000; color: #fff; 
+    height: 100%; 
+    width: 100%;
+    margin: 0; 
+    padding: 0; 
+    background: #000; 
+    color: #fff; 
     font-family: 'segoe ui', sans-serif; 
     overflow: hidden; 
+    overscroll-behavior-y: none; /* Защита от свайпа вниз (обновления страницы) */
     user-select: none; 
     -webkit-user-select: none;
 }
 
+/* FLEXBOX АРХИТЕКТУРА */
 .container { 
     display: flex; 
     flex-direction: column; 
     width: 100%;
-    height: 100dvh; 
+    height: 100dvh; /* Идеальная высота под мобилки */
     max-width: 500px; 
     margin: 0 auto; 
     background: radial-gradient(circle at top, #2a220d 0%, #000000 80%); 
@@ -33,10 +37,10 @@ html, body {
 .league-info { text-align: center; font-size: 16px; color: #d4af37; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
 .main-balance { text-align: center; font-size: 42px; font-weight: 900; margin: 5px 0 15px 0; }
 
-/* ВАЖНЫЙ ФИКС ВКЛАДОК: height: 0 заставляет flexbox правильно скроллить контент и не выталкивать нижнюю панель за экран */
+/* СКРОЛЛИТСЯ ТОЛЬКО СЕРЕДИНА */
 .tab-content { 
     flex: 1; 
-    height: 0; 
+    min-height: 0; /* Обязательно для правильного скролла на мобилках */
     display: none; 
     flex-direction: column; 
     overflow-y: auto; 
@@ -75,21 +79,22 @@ html, body {
 .floating-text { position: absolute; font-size: 32px; font-weight: 900; color: #fff; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20; }
 @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
 
-/* ИДЕАЛЬНАЯ НИЖНЯЯ ПАНЕЛЬ */
+/* НИЖНЯЯ ПАНЕЛЬ СТАЛА ФУНДАМЕНТОМ (flex-shrink: 0), никаких position: fixed! */
 .bottom-nav { 
     background: #0a0a0a; 
     display: flex; 
     padding: 10px 2px calc(15px + env(safe-area-inset-bottom)) 2px; 
     border-top: 1px solid #222; 
-    flex-shrink: 0; 
     justify-content: flex-start; 
     overflow-x: auto; 
     -webkit-overflow-scrolling: touch;
     gap: 5px; 
     scrollbar-width: none; 
-    position: relative; 
-    z-index: 99999; 
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.8); /* Тень, чтобы визуально отделить от контента */
+    
+    flex-shrink: 0; /* Не сжимается, жестко стоит внизу */
+    width: 100%;
+    z-index: 100; 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.8); 
 }
 .bottom-nav::-webkit-scrollbar { display: none; }
 
@@ -104,7 +109,7 @@ html, body {
     cursor: pointer; 
     text-transform: lowercase; 
     border-radius: 8px;
-    touch-action: manipulation; /* Защита от задержек на телефонах */
+    touch-action: manipulation; /* Игнорируем задержку клика в 300ms на телефонах */
 }
 .nav-item:active { opacity: 0.7; }
 .nav-item.active { color: #d4af37; background: #1a1508; }
